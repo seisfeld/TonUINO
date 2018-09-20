@@ -76,10 +76,10 @@
 */
 
 // comment below line to disable ir remote support, saves about 5.8 KiB of program memory
-//#define TSOP38238
+#define TSOP38238
 
 // comment below line to disable status led support, saves about 530 Byte of program memory
-//#define STATUSLED
+#define STATUSLED
 
 // include required libraries
 #include <SoftwareSerial.h>
@@ -94,8 +94,8 @@
 
 
 // define global constants
-const uint8_t softwareSerialTxPin = 2;              // software serial tx, wired with 1k ohm to rx pin of DFPlayer Mini
-const uint8_t softwareSerialRxPin = 3;              // software serial rx, wired straight to tx pin of DFPlayer Mini
+const uint8_t softwareSerialTxPin = 3;              // software serial tx, wired with 1k ohm to rx pin of DFPlayer Mini
+const uint8_t softwareSerialRxPin = 2;              // software serial rx, wired straight to tx pin of DFPlayer Mini
 const uint8_t mp3BusyPin = 4;                       // reports play state of DFPlayer Mini, low = playing
 const uint8_t irReceiverPin = 5;                    // pin used for the ir receiver
 const uint8_t statusLedPin = 6;                     // pin used for status led
@@ -105,7 +105,7 @@ const uint8_t rngSeedPin = A0;                      // used to seed the random n
 const uint8_t buPins[] = { A0, A1, A2 };            // pins used for the buttons
 const uint8_t buCount = sizeof(buPins);             // number of buttons
 const uint8_t mp3StartVolume = 10;                  // initial volume of DFPlayer Mini
-const uint8_t mp3MaxVolume = 15;                    // maximal volume of DFPlayer Mini
+const uint8_t mp3MaxVolume = 25;                    // maximal volume of DFPlayer Mini
 const uint16_t buHoldTime = 2000;                   // button hold time, 2 seconds
 const uint32_t debugConsoleSpeed = 115200;          // speed for the debug console
 
@@ -116,18 +116,17 @@ const uint8_t msgSetupNewTagFolderAssigned = 102;   // 03
 const uint8_t msgSetupNewTagStoryMode = 103;        // 04
 const uint8_t msgSetupNewTagAlbumMode = 104;        // 05
 const uint8_t msgSetupNewTagPartyMode = 105;        // 06
-const uint8_t msgSetupNewTagSingleMode = 106;		// 07
-const uint8_t msgSetupNewTagConfirm = 110;          // 08
-const uint8_t msgSetupNewTagError = 114;            // 09
-const uint8_t msgEraseTag = 111;                    // 10
-const uint8_t msgEraseTagConfirm = 112;             // 11
-const uint8_t msgEraseTagError = 115;               // 12
-const uint8_t msgCancel = 113;                      // 13
-const uint8_t msgLocked = 116;                      // 14
-const uint8_t msgUnLocked = 117;                    // 15
-const uint8_t msgAdLocked = 1;                      // 16
-const uint8_t msgAdUnLocked = 2;                    // 17
-const uint8_t msgCount = 17;                        // used to calculate the total ammount of tracks on the sd card
+const uint8_t msgSetupNewTagConfirm = 110;          // 07
+const uint8_t msgSetupNewTagError = 114;            // 08
+const uint8_t msgEraseTag = 111;                    // 09
+const uint8_t msgEraseTagConfirm = 112;             // 10
+const uint8_t msgEraseTagError = 115;               // 11
+const uint8_t msgCancel = 113;                      // 12
+const uint8_t msgLocked = 116;                      // 13
+const uint8_t msgUnLocked = 117;                    // 14
+const uint8_t msgAdLocked = 1;                      // 15
+const uint8_t msgAdUnLocked = 2;                    // 16
+const uint8_t msgCount = 16;                        // used to calculate the total ammount of tracks on the sd card
 
 // define code mappings for silver apple tv 2 ir remote
 const uint16_t ir1ButtonUp = 0x5057;
@@ -164,7 +163,6 @@ struct nfcTagObject {
   uint8_t  version;
   uint8_t  assignedFolder;
   uint8_t  playbackMode;
-  uint8_t track;
 } nfcTag;
 
 // define global variables
@@ -391,12 +389,6 @@ void playNextTrack(uint16_t globalTrack, bool directionForward, bool isInteracti
     Serial.println(folderTrackCount);
     mp3.playFolderTrack(nfcTag.assignedFolder, playTrack);
   }
-
-  // single mode: play one single song
-  if (nfcTag.playBackMode == 4)
-  {
-    // Do nothing in this case
-  }
 }
 
 // reads data from nfc tag
@@ -434,6 +426,14 @@ uint8_t readNfcTagData() {
         returnCode = 253;
       }
       else {
+        // for debug purposes, print the first 16 bytes of sector 1 / block 4
+        Serial.print(F("nfc |"));
+        for (uint8_t i = 0; i < 16; i++) {
+          Serial.print(mifareData[i] < 0x10 ? " 0" : " ");
+          Serial.print(mifareData[i], HEX);
+        }
+        Serial.println();
+
         // convert 4 byte cookie to 32bit decimal for easier handling
         uint32_t tempCookie;
         tempCookie  = (uint32_t) mifareData[0] << 24;
@@ -449,8 +449,13 @@ uint8_t readNfcTagData() {
           nfcTag.version = mifareData[4];
           nfcTag.assignedFolder = mifareData[5];
           nfcTag.playbackMode = mifareData[6];
-          nfcTag.track = mifareData[7];
-          Serial.print(F("Track #")); Serial.print(nfcTag.track); Serial.println(F(" was detected"));
+        }
+        // if cookie is blank, clear ncfTag object
+        else {
+          nfcTag.cookie = 0;
+          nfcTag.version = 0;
+          nfcTag.assignedFolder = 0;
+          nfcTag.playbackMode = 0;
         }
         returnCode = 1;
       }
@@ -617,10 +622,6 @@ void loop() {
           case 3:
             Serial.println(F("party mode"));
             break;
-          case 4:
-            Serial.print(F("nfc |   track: "));
-            Serial.println(nfcTag.track);
-            Serial.println(F("single mode"));
           default:
             break;
         }
@@ -670,15 +671,6 @@ void loop() {
             Serial.print(F(" of "));
             Serial.println(folderTrackCount);
             break;
-          case 4:
-            playTrack = nfcTag.track;
-            Serial.print(F("mp3 | single mode -> play one single track "));
-
-            Serial.print(F("mp3 | album mode -> folder "));
-            Serial.print(nfcTag.assignedFolder);
-            Serial.print(F(" -> track "));
-            Serial.print(playTrack);
-            break;
           default:
             break;
         }
@@ -693,6 +685,58 @@ void loop() {
       else if (nfcTag.cookie == 0) {
         Serial.println(F("nfc | tag is blank"));
         Serial.println(F("sys | starting tag setup"));
+        // let user pick the folder to assign
+        initNfcTagPlayback = false;
+        bool setAssignedFolder = false;
+        Serial.println(F("sys |   pick folder"));
+        mp3.playMp3FolderTrack(msgSetupNewTag);
+        // loop until folder is assigned
+        do {
+          uint8_t inputEvent = checkInput();
+          // button 1 (middle) single push or ir remote play+pause / center: confirm selected folder
+          if (inputEvent == B1P || inputEvent == IRP) {
+            if (nfcTag.assignedFolder == 0) {
+              Serial.println(F("sys |     no folder selected"));
+              continue;
+            }
+            else setAssignedFolder = true;
+          }
+          // button 2 (right) single push or ir remote up / right: next folder
+          else if (inputEvent == B2P || inputEvent == IRU || inputEvent == IRR) {
+            nfcTag.assignedFolder = min(nfcTag.assignedFolder + 1, 99);
+            Serial.print(F("sys |     folder "));
+            Serial.println(nfcTag.assignedFolder);
+            mp3.playFolderTrack(nfcTag.assignedFolder, 1);
+          }
+          // button 3 (left) single push or ir remote down / left: previous folder
+          else if (inputEvent == B3P || inputEvent == IRD || inputEvent == IRL) {
+            nfcTag.assignedFolder = max(nfcTag.assignedFolder - 1, 1);
+            Serial.print(F("sys |     folder "));
+            Serial.println(nfcTag.assignedFolder);
+            mp3.playFolderTrack(nfcTag.assignedFolder, 1);
+          }
+          // button 2 (right) & button 3 (left) multi hold for 2 sec or ir remote menu: cancel tag setup
+          else if (inputEvent == B23H || inputEvent == IRM) {
+            Serial.println(F("sys | tag setup canceled"));
+            nfcTag.assignedFolder = 0;
+            mfrc522.PICC_HaltA();
+            mfrc522.PCD_StopCrypto1();
+            mp3.playMp3FolderTrack(msgCancel);
+            return;
+          }
+
+#if defined(STATUSLED)
+          // blink status led
+          blinkStatusLed();
+#endif
+
+          mp3.loop();
+        }
+        while (!setAssignedFolder);
+        delay(500);
+        Serial.print(F("sys |     folder "));
+        Serial.print(nfcTag.assignedFolder);
+        Serial.println(F(" selected"));
         // let user pick playback mode
         initNfcTagPlayback = false;
         bool setPlaybackMode = false;
@@ -711,8 +755,7 @@ void loop() {
           }
           // button 2 (right) single push or ir remote up / right: next playback mode
           else if (inputEvent == B2P || inputEvent == IRU || inputEvent == IRR) {
-            // Compute the next playmode, limiting it to the known 4
-            nfcTag.playbackMode = min(nfcTag.playbackMode + 1, 4);
+            nfcTag.playbackMode = min(nfcTag.playbackMode + 1, 3);
             Serial.print(F("sys |     "));
             switch (nfcTag.playbackMode) {
               case 1:
@@ -726,10 +769,6 @@ void loop() {
               case 3:
                 Serial.println(F("party mode"));
                 mp3.playMp3FolderTrack(msgSetupNewTagPartyMode);
-                break;
-              case 4:
-                Serial.println(F("single mode"));
-                mp3.playMp3FolderTrack(msgSetupNewTagSingleMode);
                 break;
               default:
                 break;
@@ -786,136 +825,27 @@ void loop() {
           case 3:
             Serial.print(F("party mode"));
             break;
-          case 4:
-            Serial.print(F("single mode"));
-            break;
           default:
             break;
         }
         Serial.println(F(" selected"));
-
-        // let user pick the folder to assign
-        initNfcTagPlayback = false;
-        bool setAssignedFolder = false;
-        Serial.println(F("sys |   pick folder"));
-        mp3.playMp3FolderTrack(msgSetupNewTag);
-        // loop until folder is assigned
-        do {
-          uint8_t inputEvent = checkInput();
-          // button 1 (middle) single push or ir remote play+pause / center: confirm selected folder
-          if (inputEvent == B1P || inputEvent == IRP) {
-            if (nfcTag.assignedFolder == 0) {
-              Serial.println(F("sys |     no folder selected"));
-              continue;
-            }
-            else setAssignedFolder = true;
-          }
-          // button 2 (right) single push or ir remote up / right: next folder
-          else if (inputEvent == B2P || inputEvent == IRU || inputEvent == IRR) {
-            nfcTag.assignedFolder = min(nfcTag.assignedFolder + 1, 99);
-            Serial.print(F("sys |     folder "));
-            Serial.println(nfcTag.assignedFolder);
-            mp3.playFolderTrack(nfcTag.assignedFolder, 1);
-          }
-          // button 3 (left) single push or ir remote down / left: previous folder
-          else if (inputEvent == B3P || inputEvent == IRD || inputEvent == IRL) {
-            nfcTag.assignedFolder = max(nfcTag.assignedFolder - 1, 1);
-            Serial.print(F("sys |     folder "));
-            Serial.println(nfcTag.assignedFolder);
-            mp3.playFolderTrack(nfcTag.assignedFolder, 1);
-          }
-          // button 2 (right) & button 3 (left) multi hold for 2 sec or ir remote menu: cancel tag setup
-          else if (inputEvent == B23H || inputEvent == IRM) {
-            Serial.println(F("sys | tag setup canceled"));
-            nfcTag.assignedFolder = 0;
-            mfrc522.PICC_HaltA();
-            mfrc522.PCD_StopCrypto1();
-            mp3.playMp3FolderTrack(msgCancel);
-            return;
-          }
-
-#if defined(STATUSLED)
-          // blink status led
-          blinkStatusLed();
-#endif
-
-          mp3.loop();
-        }
-        while (!setAssignedFolder);
-        delay(500);
-        Serial.print(F("sys |     folder "));
-        Serial.print(nfcTag.assignedFolder);
-        Serial.println(F(" selected"));
-
-
-        // let user pick the track to assign, in case single mode was selected
-        if (nfcTag.playbackMode == 4)
-        {
-          //initNfcTagPlayback = false;
-          bool setAssignedTrack = false;
-          Serial.println(F("sys |   pick track"));
-          mp3.playMp3FolderTrack(msgSetupNewTag);
-          // loop until track is assigned
-          do {
-            uint8_t inputEvent = checkInput();
-            // button 1 (middle) single push or ir remote play+pause / center: confirm selected folder
-            if (inputEvent == B1P || inputEvent == IRP) {
-              if (nfcTag.track == 0) {
-                Serial.println(F("sys |     no track selected"));
-                continue;
-              }
-              else setAssignedTrack = true;
-            }
-            // button 2 (right) single push or ir remote up / right: next folder
-            else if (inputEvent == B2P || inputEvent == IRU || inputEvent == IRR) {
-              nfcTag.track = min(nfcTag.track + 1, 99);
-              Serial.print(F("sys |     track "));
-              Serial.println(nfcTag.track);
-              mp3.playFolderTrack(nfcTag.assignedFolder, nfcTag.track);
-            }
-            // button 3 (left) single push or ir remote down / left: previous folder
-            else if (inputEvent == B3P || inputEvent == IRD || inputEvent == IRL) {
-              nfcTag.track = max(nfcTag.track - 1, 1);
-              Serial.print(F("sys |     track "));
-              Serial.println(nfcTag.track);
-              mp3.playFolderTrack(nfcTag.assignedFolder, nfcTag.track);
-            }
-            // button 2 (right) & button 3 (left) multi hold for 2 sec or ir remote menu: cancel tag setup
-            else if (inputEvent == B23H || inputEvent == IRM) {
-              Serial.println(F("sys | tag setup canceled"));
-              nfcTag.track = 0;
-              mfrc522.PICC_HaltA();
-              mfrc522.PCD_StopCrypto1();
-              mp3.playMp3FolderTrack(msgCancel);
-              return;
-            }
-
-#if defined(STATUSLED)
-            // blink status led
-            blinkStatusLed();
-#endif
-
-            mp3.loop();
-          }
-          while (!setAssignedTrack);
-          delay(500);
-          Serial.print(F("sys |     track "));
-          Serial.print(nfcTag.track);
-          Serial.println(F(" selected"));
-        }
-        else {
-          nfcTag.track = 0;
-        }
         // save data to tag
         Serial.println(F("sys | attempting to save data to tag"));
         uint8_t bytesToWrite[] = { 0x13, 0x37, 0xb3, 0x47,            // 0x1337 0xb347 magic cookie to identify our nfc tags
                                    0x01,                              // version 1
                                    nfcTag.assignedFolder,             // the folder picked by the user
                                    nfcTag.playbackMode,               // the playback mode picked by the user
-                                   nfcTag.track,                              // the track the user selected
+                                   0x00,                              // reserved for future use
                                    0x00, 0x00, 0x00, 0x00,            // reserved for future use
                                    0x00, 0x00, 0x00, 0x00             // reserved for future use
                                  };
+        // for debug purposes, print the 16 bytes we are going write to the nfc tag
+        Serial.print(F("sys |"));
+        for (uint8_t i = 0; i < 16; i++) {
+          Serial.print(bytesToWrite[i] < 0x10 ? " 0" : " ");
+          Serial.print(bytesToWrite[i], HEX);
+        }
+        Serial.println();
         uint8_t writeNfcTagStatus = writeNfcTagData(bytesToWrite, sizeof(bytesToWrite));
         // handle return codes from events that happened during writing to the nfc tag
         switch (writeNfcTagStatus) {
@@ -941,7 +871,6 @@ void loop() {
             break;
         }
       }
-
       // nfc tag is not blank but unknown, ignore
       else Serial.println(F("nfc | tag is not one of ours"));
       // # end - nfc tag does not have our magic cookie 0x1337 0xb347 on it (0)
