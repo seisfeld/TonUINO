@@ -493,6 +493,18 @@ void waitPlaybackToFinish() {
   while (!digitalRead(mp3BusyPin));
 }
 
+// prints current mode, folder and track information
+void printModeFolderTrack(uint8_t playbackMode) {
+  if (playbackMode == 2) Serial.print(F("album > "));
+  else if (playbackMode == 3) Serial.print(F("party > "));
+  else if (playbackMode == 5) Serial.print(F("story book > "));
+  Serial.print(nfcTag.assignedFolder);
+  Serial.print(F("|"));
+  Serial.print(playback.playTrack);
+  Serial.print(F("/"));
+  Serial.println(playback.folderTrackCount);
+}
+
 // plays next track depending on the current playback mode
 void playNextTrack(uint16_t globalTrack, bool directionForward, bool triggeredManually) {
   static uint16_t lastCallTrack = 0;
@@ -503,21 +515,25 @@ void playNextTrack(uint16_t globalTrack, bool directionForward, bool triggeredMa
   // we only advance to a new track when in queue mode, not during interactive prompt playback (ie. during configuration of a new nfc tag)
   if (!playback.queueMode) return;
 
-  // story mode: play one random track in folder
-  // there is no next track in story mode > stop playback
-  if (nfcTag.playbackMode == 1) {
+  // story mode (1): play one random track in folder
+  // single mode (4): play a single track in folder
+  // there is no next track in story and in single mode, stop playback
+  if (nfcTag.playbackMode == 1 || nfcTag.playbackMode == 4) {
     playback.queueMode = false;
     switchButtonConfiguration(PAUSE);
 #if defined(CUBIEKID)
     cubiekidShutdownTimer.restart();
 #endif
-    Serial.println(F("story > stop"));
+    if (nfcTag.playbackMode == 1) Serial.print(F("story"));
+    else if (nfcTag.playbackMode == 4) Serial.print(F("single"));
+    Serial.println(F(" > stop"));
     mp3.stop();
   }
 
-  // album mode: play complete folder
+  // album mode (2): play complete folder
+  // story book mode (5): play complete folder and track progress
   // advance to the next track, stop if the end of the folder is reached or go back to the previous track
-  if (nfcTag.playbackMode == 2) {
+  if (nfcTag.playbackMode == 2 || nfcTag.playbackMode == 5) {
 
     // **workaround for some DFPlayer mini modules that make two callbacks in a row when finishing a track**
     // reset lastCallTrack to avoid lockup when playback was just started
@@ -534,26 +550,23 @@ void playNextTrack(uint16_t globalTrack, bool directionForward, bool triggeredMa
       // there are more tracks after the current one, play next track
       if (playback.playTrack < playback.folderTrackCount) {
         playback.playTrack++;
-        Serial.print(F("album > "));
-        Serial.print(nfcTag.assignedFolder);
-        Serial.print(F("|"));
-        Serial.print(playback.playTrack);
-        Serial.print(F("/"));
-        Serial.println(playback.folderTrackCount);
+        printModeFolderTrack(nfcTag.playbackMode);
         mp3.playFolderTrack(nfcTag.assignedFolder, playback.playTrack);
       }
       // there are no more tracks after the current one
       else {
-        // user wants to manually play the next track, ignore the next track command
-        if (triggeredManually) Serial.println(F("album > eof"));
-        // stop playback
-        else {
+        // if not triggered manually, stop playback (and reset progress)
+        if (!triggeredManually) {
           playback.queueMode = false;
           switchButtonConfiguration(PAUSE);
 #if defined(CUBIEKID)
           cubiekidShutdownTimer.restart();
 #endif
-          Serial.println(F("album > eof > stop"));
+          if (nfcTag.playbackMode == 2) Serial.println(F("album > stop"));
+          else if (nfcTag.playbackMode == 5) {
+            EEPROM.update(nfcTag.assignedFolder, 0);
+            Serial.println(F("story book > stop+reset"));
+          }
           mp3.stop();
         }
       }
@@ -563,16 +576,9 @@ void playNextTrack(uint16_t globalTrack, bool directionForward, bool triggeredMa
       // there are more tracks before the current one, play the previous track
       if (playback.playTrack > 1) {
         playback.playTrack--;
-        Serial.print(F("album > "));
-        Serial.print(nfcTag.assignedFolder);
-        Serial.print(F("|"));
-        Serial.print(playback.playTrack);
-        Serial.print(F("/"));
-        Serial.println(playback.folderTrackCount);
+        printModeFolderTrack(nfcTag.playbackMode);
         mp3.playFolderTrack(nfcTag.assignedFolder, playback.playTrack);
       }
-      // there are no more tracks before the current one, ignore the previous track command
-      else Serial.println(F("album > bof"));
     }
   }
 
@@ -582,87 +588,8 @@ void playNextTrack(uint16_t globalTrack, bool directionForward, bool triggeredMa
     playback.playTrack = random(1, playback.folderTrackCount + 1);
     if (playback.playTrack == playback.lastRandomTrack) playback.playTrack = playback.playTrack == playback.folderTrackCount ? 1 : playback.playTrack + 1;
     playback.lastRandomTrack = playback.playTrack;
-    Serial.print(F("party > "));
-    Serial.print(nfcTag.assignedFolder);
-    Serial.print(F("|"));
-    Serial.print(playback.playTrack);
-    Serial.print(F("/"));
-    Serial.println(playback.folderTrackCount);
+    printModeFolderTrack(nfcTag.playbackMode);
     mp3.playFolderTrack(nfcTag.assignedFolder, playback.playTrack);
-  }
-
-  // single mode: play a single track in folder
-  // there is no next track in single mode > stop playback
-  if (nfcTag.playbackMode == 4) {
-    playback.queueMode = false;
-    switchButtonConfiguration(PAUSE);
-#if defined(CUBIEKID)
-    cubiekidShutdownTimer.restart();
-#endif
-    Serial.println(F("single > stop"));
-    mp3.stop();
-  }
-
-  // story book mode: play complete folder and track progress
-  // advance to the next track, stop if the end of the folder is reached or go back to the previous track
-  if (nfcTag.playbackMode == 5) {
-
-    // **workaround for some DFPlayer mini modules that make two callbacks in a row when finishing a track**
-    // reset lastCallTrack to avoid lockup when playback was just started
-    if (playback.firstTrack) {
-      playback.firstTrack = false;
-      lastCallTrack = 0;
-    }
-    // check if we get called with the same track number twice in a row, if yes return immediately
-    if (lastCallTrack == globalTrack) return;
-    else lastCallTrack = globalTrack;
-
-    // play next track?
-    if (directionForward) {
-      // there are more tracks after the current one, play next track
-      if (playback.playTrack < playback.folderTrackCount) {
-        playback.playTrack++;
-        Serial.print(F("story book > "));
-        Serial.print(nfcTag.assignedFolder);
-        Serial.print(F("|"));
-        Serial.print(playback.playTrack);
-        Serial.print(F("/"));
-        Serial.println(playback.folderTrackCount);
-        mp3.playFolderTrack(nfcTag.assignedFolder, playback.playTrack);
-      }
-      // there are no more tracks after the current one
-      else {
-        // user wants to manually play the next track, ignore the next track command
-        if (triggeredManually) Serial.println(F("story book > eof"));
-        // stop playback and reset progress
-        else {
-          playback.queueMode = false;
-          EEPROM.update(nfcTag.assignedFolder, 0);
-          switchButtonConfiguration(PAUSE);
-#if defined(CUBIEKID)
-          cubiekidShutdownTimer.restart();
-#endif
-          Serial.println(F("story book > eof > stop+reset"));
-          mp3.stop();
-        }
-      }
-    }
-    // play previous track?
-    else {
-      // there are more tracks before the current one, play the previous track
-      if (playback.playTrack > 1) {
-        playback.playTrack--;
-        Serial.print(F("story book > "));
-        Serial.print(nfcTag.assignedFolder);
-        Serial.print(F("|"));
-        Serial.print(playback.playTrack);
-        Serial.print(F("/"));
-        Serial.println(playback.folderTrackCount);
-        mp3.playFolderTrack(nfcTag.assignedFolder, playback.playTrack);
-      }
-      // there are no more tracks before the current one, ignore the previous track command
-      else Serial.println(F("story book > bof"));
-    }
   }
 }
 
