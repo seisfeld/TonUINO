@@ -295,21 +295,22 @@ class Mp3Notify {
           Serial.print(F("unknown"));
           break;
       }
-      Serial.println(F(" error"));
+      Serial.print(F(" error: "));
+      Serial.println(returnValue);
     }
     static void OnPlayFinished(uint16_t returnValue) {
       playNextTrack(returnValue, true, false);
     }
     static void OnCardOnline(uint16_t returnValue) {
-      Serial.print(F("sd online "));
+      Serial.print(F("sd online: "));
       Serial.println(returnValue);
     }
     static void OnCardInserted(uint16_t returnValue) {
-      Serial.print(F("sd inserted "));
+      Serial.print(F("sd inserted: "));
       Serial.println(returnValue);
     }
     static void OnCardRemoved(uint16_t returnValue) {
-      Serial.print(F("sd removed "));
+      Serial.print(F("sd removed: "));
       Serial.println(returnValue);
     }
 };
@@ -931,21 +932,21 @@ void loop() {
         Serial.print(F(" | mode "));
         switch (nfcTag.playbackMode) {
           case 1:
-            Serial.println(F("1 story"));
+            Serial.println(F("1 (story)"));
             break;
           case 2:
-            Serial.println(F("2 album"));
+            Serial.println(F("2 (album)"));
             break;
           case 3:
-            Serial.println(F("3 party"));
+            Serial.println(F("3 (party)"));
             break;
           case 4:
-            Serial.print(F("4 single (track "));
+            Serial.print(F("4 (single, track "));
             Serial.print(nfcTag.assignedTrack);
             Serial.println(F(")"));
             break;
           case 5:
-            Serial.println(F("5 story book"));
+            Serial.println(F("5 (story book)"));
             break;
           default:
             break;
@@ -1248,21 +1249,21 @@ void loop() {
         Serial.print(F(" | mode "));
         switch (nfcTag.playbackMode) {
           case 1:
-            Serial.println(F("1 story"));
+            Serial.println(F("1 (story)"));
             break;
           case 2:
-            Serial.println(F("2 album"));
+            Serial.println(F("2 (album)"));
             break;
           case 3:
-            Serial.println(F("3 party"));
+            Serial.println(F("3 (party)"));
             break;
           case 4:
-            Serial.print(F("4 single (track "));
+            Serial.print(F("4 (single, track "));
             Serial.print(nfcTag.assignedTrack);
             Serial.println(F(")"));
             break;
           case 5:
-            Serial.println(F("5 story book"));
+            Serial.println(F("5 (story book)"));
             break;
           default:
             break;
