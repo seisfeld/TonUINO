@@ -236,8 +236,7 @@ struct playbackObject {
   uint8_t playTrack = 1;
   uint8_t storedTrack = 1;
   uint8_t playList[255];
-  uint16_t folderTrackCount = 0;
-  uint16_t lastRandomTrack = 0;
+  uint8_t folderTrackCount = 0;
 } playback;
 
 #if defined(CUBIEKID)
@@ -247,7 +246,7 @@ struct cubiekidObject {
   const uint8_t powerOffHours = 0;                  // hours until shutdown
   const uint8_t powerOffMinutes = 10;               // minutes until shutdown
   const uint8_t powerOffSeconds = 0;                // seconds until shutdown
-  const uint32_t timerInterval = 1000;              // timer interval (in milliseconds)
+  const uint16_t timerInterval = 1000;              // timer interval (in milliseconds)
   const float minVoltage = 4.4;                     // minimum expected voltage level (in volts)
   const float maxVoltage = 5.0;                     // maximum expected voltage level (in volts)
   const float voltageCorrection = 1.0 / 1.0;        // voltage measured by multimeter divided by reported voltage
@@ -492,7 +491,7 @@ void switchButtonConfiguration(uint8_t buttonMode) {
 
 // waits for current playing track to finish
 void waitPlaybackToFinish() {
-  uint32_t waitPlaybackToStartMillis = millis();
+  uint64_t waitPlaybackToStartMillis = millis();
   delay(100);
   while (digitalRead(mp3BusyPin)) if (millis() - waitPlaybackToStartMillis >= 10000) break;
   while (!digitalRead(mp3BusyPin));
@@ -724,7 +723,7 @@ uint8_t writeNfcTagData(uint8_t mifareData[], uint8_t mifareDataSize) {
 void fadeStatusLed(bool isPlaying) {
   static bool statusLedDirection = false;
   static int16_t statusLedValue = 255;
-  static uint32_t statusLedOldMillis;
+  static uint64_t statusLedOldMillis;
 
   // TonUINO is playing, set status led to full brightness
   if (isPlaying) {
@@ -733,7 +732,7 @@ void fadeStatusLed(bool isPlaying) {
   }
   // TonUINO is not playing, fade status led in/out
   else {
-    uint32_t statusLedNewMillis = millis();
+    uint64_t statusLedNewMillis = millis();
     if (statusLedNewMillis - statusLedOldMillis >= 100) {
       statusLedOldMillis = statusLedNewMillis;
       if (statusLedDirection) {
@@ -758,9 +757,9 @@ void fadeStatusLed(bool isPlaying) {
 // blink status led every blinkInterval milliseconds
 void blinkStatusLed(uint16_t blinkInterval) {
   static bool statusLedState;
-  static uint32_t statusLedOldMillis;
+  static uint64_t statusLedOldMillis;
 
-  uint32_t statusLedNewMillis = millis();
+  uint64_t statusLedNewMillis = millis();
   if (statusLedNewMillis - statusLedOldMillis >= blinkInterval) {
     statusLedOldMillis = statusLedNewMillis;
     statusLedState = !statusLedState;
