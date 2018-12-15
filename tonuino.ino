@@ -519,7 +519,7 @@ void playNextTrack(uint16_t globalTrack, bool directionForward, bool triggeredMa
   if (!playback.queueMode) return;
 
   // story mode (1): play one random track in folder
-  // single mode (4): play a single track in folder
+  // single mode (4): play one single track in folder
   // there is no next track in story and in single mode, stop playback
   if (nfcTag.playbackMode == 1 || nfcTag.playbackMode == 4) {
     playback.queueMode = false;
@@ -533,8 +533,8 @@ void playNextTrack(uint16_t globalTrack, bool directionForward, bool triggeredMa
     mp3.stop();
   }
 
-  // album mode (2): play complete folder
-  // story book mode (5): play complete folder and track progress
+  // album mode (2): play the complete folder
+  // story book mode (5): play the complete folder and track progress
   // advance to the next track, stop if the end of the folder is reached or go back to the previous track
   if (nfcTag.playbackMode == 2 || nfcTag.playbackMode == 5) {
 
