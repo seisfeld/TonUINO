@@ -494,15 +494,18 @@ void waitPlaybackToFinish() {
 }
 
 // prints current mode, folder and track information
-void printModeFolderTrack(uint8_t playbackMode) {
-  if (playbackMode == 2) Serial.print(F("album > "));
-  else if (playbackMode == 3) Serial.print(F("party > "));
-  else if (playbackMode == 5) Serial.print(F("story book > "));
+void printModeFolderTrack(bool cr) {
+  if (nfcTag.playbackMode == 1) Serial.print(F("story > "));
+  else if (nfcTag.playbackMode == 2) Serial.print(F("album > "));
+  else if (nfcTag.playbackMode == 3) Serial.print(F("party > "));
+  else if (nfcTag.playbackMode == 4) Serial.print(F("single > "));
+  else if (nfcTag.playbackMode == 5) Serial.print(F("story book > "));
   Serial.print(nfcTag.assignedFolder);
   Serial.print(F("|"));
   Serial.print(playback.playTrack);
   Serial.print(F("/"));
-  Serial.println(playback.folderTrackCount);
+  Serial.print(playback.folderTrackCount);
+  if (cr) Serial.println();
 }
 
 // plays next track depending on the current playback mode
@@ -550,7 +553,7 @@ void playNextTrack(uint16_t globalTrack, bool directionForward, bool triggeredMa
       // there are more tracks after the current one, play next track
       if (playback.playTrack < playback.folderTrackCount) {
         playback.playTrack++;
-        printModeFolderTrack(nfcTag.playbackMode);
+        printModeFolderTrack(true);
         mp3.playFolderTrack(nfcTag.assignedFolder, playback.playTrack);
       }
       // there are no more tracks after the current one
@@ -564,8 +567,8 @@ void playNextTrack(uint16_t globalTrack, bool directionForward, bool triggeredMa
 #endif
           if (nfcTag.playbackMode == 2) Serial.println(F("album > stop"));
           else if (nfcTag.playbackMode == 5) {
-            EEPROM.update(nfcTag.assignedFolder, 0);
             Serial.println(F("story book > stop+reset"));
+            EEPROM.update(nfcTag.assignedFolder, 0);
           }
           mp3.stop();
         }
@@ -576,7 +579,7 @@ void playNextTrack(uint16_t globalTrack, bool directionForward, bool triggeredMa
       // there are more tracks before the current one, play the previous track
       if (playback.playTrack > 1) {
         playback.playTrack--;
-        printModeFolderTrack(nfcTag.playbackMode);
+        printModeFolderTrack(true);
         mp3.playFolderTrack(nfcTag.assignedFolder, playback.playTrack);
       }
     }
@@ -588,7 +591,7 @@ void playNextTrack(uint16_t globalTrack, bool directionForward, bool triggeredMa
     playback.playTrack = random(1, playback.folderTrackCount + 1);
     if (playback.playTrack == playback.lastRandomTrack) playback.playTrack = playback.playTrack == playback.folderTrackCount ? 1 : playback.playTrack + 1;
     playback.lastRandomTrack = playback.playTrack;
-    printModeFolderTrack(nfcTag.playbackMode);
+    printModeFolderTrack(true);
     mp3.playFolderTrack(nfcTag.assignedFolder, playback.playTrack);
   }
 }
@@ -902,12 +905,7 @@ void loop() {
   if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial() && !isLocked) {
     // if the current playback mode is story book mode, only while playing: store the current progress
     if (nfcTag.playbackMode == 5 && isPlaying) {
-      Serial.print(F("story book > "));
-      Serial.print(nfcTag.assignedFolder);
-      Serial.print(F("|"));
-      Serial.print(playback.playTrack);
-      Serial.print(F("/"));
-      Serial.print(playback.folderTrackCount);
+      printModeFolderTrack(false);
       Serial.println(F(" > saved"));
       EEPROM.update(nfcTag.assignedFolder, playback.playTrack);
     }
@@ -930,21 +928,21 @@ void loop() {
         Serial.print(F(" | mode "));
         switch (nfcTag.playbackMode) {
           case 1:
-            Serial.println(F("story"));
+            Serial.println(F("1 story"));
             break;
           case 2:
-            Serial.println(F("album"));
+            Serial.println(F("2 album"));
             break;
           case 3:
-            Serial.println(F("party"));
+            Serial.println(F("3 party"));
             break;
           case 4:
-            Serial.print(F("single (track "));
+            Serial.print(F("4 single (track "));
             Serial.print(nfcTag.assignedTrack);
             Serial.println(F(")"));
             break;
           case 5:
-            Serial.println(F("story book"));
+            Serial.println(F("5 story book"));
             break;
           default:
             break;
@@ -955,43 +953,23 @@ void loop() {
           // story mode
           case 1:
             playback.playTrack = random(1, playback.folderTrackCount + 1);
-            Serial.print(F("story > "));
-            Serial.print(nfcTag.assignedFolder);
-            Serial.print(F("|"));
-            Serial.print(playback.playTrack);
-            Serial.print(F("/"));
-            Serial.println(playback.folderTrackCount);
+            printModeFolderTrack(true);
             break;
           // album mode
           case 2:
             playback.playTrack = 1;
-            Serial.print(F("album > "));
-            Serial.print(nfcTag.assignedFolder);
-            Serial.print(F("|"));
-            Serial.print(playback.playTrack);
-            Serial.print(F("/"));
-            Serial.println(playback.folderTrackCount);
+            printModeFolderTrack(true);
             break;
           // party mode
           case 3:
             playback.playTrack = random(1, playback.folderTrackCount + 1);
             playback.lastRandomTrack = playback.playTrack;
-            Serial.print(F("party > "));
-            Serial.print(nfcTag.assignedFolder);
-            Serial.print(F("|"));
-            Serial.print(playback.playTrack);
-            Serial.print(F("/"));
-            Serial.println(playback.folderTrackCount);
+            printModeFolderTrack(true);
             break;
           // single mode
           case 4:
             playback.playTrack = nfcTag.assignedTrack;
-            Serial.print(F("single > "));
-            Serial.print(nfcTag.assignedFolder);
-            Serial.print(F("|"));
-            Serial.print(playback.playTrack);
-            Serial.print(F("/"));
-            Serial.println(playback.folderTrackCount);
+            printModeFolderTrack(true);
             break;
           // story book mode
           case 5:
@@ -1004,12 +982,7 @@ void loop() {
               playback.playTrack = playback.storedTrack;
               Serial.print(F("resuming "));
             }
-            Serial.print(F("story book > "));
-            Serial.print(nfcTag.assignedFolder);
-            Serial.print(F("|"));
-            Serial.print(playback.playTrack);
-            Serial.print(F("/"));
-            Serial.println(playback.folderTrackCount);
+            printModeFolderTrack(true);
             break;
           default:
             break;
@@ -1272,21 +1245,21 @@ void loop() {
         Serial.print(F(" | mode "));
         switch (nfcTag.playbackMode) {
           case 1:
-            Serial.println(F("story"));
+            Serial.println(F("1 story"));
             break;
           case 2:
-            Serial.println(F("album"));
+            Serial.println(F("2 album"));
             break;
           case 3:
-            Serial.println(F("party"));
+            Serial.println(F("3 party"));
             break;
           case 4:
-            Serial.print(F("single (track "));
+            Serial.print(F("4 single (track "));
             Serial.print(nfcTag.assignedTrack);
             Serial.println(F(")"));
             break;
           case 5:
-            Serial.println(F("story book"));
+            Serial.println(F("5 story book"));
             break;
           default:
             break;
@@ -1365,12 +1338,7 @@ void loop() {
       mp3.pause();
       // if the current playback mode is story book mode: store the current progress
       if (nfcTag.playbackMode == 5) {
-        Serial.print(F("story book > "));
-        Serial.print(nfcTag.assignedFolder);
-        Serial.print(F("|"));
-        Serial.print(playback.playTrack);
-        Serial.print(F("/"));
-        Serial.print(playback.folderTrackCount);
+        printModeFolderTrack(false);
         Serial.println(F(" > saved"));
         EEPROM.update(nfcTag.assignedFolder, playback.playTrack);
       }
@@ -1424,13 +1392,11 @@ void loop() {
   }
   // button 0 (middle) hold for 5 sec or ir remote menu, only during story book mode while playing: reset progress
   else if (((inputEvent == B0H && !isLocked) || inputEvent == IRM) && nfcTag.playbackMode == 5 && isPlaying) {
-    EEPROM.update(nfcTag.assignedFolder, 0);
-    Serial.print(F("story book > "));
-    Serial.print(nfcTag.assignedFolder);
-    Serial.print(F("|1/"));
-    Serial.print(playback.folderTrackCount);
+    playback.playTrack = 1;
+    printModeFolderTrack(false);
     Serial.println(F(" > reset"));
-    mp3.playFolderTrack(nfcTag.assignedFolder, playback.playTrack = 1);
+    EEPROM.update(nfcTag.assignedFolder, 0);
+    mp3.playFolderTrack(nfcTag.assignedFolder, playback.playTrack);
   }
   // button 0 (middle) hold for 5 sec or ir remote menu while not playing: erase nfc tag
   else if (((inputEvent == B0H && !isLocked) || inputEvent == IRM) && !isPlaying) {
