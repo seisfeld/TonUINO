@@ -301,13 +301,16 @@ class Mp3Notify {
       playNextTrack(returnValue, true, false);
     }
     static void OnCardOnline(uint16_t returnValue) {
-      Serial.println(F("sd online"));
+      Serial.print(F("sd online "));
+      Serial.println(returnValue);
     }
     static void OnCardInserted(uint16_t returnValue) {
-      Serial.println(F("sd inserted"));
+      Serial.print(F("sd inserted "));
+      Serial.println(returnValue);
     }
     static void OnCardRemoved(uint16_t returnValue) {
-      Serial.println(F("sd removed"));
+      Serial.print(F("sd removed "));
+      Serial.println(returnValue);
     }
 };
 
@@ -865,7 +868,7 @@ void setup() {
   // hold down all three buttons while powering up: erase the eeprom contents
   if (digitalRead(button0Pin) == LOW && digitalRead(button1Pin) == LOW && digitalRead(button2Pin) == LOW) {
     Serial.println(F("init eeprom"));
-    for (int i = 0; i < EEPROM.length(); i++) {
+    for (uint16_t i = 0; i < EEPROM.length(); i++) {
       EEPROM.update(i, 0);
 #if defined(STATUSLED)
       blinkStatusLed(50);
