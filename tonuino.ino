@@ -29,10 +29,10 @@
   Hold B1 for 2 seconds during playback in album, party and story book mode: Skip to the next track
   Hold B1 for 2 seconds during nfc tag setup mode: Jump 10 folders or 10 tracks forward
 
-  Hold B2 for 2 seconds during playback in album and story book mode: Skip to the previous track
+  Hold B2 for 2 seconds during playback in album, party and story book mode: Skip to the previous track
   Hold B2 for 2 seconds during nfc tag setup mode: Jump 10 folders or 10 tracks backwards
 
-  Hold B0 + B1 + B2 while powering up: Erase the eeprom contents. (Use with care, eeprom write/erase cycles are limited.)
+  Hold B0 + B1 + B2 while powering up: Erase the eeprom contents. (Use with care, eeprom write/erase cycles are limited!)
 
   ir remote:
   ----------
@@ -42,7 +42,7 @@
   change them to other codes to match different remotes. This feature can be enabled by
   uncommenting the define TSOP38238 below.
 
-  There is one function, currently only available with the ir remote - box lock.
+  There is one function, currently only available with the ir remote: Box lock.
   When TonUINO is locked, the buttons on TonUINO as well as the nfc reader are disabled
   until TonUINO is unlocked again. Playback continues while TonUINO is locked.
 
@@ -50,7 +50,7 @@
   center - toggle box lock
   play+pause - toggle playback
   up / down - volume up / down
-  left / right - previous / next track during album and story book mode, next track during party mode
+  left / right - previous / next track in album, party and story book mode
   menu - reset progress to track 1 in story book mode
 
   During idle:
@@ -82,10 +82,10 @@
   cubiekid:
   ---------
 
-  If you happen to have a CubieKid case and the additional circuit board, this sketch
+  If you happen to have a CubieKid case and the additional circuit board, this firmware
   supports both shutdown methods - due to low battery voltage as well as due to
   inactivity after a configurable ammount of time. The shutdown voltage, inactivity time
-  as well as other parameters can be setup in the configuration section of this sketch.
+  as well as other parameters can be setup in the configuration section of this firmware.
   This feature can be enabled by uncommenting the define CUBIEKID below.
 
   The CubieKid case as well as the additional circuit board, have been designed and developed
@@ -106,8 +106,8 @@
        |      + version (currently always 0x01)
        + magic cookie to recognize that a card belongs to TonUINO
 
-  non standard libraries used in this sketch:
-  -------------------------------------------
+  non standard libraries used in this firmware:
+  ---------------------------------------------
 
   MFRC522.h - https://github.com/miguelbalboa/rfid
   DFMiniMp3.h - https://github.com/Makuna/DFMiniMp3
@@ -235,6 +235,7 @@ struct playbackObject {
   bool queueMode = false;
   uint8_t playTrack = 1;
   uint8_t storedTrack = 1;
+  uint8_t playList[255];
   uint16_t folderTrackCount = 0;
   uint16_t lastRandomTrack = 0;
 } playback;
@@ -332,7 +333,7 @@ decode_results irReadings;                                                    //
 
 #if defined(CUBIEKID)
 Countimer cubiekidShutdownTimer;                                              // create Countimer instance
-Vcc cubiekidVoltage(cubiekid.voltageCorrection);                              // create Vcc instalce
+Vcc cubiekidVoltage(cubiekid.voltageCorrection);                              // create Vcc instance
 #endif
 
 // checks all input sources and populates the global inputEvent variable
@@ -524,7 +525,7 @@ void playNextTrack(uint16_t globalTrack, bool directionForward, bool triggeredMa
 
   // story mode (1): play one random track in folder
   // single mode (4): play one single track in folder
-  // there is no next track in story and in single mode, stop playback
+  // there is no next track in story and single mode, stop playback
   if (nfcTag.playbackMode == 1 || nfcTag.playbackMode == 4) {
     playback.queueMode = false;
     switchButtonConfiguration(PAUSE);
@@ -538,9 +539,10 @@ void playNextTrack(uint16_t globalTrack, bool directionForward, bool triggeredMa
   }
 
   // album mode (2): play the complete folder
+  // party mode (3): shuffle the complete folder
   // story book mode (5): play the complete folder and track progress
-  // advance to the next track, stop if the end of the folder is reached or go back to the previous track
-  if (nfcTag.playbackMode == 2 || nfcTag.playbackMode == 5) {
+  // advance to the next or previous track, stop if the end of the folder is reached
+  if (nfcTag.playbackMode == 2 || nfcTag.playbackMode == 3 || nfcTag.playbackMode == 5) {
 
     // **workaround for some DFPlayer mini modules that make two callbacks in a row when finishing a track**
     // reset lastCallTrack to avoid lockup when playback was just started
@@ -557,8 +559,14 @@ void playNextTrack(uint16_t globalTrack, bool directionForward, bool triggeredMa
       // there are more tracks after the current one, play next track
       if (playback.playTrack < playback.folderTrackCount) {
         playback.playTrack++;
-        printModeFolderTrack(playback.playTrack, true);
-        mp3.playFolderTrack(nfcTag.assignedFolder, playback.playTrack);
+        if (nfcTag.playbackMode == 2 || nfcTag.playbackMode == 5) {
+          printModeFolderTrack(playback.playTrack, true);
+          mp3.playFolderTrack(nfcTag.assignedFolder, playback.playTrack);
+        }
+        else if (nfcTag.playbackMode == 3) {
+          printModeFolderTrack(playback.playList[playback.playTrack - 1], true);
+          mp3.playFolderTrack(nfcTag.assignedFolder, playback.playList[playback.playTrack - 1]);
+        }
       }
       // there are no more tracks after the current one
       else {
@@ -570,6 +578,7 @@ void playNextTrack(uint16_t globalTrack, bool directionForward, bool triggeredMa
           cubiekidShutdownTimer.restart();
 #endif
           if (nfcTag.playbackMode == 2) Serial.println(F("album > stop"));
+          else if (nfcTag.playbackMode == 3) Serial.println(F("party > stop"));
           else if (nfcTag.playbackMode == 5) {
             Serial.println(F("story book > stop+reset"));
             EEPROM.update(nfcTag.assignedFolder, 0);
@@ -583,20 +592,16 @@ void playNextTrack(uint16_t globalTrack, bool directionForward, bool triggeredMa
       // there are more tracks before the current one, play the previous track
       if (playback.playTrack > 1) {
         playback.playTrack--;
-        printModeFolderTrack(playback.playTrack, true);
-        mp3.playFolderTrack(nfcTag.assignedFolder, playback.playTrack);
+        if (nfcTag.playbackMode == 2 || nfcTag.playbackMode == 5) {
+          printModeFolderTrack(playback.playTrack, true);
+          mp3.playFolderTrack(nfcTag.assignedFolder, playback.playTrack);
+        }
+        else if (nfcTag.playbackMode == 3) {
+          printModeFolderTrack(playback.playList[playback.playTrack - 1], true);
+          mp3.playFolderTrack(nfcTag.assignedFolder, playback.playList[playback.playTrack - 1]);
+        }
       }
     }
-  }
-
-  // party mode: shuffle tracks in folder indefinitely
-  // just play another random track
-  if (nfcTag.playbackMode == 3) {
-    playback.playTrack = random(1, playback.folderTrackCount + 1);
-    if (playback.playTrack == playback.lastRandomTrack) playback.playTrack = playback.playTrack == playback.folderTrackCount ? 1 : playback.playTrack + 1;
-    playback.lastRandomTrack = playback.playTrack;
-    printModeFolderTrack(playback.playTrack, true);
-    mp3.playFolderTrack(nfcTag.assignedFolder, playback.playTrack);
   }
 }
 
@@ -966,9 +971,17 @@ void loop() {
             break;
           // party mode
           case 3:
-            playback.playTrack = random(1, playback.folderTrackCount + 1);
-            playback.lastRandomTrack = playback.playTrack;
-            printModeFolderTrack(playback.playTrack, true);
+            playback.playTrack = 1;
+            // fill playlist
+            for (uint8_t i = 0; i < 255; i++) playback.playList[i] = i + 1 <= playback.folderTrackCount ? i + 1 : 0;
+            // shuffle playlist
+            for (uint8_t i = 0; i < playback.folderTrackCount; i++) {
+              uint8_t j = random(0, playback.folderTrackCount);
+              uint8_t temp = playback.playList[i];
+              playback.playList[i] = playback.playList[j];
+              playback.playList[j] = temp;
+            }
+            printModeFolderTrack(playback.playList[playback.playTrack - 1], true);
             break;
           // single mode
           case 4:
@@ -977,7 +990,6 @@ void loop() {
             break;
           // story book mode
           case 5:
-            playback.playTrack = 1;
             playback.storedTrack = EEPROM.read(nfcTag.assignedFolder);
             // don't resume from eeprom, play from the beginning
             if (playback.storedTrack == 0 || playback.storedTrack > playback.folderTrackCount) playback.playTrack = 1;
@@ -993,7 +1005,8 @@ void loop() {
         }
         playback.firstTrack = true;
         playback.queueMode = true;
-        mp3.playFolderTrack(nfcTag.assignedFolder, playback.playTrack);
+        if (nfcTag.playbackMode == 3) mp3.playFolderTrack(nfcTag.assignedFolder, playback.playList[playback.playTrack - 1]);
+        else mp3.playFolderTrack(nfcTag.assignedFolder, playback.playTrack);
       }
       // # end - nfc tag has our magic cookie 0x1337 0xb347 on it (322417479)
       // ####################################################################
@@ -1389,8 +1402,8 @@ void loop() {
     Serial.println(F("next track"));
     playNextTrack(random(65536), true, true);
   }
-  // button 2 (left) hold for 2 sec or ir remote left, only during album and story book mode while playing: previous track
-  else if (((inputEvent == B2H && !isLocked) || inputEvent == IRL) && (nfcTag.playbackMode == 2 || nfcTag.playbackMode == 5) && isPlaying) {
+  // button 2 (left) hold for 2 sec or ir remote left, only during album, party and story book mode while playing: previous track
+  else if (((inputEvent == B2H && !isLocked) || inputEvent == IRL) && (nfcTag.playbackMode == 2 || nfcTag.playbackMode == 3 || nfcTag.playbackMode == 5) && isPlaying) {
     Serial.println(F("previous track"));
     playNextTrack(random(65536), false, true);
   }
