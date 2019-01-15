@@ -82,13 +82,12 @@
   cubiekid:
   ---------
 
-  If you happen to have a CubieKid case and the additional circuit board, this firmware
-  supports both shutdown methods - due to low battery voltage as well as due to
-  inactivity after a configurable ammount of time. The shutdown voltage, inactivity time
-  as well as other parameters can be setup in the configuration section of this firmware.
-  This feature can be enabled by uncommenting the define CUBIEKID below.
+  If you happen to have a CubieKid case and the CubieKid circuit board, this firmware
+  supports both shutdown methods. They can be configured in the shutdown section below.
+  The inactivity shutdown timer is enabled by default, the shutdown due to low battery
+  voltage can be enabled by uncommenting the define LOWVOLTAGE below.
 
-  The CubieKid case as well as the additional circuit board, have been designed and developed
+  The CubieKid case as well as the CubieKid circuit board, have been designed and developed
   by Jens Hackel aka DB3JHF and can be found here: https://www.thingiverse.com/thing:3148200
 
   data stored on the nfc tags:
@@ -113,7 +112,6 @@
   DFMiniMp3.h - https://github.com/Makuna/DFMiniMp3
   AceButton.h - https://github.com/bxparks/AceButton
   IRremote.h - https://github.com/z3t0/Arduino-IRremote
-  Countimer.h - https://github.com/inflop/Countimer
   Vcc.h - https://github.com/Yveaux/Arduino_Vcc
 */
 
@@ -123,13 +121,11 @@
 // uncomment the below line to enable status led support
 // #define STATUSLED
 
-// uncomment the below line to enable cubiekid support
-// #define CUBIEKID
-
-// uncomment the below line to enable additional cubiekid debug output
-// #define CUBIEKIDDEBUG
+// uncomment the below line to enable low voltage shutdown support
+// #define LOWVOLTAGE
 
 // include required libraries
+#include <avr/sleep.h>
 #include <SoftwareSerial.h>
 #include <SPI.h>
 #include <EEPROM.h>
@@ -143,13 +139,12 @@ using namespace ace_button;
 #include <IRremote.h>
 #endif
 
-// include additional libraries if cubiekid support is enabled
-#if defined(CUBIEKID)
-#include <Countimer.h>
+// include additional library if low voltage shutdown support is enabled
+#if defined(LOWVOLTAGE)
 #include <Vcc.h>
 #endif
 
-// define global constants
+// define general configuration constants
 const uint8_t softwareSerialTxPin = 3;              // software serial tx, wired with 1k ohm to rx pin of DFPlayer Mini
 const uint8_t softwareSerialRxPin = 2;              // software serial rx, wired straight to tx pin of DFPlayer Mini
 const uint8_t mp3BusyPin = 4;                       // reports play state of DFPlayer Mini (LOW = playing)
@@ -168,6 +163,13 @@ const uint16_t buttonShortLongPressDelay = 2000;    // time after which a button
 const uint16_t buttonLongLongPressDelay = 5000;     // longer long press delay for special cases, i.e. to trigger erase nfc tag mode (in milliseconds)
 const uint16_t ledBlinkInterval = 500;              // led blink interval (in milliseconds)
 const uint32_t debugConsoleSpeed = 115200;          // speed for the debug console
+
+// define constants for shutdown feature
+const uint8_t shutdownPin = 7;                      // pin used to shutdown the system
+const uint8_t shutdownMinutes = 10;                 // minutes until shutdown (to disable, set to 0)
+const float shutdownMinVoltage = 4.4;               // minimum expected voltage level (in volts)
+const float shutdownMaxVoltage = 5.0;               // maximum expected voltage level (in volts)
+const float shutdownVoltageCorrection = 1.0 / 1.0;  // voltage measured by multimeter divided by reported voltage
 
 // define message to mp3 file mappings for spoken feedback
 const uint16_t msgSetupNewTag = 305;                // 01
@@ -209,6 +211,12 @@ const uint16_t ir2ButtonCenter = 0x3ABF;
 const uint16_t ir2ButtonMenu = 0xC0BF;
 const uint16_t ir2ButtonPlayPause = 0xFABF;
 
+// define strings
+const char* playbackModeName[] = {"nomode", "story", "album", "party", "single", "story book"};
+
+// playback modes
+enum {NOMODE, STORY, ALBUM, PARTY, SINGLE, STORYBOOK};
+
 // button actions
 enum {NOACTION,
       B0P, B1P, B2P,
@@ -219,6 +227,9 @@ enum {NOACTION,
 
 // button modes
 enum {PAUSE, PLAY, CONFIG};
+
+// shutdown timer actions
+enum {START, STOP, CHECK};
 
 // this object stores nfc tag data
 struct nfcTagObject {
@@ -232,26 +243,12 @@ struct nfcTagObject {
 // this object tracks the playback state
 struct playbackObject {
   bool firstTrack = true;
-  bool queueMode = false;
+  bool playListMode = false;
   uint8_t playTrack = 1;
   uint8_t storedTrack = 1;
-  uint8_t playList[255];
   uint8_t folderTrackCount = 0;
+  uint8_t playList[255];
 } playback;
-
-#if defined(CUBIEKID)
-// this object stores the cubiekid configuration
-struct cubiekidObject {
-  const uint8_t shutdownPin = 7;                    // pin used to shutdown the system
-  const uint8_t powerOffHours = 0;                  // hours until shutdown
-  const uint8_t powerOffMinutes = 10;               // minutes until shutdown
-  const uint8_t powerOffSeconds = 0;                // seconds until shutdown
-  const uint16_t timerInterval = 1000;              // timer interval (in milliseconds)
-  const float minVoltage = 4.4;                     // minimum expected voltage level (in volts)
-  const float maxVoltage = 5.0;                     // maximum expected voltage level (in volts)
-  const float voltageCorrection = 1.0 / 1.0;        // voltage measured by multimeter divided by reported voltage
-} cubiekid;
-#endif
 
 // global variables
 uint8_t inputEvent = NOACTION;
@@ -330,9 +327,8 @@ IRrecv irReceiver(irReceiverPin);                                             //
 decode_results irReadings;                                                    // create decode_results instance to store received ir readings
 #endif
 
-#if defined(CUBIEKID)
-Countimer cubiekidShutdownTimer;                                              // create Countimer instance
-Vcc cubiekidVoltage(cubiekid.voltageCorrection);                              // create Vcc instance
+#if defined(LOWVOLTAGE)
+Vcc shutdownVoltage(shutdownVoltageCorrection);                               // create Vcc instance
 #endif
 
 // checks all input sources and populates the global inputEvent variable
@@ -499,16 +495,7 @@ void waitPlaybackToFinish() {
 
 // prints current mode, folder and track information
 void printModeFolderTrack(uint8_t playTrack, bool cr) {
-  if (nfcTag.playbackMode == 1) Serial.print(F("story > "));
-  else if (nfcTag.playbackMode == 2) Serial.print(F("album > "));
-  else if (nfcTag.playbackMode == 3) Serial.print(F("party > "));
-  else if (nfcTag.playbackMode == 4) Serial.print(F("single > "));
-  else if (nfcTag.playbackMode == 5) Serial.print(F("story book > "));
-  Serial.print(nfcTag.assignedFolder);
-  Serial.print(F("|"));
-  Serial.print(playTrack);
-  Serial.print(F("/"));
-  Serial.print(playback.folderTrackCount);
+  Serial.print(String(playbackModeName[nfcTag.playbackMode]) + F("-") + String(nfcTag.assignedFolder) + F("-") + String(playTrack) + F("/") + String(playback.folderTrackCount));
   if (cr) Serial.println();
 }
 
@@ -519,20 +506,17 @@ void playNextTrack(uint16_t globalTrack, bool directionForward, bool triggeredMa
   //delay 100ms to be on the safe side with the serial communication
   delay(100);
 
-  // we only advance to a new track when in queue mode, not during interactive prompt playback (ie. during configuration of a new nfc tag)
-  if (!playback.queueMode) return;
+  // we only advance to a new track when in playlist mode, not during interactive prompt playback (ie. during configuration of a new nfc tag)
+  if (!playback.playListMode) return;
 
   // story mode (1): play one random track in folder
   // single mode (4): play one single track in folder
   // there is no next track in story and single mode, stop playback
-  if (nfcTag.playbackMode == 1 || nfcTag.playbackMode == 4) {
-    playback.queueMode = false;
+  if (nfcTag.playbackMode == STORY || nfcTag.playbackMode == SINGLE) {
+    playback.playListMode = false;
     switchButtonConfiguration(PAUSE);
-#if defined(CUBIEKID)
-    cubiekidShutdownTimer.restart();
-#endif
-    if (nfcTag.playbackMode == 1) Serial.print(F("story"));
-    else if (nfcTag.playbackMode == 4) Serial.print(F("single"));
+    shutdownTimer(START);
+    Serial.print(playbackModeName[nfcTag.playbackMode]);
     Serial.println(F(" > stop"));
     mp3.stop();
   }
@@ -541,7 +525,7 @@ void playNextTrack(uint16_t globalTrack, bool directionForward, bool triggeredMa
   // party mode (3): shuffle the complete folder
   // story book mode (5): play the complete folder and track progress
   // advance to the next or previous track, stop if the end of the folder is reached
-  if (nfcTag.playbackMode == 2 || nfcTag.playbackMode == 3 || nfcTag.playbackMode == 5) {
+  if (nfcTag.playbackMode == ALBUM || nfcTag.playbackMode == PARTY || nfcTag.playbackMode == STORYBOOK) {
 
     // **workaround for some DFPlayer mini modules that make two callbacks in a row when finishing a track**
     // reset lastCallTrack to avoid lockup when playback was just started
@@ -558,30 +542,23 @@ void playNextTrack(uint16_t globalTrack, bool directionForward, bool triggeredMa
       // there are more tracks after the current one, play next track
       if (playback.playTrack < playback.folderTrackCount) {
         playback.playTrack++;
-        if (nfcTag.playbackMode == 2 || nfcTag.playbackMode == 5) {
-          printModeFolderTrack(playback.playTrack, true);
-          mp3.playFolderTrack(nfcTag.assignedFolder, playback.playTrack);
-        }
-        else if (nfcTag.playbackMode == 3) {
-          printModeFolderTrack(playback.playList[playback.playTrack - 1], true);
-          mp3.playFolderTrack(nfcTag.assignedFolder, playback.playList[playback.playTrack - 1]);
-        }
+        printModeFolderTrack(playback.playList[playback.playTrack - 1], true);
+        mp3.playFolderTrack(nfcTag.assignedFolder, playback.playList[playback.playTrack - 1]);
       }
       // there are no more tracks after the current one
       else {
         // if not triggered manually, stop playback (and reset progress)
         if (!triggeredManually) {
-          playback.queueMode = false;
+          playback.playListMode = false;
           switchButtonConfiguration(PAUSE);
-#if defined(CUBIEKID)
-          cubiekidShutdownTimer.restart();
-#endif
-          if (nfcTag.playbackMode == 2) Serial.println(F("album > stop"));
-          else if (nfcTag.playbackMode == 3) Serial.println(F("party > stop"));
-          else if (nfcTag.playbackMode == 5) {
-            Serial.println(F("story book > stop+reset"));
+          shutdownTimer(START);
+          Serial.print(playbackModeName[nfcTag.playbackMode]);
+          Serial.print(F(" > stop"));
+          if (nfcTag.playbackMode == STORYBOOK) {
+            Serial.print(F("+reset"));
             EEPROM.update(nfcTag.assignedFolder, 0);
           }
+          Serial.println();
           mp3.stop();
         }
       }
@@ -591,14 +568,8 @@ void playNextTrack(uint16_t globalTrack, bool directionForward, bool triggeredMa
       // there are more tracks before the current one, play the previous track
       if (playback.playTrack > 1) {
         playback.playTrack--;
-        if (nfcTag.playbackMode == 2 || nfcTag.playbackMode == 5) {
-          printModeFolderTrack(playback.playTrack, true);
-          mp3.playFolderTrack(nfcTag.assignedFolder, playback.playTrack);
-        }
-        else if (nfcTag.playbackMode == 3) {
-          printModeFolderTrack(playback.playList[playback.playTrack - 1], true);
-          mp3.playFolderTrack(nfcTag.assignedFolder, playback.playList[playback.playTrack - 1]);
-        }
+        printModeFolderTrack(playback.playList[playback.playTrack - 1], true);
+        mp3.playFolderTrack(nfcTag.assignedFolder, playback.playList[playback.playTrack - 1]);
       }
     }
   }
@@ -718,6 +689,36 @@ uint8_t writeNfcTagData(uint8_t mifareData[], uint8_t mifareDataSize) {
   return returnCode;
 }
 
+// starts, stops and checks the shutdown timer
+void shutdownTimer(uint8_t timerAction) {
+  static uint64_t shutdownMillis = 0;
+
+  switch (timerAction) {
+    case START:
+      if (shutdownMinutes != 0) shutdownMillis = millis() + (shutdownMinutes * 60000);
+      else shutdownMillis = 0;
+      break;
+    case STOP:
+      shutdownMillis = 0;
+      break;
+    case CHECK:
+      if (shutdownMillis != 0 && millis() > shutdownMillis) {
+        Serial.println(F("idle shutdown"));
+        digitalWrite(statusLedPin, LOW);
+        digitalWrite(shutdownPin, LOW);
+        mfrc522.PCD_AntennaOff();
+        mfrc522.PCD_SoftPowerDown();
+        mp3.sleep();
+        set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+        cli();
+        sleep_mode();
+      }
+      break;
+    default:
+      break;
+  }
+}
+
 #if defined(STATUSLED)
 // fade in/out status led while beeing idle, during playback set to full brightness
 void fadeStatusLed(bool isPlaying) {
@@ -779,31 +780,12 @@ void burstStatusLed() {
 }
 #endif
 
-#if defined(CUBIEKID)
-// show time remaining until shutdown
-// available when CUBIEKIDDEBUG is enabled
-void cubiekidTimerRemaining() {
-#if defined(CUBIEKIDDEBUG)
-  Serial.print(F("shutdown in "));
-  Serial.println(cubiekidShutdownTimer.getCurrentTime());
-#endif
-}
-
-// shutdown the system
-void cubiekidShutdown() {
-  Serial.println(F("inactivity shutdown..."));
-  digitalWrite(cubiekid.shutdownPin, LOW);
-}
-#endif
-
 void setup() {
-#if defined(CUBIEKID)
-  pinMode(cubiekid.shutdownPin, OUTPUT);
-  digitalWrite(cubiekid.shutdownPin, HIGH);
-#endif
+  pinMode(shutdownPin, OUTPUT);
+  digitalWrite(shutdownPin, HIGH);
   Serial.begin(debugConsoleSpeed);
   while (!Serial);
-  Serial.println(F("TonUINO JUKEBOX"));
+  Serial.println(F("\n\nTonUINO JUKEBOX"));
   Serial.println(F("by Thorsten Voß"));
   Serial.println(F("Stephan Eisfeld"));
   Serial.println(F("---------------"));
@@ -834,6 +816,11 @@ void setup() {
   button2.init(button2Pin, HIGH, 2);
   switchButtonConfiguration(PAUSE);
 
+  Serial.print(F("init timer "));
+  Serial.print(shutdownMinutes);
+  Serial.println(F("m"));
+  shutdownTimer(START);
+
 #if defined(TSOP38238)
   Serial.println(F("init ir"));
   irReceiver.enableIRIn();
@@ -845,29 +832,19 @@ void setup() {
   digitalWrite(statusLedPin, HIGH);
 #endif
 
-#if defined(CUBIEKID)
-  Serial.println(F("init cubiekid"));
+#if defined(LOWVOLTAGE)
+  Serial.println(F("init voltage monitor"));
   Serial.print(F("  expected "));
-  Serial.print(cubiekid.maxVoltage);
+  Serial.print(shutdownMaxVoltage);
   Serial.println(F("V"));
   Serial.print(F("  shutdown "));
-  Serial.print(cubiekid.minVoltage);
+  Serial.print(shutdownMinVoltage);
   Serial.println(F("V"));
   Serial.print(F("   current "));
-  Serial.print(cubiekidVoltage.Read_Volts());
+  Serial.print(shutdownVoltage.Read_Volts());
   Serial.print(F("V ("));
-  Serial.print(cubiekidVoltage.Read_Perc(cubiekid.minVoltage, cubiekid.maxVoltage));
+  Serial.print(shutdownVoltage.Read_Perc(shutdownMinVoltage, shutdownMaxVoltage));
   Serial.println(F("%)"));
-  Serial.print(F("     timer "));
-  Serial.print(cubiekid.powerOffHours);
-  Serial.print(F("h:"));
-  Serial.print(cubiekid.powerOffMinutes);
-  Serial.print(F("m:"));
-  Serial.print(cubiekid.powerOffSeconds);
-  Serial.println(F("s"));
-  cubiekidShutdownTimer.setCounter(cubiekid.powerOffHours, cubiekid.powerOffMinutes, cubiekid.powerOffSeconds, cubiekidShutdownTimer.COUNT_DOWN, cubiekidShutdown);
-  cubiekidShutdownTimer.setInterval(cubiekidTimerRemaining, cubiekid.timerInterval);
-  cubiekidShutdownTimer.start();
 #endif
 
   // hold down all three buttons while powering up: erase the eeprom contents
@@ -881,7 +858,7 @@ void setup() {
     }
   }
 
-  Serial.println(F("system is ready"));
+  Serial.println(F("ready"));
   mp3.playMp3FolderTrack(msgWelcome);
 }
 
@@ -889,22 +866,20 @@ void loop() {
   static bool isLocked = false;
   bool isPlaying = !digitalRead(mp3BusyPin);
   checkForInput();
+  shutdownTimer(CHECK);
 
 #if defined(STATUSLED)
   fadeStatusLed(isPlaying);
 #endif
 
-#if defined(CUBIEKID)
-  // update timer
-  cubiekidShutdownTimer.run();
+#if defined(LOWVOLTAGE)
   // if low voltage level is reached, store progress and shutdown
-  if (cubiekidVoltage.Read_Volts() <= cubiekid.minVoltage) {
-    // if the current playback mode is story book mode: store the current progress
-    if (nfcTag.playbackMode == 5) EEPROM.update(nfcTag.assignedFolder, playback.playTrack);
+  if (shutdownVoltage.Read_Volts() <= shutdownMinVoltage) {
+    if (nfcTag.playbackMode == STORYBOOK) EEPROM.update(nfcTag.assignedFolder, playback.playTrack);
     mp3.playMp3FolderTrack(msgBatteryLow);
     waitPlaybackToFinish();
-    Serial.println(F("low voltage shutdown..."));
-    digitalWrite(cubiekid.shutdownPin, LOW);
+    Serial.println(F("low voltage shutdown"));
+    digitalWrite(shutdownPin, LOW);
   }
 #endif
 
@@ -912,7 +887,7 @@ void loop() {
   // # main code block, if nfc tag is detected and TonUINO is not locked do something
   if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial() && !isLocked) {
     // if the current playback mode is story book mode, only while playing: store the current progress
-    if (nfcTag.playbackMode == 5 && isPlaying) {
+    if (nfcTag.playbackMode == STORYBOOK && isPlaying) {
       printModeFolderTrack(playback.playTrack, false);
       Serial.println(F(" > saved"));
       EEPROM.update(nfcTag.assignedFolder, playback.playTrack);
@@ -925,54 +900,19 @@ void loop() {
       // # nfc tag has our magic cookie 0x1337 0xb347 on it (322417479), use data from nfc tag to start playback
       if (nfcTag.cookie == 322417479) {
         switchButtonConfiguration(PLAY);
-#if defined(CUBIEKID)
-        cubiekidShutdownTimer.stop();
-#endif
-        // log data to the console
-        Serial.print(F("read version "));
-        Serial.print(nfcTag.version);
-        Serial.print(F(" | folder "));
-        Serial.print(nfcTag.assignedFolder);
-        Serial.print(F(" | mode "));
-        switch (nfcTag.playbackMode) {
-          case 1:
-            Serial.println(F("1 (story)"));
-            break;
-          case 2:
-            Serial.println(F("2 (album)"));
-            break;
-          case 3:
-            Serial.println(F("3 (party)"));
-            break;
-          case 4:
-            Serial.print(F("4 (single, track "));
-            Serial.print(nfcTag.assignedTrack);
-            Serial.println(F(")"));
-            break;
-          case 5:
-            Serial.println(F("5 (story book)"));
-            break;
-          default:
-            break;
-        }
-        // start playback
+        shutdownTimer(STOP);
+        // prepare playlist for playback
         playback.folderTrackCount = mp3.getFolderTrackCount(nfcTag.assignedFolder);
+        for (uint8_t i = 0; i < 255; i++) playback.playList[i] = i + 1 <= playback.folderTrackCount ? i + 1 : 0;
         switch (nfcTag.playbackMode) {
-          // story mode
-          case 1:
+          case STORY:
             playback.playTrack = random(1, playback.folderTrackCount + 1);
-            printModeFolderTrack(playback.playTrack, true);
             break;
-          // album mode
-          case 2:
+          case ALBUM:
             playback.playTrack = 1;
-            printModeFolderTrack(playback.playTrack, true);
             break;
-          // party mode
-          case 3:
+          case PARTY:
             playback.playTrack = 1;
-            // fill playlist
-            for (uint8_t i = 0; i < 255; i++) playback.playList[i] = i + 1 <= playback.folderTrackCount ? i + 1 : 0;
             // shuffle playlist
             for (uint8_t i = 0; i < playback.folderTrackCount; i++) {
               uint8_t j = random(0, playback.folderTrackCount);
@@ -980,15 +920,11 @@ void loop() {
               playback.playList[i] = playback.playList[j];
               playback.playList[j] = temp;
             }
-            printModeFolderTrack(playback.playList[playback.playTrack - 1], true);
             break;
-          // single mode
-          case 4:
+          case SINGLE:
             playback.playTrack = nfcTag.assignedTrack;
-            printModeFolderTrack(playback.playTrack, true);
             break;
-          // story book mode
-          case 5:
+          case STORYBOOK:
             playback.storedTrack = EEPROM.read(nfcTag.assignedFolder);
             // don't resume from eeprom, play from the beginning
             if (playback.storedTrack == 0 || playback.storedTrack > playback.folderTrackCount) playback.playTrack = 1;
@@ -997,15 +933,14 @@ void loop() {
               playback.playTrack = playback.storedTrack;
               Serial.print(F("resuming "));
             }
-            printModeFolderTrack(playback.playTrack, true);
             break;
           default:
             break;
         }
         playback.firstTrack = true;
-        playback.queueMode = true;
-        if (nfcTag.playbackMode == 3) mp3.playFolderTrack(nfcTag.assignedFolder, playback.playList[playback.playTrack - 1]);
-        else mp3.playFolderTrack(nfcTag.assignedFolder, playback.playTrack);
+        playback.playListMode = true;
+        printModeFolderTrack(playback.playList[playback.playTrack - 1], true);
+        mp3.playFolderTrack(nfcTag.assignedFolder, playback.playList[playback.playTrack - 1]);
       }
       // # end - nfc tag has our magic cookie 0x1337 0xb347 on it (322417479)
       // ####################################################################
@@ -1014,12 +949,10 @@ void loop() {
       // # nfc tag does not have our magic cookie 0x1337 0xb347 on it (0), start setup to configure this nfc tag
       else if (nfcTag.cookie == 0) {
         switchButtonConfiguration(CONFIG);
-#if defined(CUBIEKID)
-        cubiekidShutdownTimer.stop();
-#endif
+        shutdownTimer(STOP);
         Serial.println(F("starting tag setup"));
         // let user select the folder to assign
-        playback.queueMode = false;
+        playback.playListMode = false;
         bool setAssignedFolder = false;
         Serial.println(F("select folder"));
         mp3.playMp3FolderTrack(msgSetupNewTag);
@@ -1050,9 +983,7 @@ void loop() {
           // button 0 (middle) hold for 2 sec or ir remote menu: cancel tag setup
           else if (inputEvent == B0H || inputEvent == IRM) {
             switchButtonConfiguration(PAUSE);
-#if defined(CUBIEKID)
-            cubiekidShutdownTimer.start();
-#endif
+            shutdownTimer(START);
             Serial.println(F("canceled"));
             nfcTag.assignedFolder = 0;
             nfcTag.playbackMode = 0;
@@ -1094,31 +1025,27 @@ void loop() {
           checkForInput();
           // button 0 (middle) press or ir remote play+pause: confirm selected playback mode
           if (inputEvent == B0P || inputEvent == IRP) {
-            if (nfcTag.playbackMode == 0) continue;
+            if (nfcTag.playbackMode == NOMODE) continue;
             else setPlaybackMode = true;
           }
           // button 1 (right) press or ir remote up / right: next playback mode
           else if (inputEvent == B1P || inputEvent == IRU || inputEvent == IRR) {
             nfcTag.playbackMode = min(nfcTag.playbackMode + 1, 5);
+            Serial.print(playbackModeName[nfcTag.playbackMode]);
             switch (nfcTag.playbackMode) {
-              case 1:
-                Serial.println(F("story"));
+              case STORY:
                 mp3.playMp3FolderTrack(msgSetupNewTagStoryMode);
                 break;
-              case 2:
-                Serial.println(F("album"));
+              case ALBUM:
                 mp3.playMp3FolderTrack(msgSetupNewTagAlbumMode);
                 break;
-              case 3:
-                Serial.println(F("party"));
+              case PARTY:
                 mp3.playMp3FolderTrack(msgSetupNewTagPartyMode);
                 break;
-              case 4:
-                Serial.println(F("single"));
+              case SINGLE:
                 mp3.playMp3FolderTrack(msgSetupNewTagSingleMode);
                 break;
-              case 5:
-                Serial.println(F("story book"));
+              case STORYBOOK:
                 mp3.playMp3FolderTrack(msgSetupNewTagStoryBookMode);
                 break;
               default:
@@ -1128,25 +1055,21 @@ void loop() {
           // button 2 (left) press or ir remote down / left: previous playback mode
           else if (inputEvent == B2P || inputEvent == IRD || inputEvent == IRL) {
             nfcTag.playbackMode = max(nfcTag.playbackMode - 1, 1);
+            Serial.print(playbackModeName[nfcTag.playbackMode]);
             switch (nfcTag.playbackMode) {
-              case 1:
-                Serial.println(F("story"));
+              case STORY:
                 mp3.playMp3FolderTrack(msgSetupNewTagStoryMode);
                 break;
-              case 2:
-                Serial.println(F("album"));
+              case ALBUM:
                 mp3.playMp3FolderTrack(msgSetupNewTagAlbumMode);
                 break;
-              case 3:
-                Serial.println(F("party"));
+              case PARTY:
                 mp3.playMp3FolderTrack(msgSetupNewTagPartyMode);
                 break;
-              case 4:
-                Serial.println(F("single"));
+              case SINGLE:
                 mp3.playMp3FolderTrack(msgSetupNewTagSingleMode);
                 break;
-              case 5:
-                Serial.println(F("story book"));
+              case STORYBOOK:
                 mp3.playMp3FolderTrack(msgSetupNewTagStoryBookMode);
                 break;
               default:
@@ -1156,9 +1079,7 @@ void loop() {
           // button 0 (middle) hold for 2 sec or ir remote menu: cancel tag setup
           else if (inputEvent == B0H || inputEvent == IRM) {
             switchButtonConfiguration(PAUSE);
-#if defined(CUBIEKID)
-            cubiekidShutdownTimer.start();
-#endif
+            shutdownTimer(START);
             Serial.println(F("canceled"));
             nfcTag.assignedFolder = 0;
             nfcTag.playbackMode = 0;
@@ -1176,7 +1097,7 @@ void loop() {
         while (!setPlaybackMode);
         delay(500);
         // if single mode was selected, let user select the track to assign
-        if (nfcTag.playbackMode == 4) {
+        if (nfcTag.playbackMode == SINGLE) {
           bool setAssignedTrack = false;
           Serial.println(F("select track"));
           mp3.playMp3FolderTrack(msgSetupNewTagSingleModeCont);
@@ -1207,9 +1128,7 @@ void loop() {
             // button 0 (middle) hold for 2 sec or ir remote menu: cancel tag setup
             else if (inputEvent == B0H || inputEvent == IRM) {
               switchButtonConfiguration(PAUSE);
-#if defined(CUBIEKID)
-              cubiekidShutdownTimer.start();
-#endif
+              shutdownTimer(START);
               Serial.println(F("canceled"));
               nfcTag.assignedFolder = 0;
               nfcTag.playbackMode = 0;
@@ -1244,9 +1163,7 @@ void loop() {
           delay(500);
         }
         switchButtonConfiguration(PAUSE);
-#if defined(CUBIEKID)
-        cubiekidShutdownTimer.start();
-#endif
+        shutdownTimer(START);
         uint8_t bytesToWrite[] = {0x13, 0x37, 0xb3, 0x47,            // 0x1337 0xb347 magic cookie to identify our nfc tags
                                   0x01,                              // version 1
                                   nfcTag.assignedFolder,             // the folder selected by the user
@@ -1255,31 +1172,6 @@ void loop() {
                                   0x00, 0x00, 0x00, 0x00,            // reserved for future use
                                   0x00, 0x00, 0x00, 0x00             // reserved for future use
                                  };
-        // log data to the console
-        Serial.print(F("write version 1 | folder "));
-        Serial.print(nfcTag.assignedFolder);
-        Serial.print(F(" | mode "));
-        switch (nfcTag.playbackMode) {
-          case 1:
-            Serial.println(F("1 (story)"));
-            break;
-          case 2:
-            Serial.println(F("2 (album)"));
-            break;
-          case 3:
-            Serial.println(F("3 (party)"));
-            break;
-          case 4:
-            Serial.print(F("4 (single, track "));
-            Serial.print(nfcTag.assignedTrack);
-            Serial.println(F(")"));
-            break;
-          case 5:
-            Serial.println(F("5 (story book)"));
-            break;
-          default:
-            break;
-        }
         uint8_t writeNfcTagStatus = writeNfcTagData(bytesToWrite, sizeof(bytesToWrite));
         // handle return codes from events that happened during writing to the nfc tag
         switch (writeNfcTagStatus) {
@@ -1347,9 +1239,7 @@ void loop() {
   else if ((inputEvent == B0P && !isLocked) || inputEvent == IRP) {
     if (isPlaying) {
       switchButtonConfiguration(PAUSE);
-#if defined(CUBIEKID)
-      cubiekidShutdownTimer.start();
-#endif
+      shutdownTimer(START);
       Serial.println(F("pause"));
       mp3.pause();
       // if the current playback mode is story book mode: store the current progress
@@ -1360,11 +1250,9 @@ void loop() {
       }
     }
     else {
-      if (playback.queueMode) {
+      if (playback.playListMode) {
         switchButtonConfiguration(PLAY);
-#if defined(CUBIEKID)
-        cubiekidShutdownTimer.stop();
-#endif
+        shutdownTimer(STOP);
         Serial.println(F("play"));
         mp3.start();
       }
@@ -1397,17 +1285,17 @@ void loop() {
     else Serial.println(F("mute"));
   }
   // button 1 (right) hold for 2 sec or ir remote right, only during album, party and story book mode while playing: next track
-  else if (((inputEvent == B1H && !isLocked) || inputEvent == IRR) && (nfcTag.playbackMode == 2 || nfcTag.playbackMode == 3 || nfcTag.playbackMode == 5) && isPlaying) {
+  else if (((inputEvent == B1H && !isLocked) || inputEvent == IRR) && (nfcTag.playbackMode == ALBUM || nfcTag.playbackMode == PARTY || nfcTag.playbackMode == STORYBOOK) && isPlaying) {
     Serial.println(F("next track"));
     playNextTrack(random(65536), true, true);
   }
   // button 2 (left) hold for 2 sec or ir remote left, only during album, party and story book mode while playing: previous track
-  else if (((inputEvent == B2H && !isLocked) || inputEvent == IRL) && (nfcTag.playbackMode == 2 || nfcTag.playbackMode == 3 || nfcTag.playbackMode == 5) && isPlaying) {
+  else if (((inputEvent == B2H && !isLocked) || inputEvent == IRL) && (nfcTag.playbackMode == ALBUM || nfcTag.playbackMode == PARTY || nfcTag.playbackMode == STORYBOOK) && isPlaying) {
     Serial.println(F("previous track"));
     playNextTrack(random(65536), false, true);
   }
   // button 0 (middle) hold for 5 sec or ir remote menu, only during story book mode while playing: reset progress
-  else if (((inputEvent == B0H && !isLocked) || inputEvent == IRM) && nfcTag.playbackMode == 5 && isPlaying) {
+  else if (((inputEvent == B0H && !isLocked) || inputEvent == IRM) && nfcTag.playbackMode == STORYBOOK && isPlaying) {
     playback.playTrack = 1;
     printModeFolderTrack(playback.playTrack, false);
     Serial.println(F(" > reset"));
@@ -1417,21 +1305,17 @@ void loop() {
   // button 0 (middle) hold for 5 sec or ir remote menu while not playing: erase nfc tag
   else if (((inputEvent == B0H && !isLocked) || inputEvent == IRM) && !isPlaying) {
     switchButtonConfiguration(CONFIG);
-#if defined(CUBIEKID)
-    cubiekidShutdownTimer.stop();
-#endif
-    playback.queueMode = false;
+    shutdownTimer(STOP);
+    playback.playListMode = false;
     uint8_t writeNfcTagStatus = 0;
-    Serial.println(F("waiting for tag to erase"));
+    Serial.println(F("tag erase mode"));
     mp3.playMp3FolderTrack(msgEraseTag);
     do {
       checkForInput();
       // button 0 (middle) hold for 2 sec or ir remote menu: cancel erase nfc tag
       if (inputEvent == B0H || inputEvent == IRM) {
         switchButtonConfiguration(PAUSE);
-#if defined(CUBIEKID)
-        cubiekidShutdownTimer.start();
-#endif
+        shutdownTimer(START);
         Serial.println(F("canceled"));
         mp3.playMp3FolderTrack(msgEraseTagCancel);
         return;
@@ -1439,9 +1323,7 @@ void loop() {
       // wait for nfc tag, erase once detected
       if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
         switchButtonConfiguration(PAUSE);
-#if defined(CUBIEKID)
-        cubiekidShutdownTimer.start();
-#endif
+        shutdownTimer(START);
         uint8_t bytesToWrite[16];
         for (uint8_t i = 0; i < 16; i++) bytesToWrite[i] = 0x00;
         writeNfcTagStatus = writeNfcTagData(bytesToWrite, sizeof(bytesToWrite));
