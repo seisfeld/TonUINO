@@ -21,7 +21,7 @@ Die Firmware wird "as-is" zur Verfügung gestellt. Wenn jemand die Firmware in s
 
 ## Tastenbelegung
 
-[Tastenbelegung](usage_cheat_sheet_de.png)
+![Tastenbelegung](usage_cheat_sheet_de.png)
 
 ## Audio Meldungen
 
