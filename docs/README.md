@@ -1,34 +1,32 @@
 Alternative TonUINO Firmware
 ============================
 
-Hier ist eine alternative Version der TonUINO Firmware. Da ich das Glück hatte, beim _Betatest_ von TonUINO dabei sein zu dürfen, habe ich für mich selber mit der Zeit immer weitere Funktionen nachgerüstet. Vielleicht sind diese ja für den ein oder anderen ebenfalls interessant. Die u.a. Änderungen beziehen sich auf die TonUINO Firmware in der Version 1.0. Einige der Funktionen sind mittlerweile auch in der originalen TonUINO Firmware zu finden.
+Dies ist meine alternative Firmware für das wundervolle [TonUINO](https://www.voss.earth/tonuino/) Projekt. Ziel ist hier nicht unbedingt 100%ige Funktionsgleichheit mit der original Firmware. Es wurden vielmehr für meinen Zweck interessante Funktionen hinzugefügt und desweiteren auch einige Punkte (erstmal) ausgelassen. Im großen und ganzen macht es einfach Spaß, sich mit der TonUINO Plattform auszutoben, ich bin deswegen auch viel in der [TonUINO Community](https://discourse.voss.earth/) aktiv. Schaut doch dort auch einfach mal vorbei - ihr findet dort viele Gleichgesinnte, Bauvorschläge, Hacks und Informationen rund um den TonUINO.
 
-## Funktionen
+Die Firmware wird "as-is" zur Verfügung gestellt. Wenn jemand die Firmware in seinem TonUINO einsetzt, freue ich mich natürlich darüber. Ich kann allerdings keinen Support bieten.
 
-- **Erweiterung:** Die Verknüpfung der einzelnen Ordner zu den NFC Tags wird auf den Tags selbst und nicht mehr im EEPROM des Arduinos gespeichert. Damit gibt es im Prinzip kein Limit mehr für die Anzahl der unterstützten Tags.
-- **Erweiterung:** Die serielle Konsole gibt zu Debug Zwecken allerlei nützlicher Daten aus, so dass man beim basteln zu jeder Zeit weiss was gerade passiert.
-- **Erweiterung:** Man kann das anlernen von NFC Tags abbrechen (die play/pause Taste 2sec gerückt halten).
-- **Erweiterung:** Wenn TonUINO gerade keinen Titel spielt, kommt man mit "play/pause Taste 5sec gerückt halten“ in den NFC Tag löschen Modus, zum abbrechen des selbigen wiederum die "play/pause Taste 2sec gerückt halten“. Somit kann man zu jeder Zeit auch einzelne NFC Tags wieder löschen um sie danach neu verwenden zu können.
-- **Erweiterung:** Wenn TonUINO gerade einen Titel spielt und sich im Album oder Hörbuch Modus befindet, kann man mit den beiden Laustärketasten (jeweils 2sec gerückt halten) zum nächsten oder vorherigen Titel springen. Im Party Modus ebenfalls, allerdings dann nur zum nächsten Titel.
-- **Erweiterung:** Man kann im Sketch die Maximallautstärke zum Schutz der Kinderohren (und der Nerven der Eltern ;-)) zwischnen 0 und 30 festlegen.
-- **Erweiterung:** Wenn man einen passenden IR Empfänger nachrüstet, kann man TonUINO auch fernsteuern. Momentan sind die codes für zwei verschiedene Apple Fernbedienungen hinterlegt, das lässt sich aber für andere Fernbedienungen anpassen.
-- **Erweiterung:** Wenn man eine LED nachrüstet, werden mit dieser LED ein paar nützliche Informationen angezeigt. Man sieht dann z.B. ob TonUINO gerade einen Titel spielt (LED leuchtet dauerhaft), sich im NFC Tag löschen oder anlernen Modus befindet (LED blinkt alle 500ms), oder einfach nur idle ist (LED pulsiert langsam).
-- **Erweiterung:** Man kann mit der IR Fernbedienung die Buttons und den NFC Leser von TonUINO sperren.
-- **Erweiterung:** Lieblingsfolge. Es kann nun auch ein einzelner Titel aus einem Ordner mit einem NFC Tag verknüpft werden. Kinder lieben bekanntlich Wiederholungen. ;-) _Diesen Modus habe ich aus der 2.0 der originalen TonUINO Firmware übernommen._
-- **Erweiterung:** Hörbuchmodus. Spielt wie der Albummodus den gesammten Ordner, merkt sich aber den letzten Titel. Wenn man während der Wiedergabe die play/pause Taste für 5sec gedrückt hällt, startet die Wiedergabe wieder von vorne. _Diesen Modus habe ich aus der 2.0 der originalen TonUINO Firmware übernommen._
-- **Erweiterung:** CubieKid Unterstützung. Wenn die CubieKid Platine zum Einsatz kommt, kann in dieser Firmware sowohl die Abschaltung bei Unterspannung als auch die zeitbasierte Abschaltung bei Inaktivität aktiviert werden. Dies schont die Batterien. CubieKid ist ein Projekt von Jens Hackl aka DB3JHF - alle Informationen dazu findet man [hier](https://www.thingiverse.com/thing:3148200).
-- **Bugfix:** Man kann während man ein NFC Tag anlernt nicht mehr bestätigen ohne vorher wirklich sowohl Ordner als auch Wiedergabemodus ausgewählt zu haben.
-- **Bugfix:** Umgang mit bestimmten Versionen des DFPlayer Mini Moduls verbessert.
-- **Bugfix:** Play/Pause funktioniert jetzt richtig wenn gerade keine Queue abgespielt wird.
+## Funktionsübersicht
 
-## Dokumentation
+- Abspielmodi: Hörspiel, Album, Party, Lieblingsfolge und Hörbuch.
+- Speichert die Ordnerverknüpfungen, Abspielmodi etc. auf den NFC Tags/Karten.
+- Debugausgabe auf der seriellen Konsole.
+- Maximale Lautstärke kann begrenzt werden.
+- Konfigurationsdialoge (NFC Tags/Karten anlernen/löschen etc.) können abgebrochen werden.
+- NFC Tags/Karten können komplett wieder gelöscht werden.
+- Nächster/Vorheriger Titel in den Abspielmodi Album, Party und Hörbuch.
+- Timer zum automatischen abschalten.
+- Optional: Fernbedienbar über Infrarotfernbedienung (inkl. Tastensperre).
+- Optional: Unterstützung einer Status LED.
+- Optional: Unterspannungsabschaltung für z.B. die [CubieKid Platine](https://www.thingiverse.com/thing:3148200).
 
-Der Sketch ist relativ gut dokumentiert und am Anfang ist auch nochmal alles zusammen gefasst (allerdings auf Englisch). Dort finden sich dann auch nochmal eine generelle Übersicht der Funktionen und Informationen wie man die Pins definiert usw., weil das von Aufbau zu Aufbau verschieden sein kann. Ebenfalls ist dort erklärt wo der optionale IR Empfänger und die LED anzuschliessen sind etc. etc.
+## Tastenbelegung
+
+[Tastenbelegung](usage_cheat_sheet_de.png)
 
 ## Audio Meldungen
 
-Ihr könnt die benötigten Audiomeldunden natürlich selbst einsprechen (siehe `audio_messages.txt`). Wem das zu aufwendig ist, kann das beigelegte shell script `create_audio_messages.sh` verwenden, welches alle MP3s in einem Rutsch erzeugt. Dazu wird sowohl das `say` Kommando (von MacOS) als auch `ffmpeg` benötigt. Die erzeugten Ordner `mp3` und `advert` sind so wie sie sind auf die SD Karte zu kopieren. Bitte achtet darauf, dass wirklich keine anderen Dateien (Stichwort .DS_Store usw. unter MacOS...) auf der Karte landen, da das MP3 Modul da sehr pingelig ist. Details dazu gibt es auch nochmal auf der Homepage des Projekts.
+TonUINO funktioniert nur korrekt, wenn ein zur Firmware passendes Set and Audio Meldungen auf der SD Karte vorhanden ist (die Ordner **mp3** und **advert**). Unter MacOS X lässt sich das passende Set an Audio Meldungen mit dem begelegten Script `create_audio_messages.sh` schnell und einfach erzeugen. Benötigt werden dazu die Tools `say` und `ffmpeg`. Zum Download kann ich die Dateien leider nicht anbieten!
 
 ## Lizenz
 
-GPL v3. Siehe [LICENSE](https://github.com/seisfeld/TonUINO/blob/master/LICENSE) Datei.
+GPL v3. Siehe [LICENSE](../LICENSE.md).
