@@ -116,10 +116,10 @@
 */
 
 // uncomment the below line to enable ir remote support
-// #define TSOP38238
+#define TSOP38238
 
 // uncomment the below line to enable status led support
-// #define STATUSLED
+#define STATUSLED
 
 // uncomment the below line to enable low voltage shutdown support
 // #define LOWVOLTAGE
@@ -145,8 +145,8 @@ using namespace ace_button;
 #endif
 
 // define general configuration constants
-const uint8_t softwareSerialTxPin = 3;              // software serial tx, wired with 1k ohm to rx pin of DFPlayer Mini
-const uint8_t softwareSerialRxPin = 2;              // software serial rx, wired straight to tx pin of DFPlayer Mini
+const uint8_t softwareSerialTxPin = 2;              // software serial tx, wired with 1k ohm to rx pin of DFPlayer Mini
+const uint8_t softwareSerialRxPin = 3;              // software serial rx, wired straight to tx pin of DFPlayer Mini
 const uint8_t mp3BusyPin = 4;                       // reports play state of DFPlayer Mini (LOW = playing)
 const uint8_t irReceiverPin = 5;                    // pin used for the ir receiver
 const uint8_t statusLedPin = 6;                     // pin used for status led
@@ -193,23 +193,15 @@ const uint16_t msgBatteryLow = 510;                 // 17
 // used to calculate the total ammount of tracks on the sd card (510 + count from above)
 const uint16_t msgCount = 527;
 
-// define code mappings for silver apple tv 2 ir remote
-const uint16_t ir1ButtonUp = 0x5057;
-const uint16_t ir1ButtonDown = 0x3057;
-const uint16_t ir1ButtonLeft = 0x9057;
-const uint16_t ir1ButtonRight = 0x6057;
-const uint16_t ir1ButtonCenter = 0x3A57;
-const uint16_t ir1ButtonMenu = 0xC057;
-const uint16_t ir1ButtonPlayPause = 0xFA57;
-
-// define code mappings for silver apple tv 3 ir remote
-const uint16_t ir2ButtonUp = 0x50BF;
-const uint16_t ir2ButtonDown = 0x30BF;
-const uint16_t ir2ButtonLeft = 0x90BF;
-const uint16_t ir2ButtonRight = 0x60BF;
-const uint16_t ir2ButtonCenter = 0x3ABF;
-const uint16_t ir2ButtonMenu = 0xC0BF;
-const uint16_t ir2ButtonPlayPause = 0xFABF;
+// define codes for ir remotes
+// one remote per line with codes for: up, down, left, right, center, menu, play/pause
+const uint8_t irRemoteCount = 3;                    // the number of remotes currently in the database
+const uint16_t irRemoteCodes[irRemoteCount][7] = {
+  {0x5057, 0x3057, 0x9057, 0x6057, 0x3A57, 0xC057, 0xFA57},
+  {0x50BF, 0x30BF, 0x90BF, 0x60BF, 0x3ABF, 0xC0BF, 0xFABF},
+  {0xD0E4, 0xB0E4, 0x10E4, 0xE0E4, 0xBAE4, 0x40E4, 0x7AE4}
+};
+const uint8_t irRemoteCodeCount = sizeof(irRemoteCodes) / (2 * irRemoteCount);
 
 // define strings
 const char* playbackModeName[] = {"nomode", "story", "album", "party", "single", "story book"};
@@ -333,8 +325,11 @@ Vcc shutdownVoltage(shutdownVoltageCorrection);                               //
 
 // checks all input sources and populates the global inputEvent variable
 void checkForInput() {
+  uint8_t irRemoteEvent = NOACTION;
+  uint16_t irRemoteCode = 0;
+
   // clear inputEvent
-  inputEvent = 0;
+  inputEvent = NOACTION;
 
   // check all buttons
   button0.check();
@@ -344,44 +339,20 @@ void checkForInput() {
 #if defined(TSOP38238)
   // poll ir receiver, has precedence over (overwrites) physical buttons
   if (irReceiver.decode(&irReadings)) {
-    switch (irReadings.value & 0xFFFF) {
-      // button up
-      case ir1ButtonUp:
-      case ir2ButtonUp:
-        inputEvent = IRU;
+    irRemoteCode = irReadings.value & 0xFFFF;
+    for (uint8_t i = 0; i < irRemoteCount; i++) {
+      for (uint8_t j = 0; j < irRemoteCodeCount; j++) {
+        //if we have a match, temporally populate irRemoteEvent and break
+        if (irRemoteCode == irRemoteCodes[i][j]) {
+          irRemoteEvent = 10 + j;
+          break;
+        }
+      }
+      // if the inner loop had a match, populate inputEvent and break
+      if (irRemoteEvent != NOACTION) {
+        inputEvent = irRemoteEvent;
         break;
-      // button down
-      case ir1ButtonDown:
-      case ir2ButtonDown:
-        inputEvent = IRD;
-        break;
-      // button left
-      case ir1ButtonLeft:
-      case ir2ButtonLeft:
-        inputEvent = IRL;
-        break;
-      // button right
-      case ir1ButtonRight:
-      case ir2ButtonRight:
-        inputEvent = IRR;
-        break;
-      // button center
-      case ir1ButtonCenter:
-      case ir2ButtonCenter:
-        inputEvent = IRC;
-        break;
-      // button menu
-      case ir1ButtonMenu:
-      case ir2ButtonMenu:
-        inputEvent = IRM;
-        break;
-      // button play+pause
-      case ir1ButtonPlayPause:
-      case ir2ButtonPlayPause:
-        inputEvent = IRP;
-        break;
-      default:
-        break;
+      }
     }
     irReceiver.resume();
   }
