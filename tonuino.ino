@@ -116,10 +116,10 @@
 */
 
 // uncomment the below line to enable ir remote support
-#define TSOP38238
+// #define TSOP38238
 
 // uncomment the below line to enable status led support
-#define STATUSLED
+// #define STATUSLED
 
 // uncomment the below line to enable low voltage shutdown support
 // #define LOWVOLTAGE
@@ -145,8 +145,8 @@ using namespace ace_button;
 #endif
 
 // define general configuration constants
-const uint8_t softwareSerialTxPin = 2;              // software serial tx, wired with 1k ohm to rx pin of DFPlayer Mini
-const uint8_t softwareSerialRxPin = 3;              // software serial rx, wired straight to tx pin of DFPlayer Mini
+const uint8_t softwareSerialTxPin = 3;              // software serial tx, wired with 1k ohm to rx pin of DFPlayer Mini
+const uint8_t softwareSerialRxPin = 2;              // software serial rx, wired straight to tx pin of DFPlayer Mini
 const uint8_t mp3BusyPin = 4;                       // reports play state of DFPlayer Mini (LOW = playing)
 const uint8_t irReceiverPin = 5;                    // pin used for the ir receiver
 const uint8_t statusLedPin = 6;                     // pin used for status led
