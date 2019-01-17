@@ -195,12 +195,12 @@ const uint16_t msgCount = 527;
 
 // define codes for ir remotes
 // one remote per line with codes for: up, down, left, right, center, menu, play/pause
-const uint8_t irRemoteCount = 3;                    // the number of remotes currently in the database
-const uint16_t irRemoteCodes[irRemoteCount][7] = {
-  {0x5057, 0x3057, 0x9057, 0x6057, 0x3A57, 0xC057, 0xFA57},
-  {0x50BF, 0x30BF, 0x90BF, 0x60BF, 0x3ABF, 0xC0BF, 0xFABF},
-  {0xD0E4, 0xB0E4, 0x10E4, 0xE0E4, 0xBAE4, 0x40E4, 0x7AE4}
+const uint16_t irRemoteCodes[][7] = {
+  {0x5057, 0x3057, 0x9057, 0x6057, 0x3A57, 0xC057, 0xFA57},  // silver apple tv remote
+  {0x50BF, 0x30BF, 0x90BF, 0x60BF, 0x3ABF, 0xC0BF, 0xFABF},  // silver apple tv remote
+  {0xD0E4, 0xB0E4, 0x10E4, 0xE0E4, 0xBAE4, 0x40E4, 0x7AE4}   // silver apple tv remote
 };
+const uint8_t irRemoteCount = sizeof(irRemoteCodes) / 14;
 const uint8_t irRemoteCodeCount = sizeof(irRemoteCodes) / (2 * irRemoteCount);
 
 // define strings
@@ -325,9 +325,6 @@ Vcc shutdownVoltage(shutdownVoltageCorrection);                               //
 
 // checks all input sources and populates the global inputEvent variable
 void checkForInput() {
-  uint8_t irRemoteEvent = NOACTION;
-  uint16_t irRemoteCode = 0;
-
   // clear inputEvent
   inputEvent = NOACTION;
 
@@ -337,6 +334,9 @@ void checkForInput() {
   button2.check();
 
 #if defined(TSOP38238)
+  uint8_t irRemoteEvent = 0;
+  uint16_t irRemoteCode = 0;
+
   // poll ir receiver, has precedence over (overwrites) physical buttons
   if (irReceiver.decode(&irReadings)) {
     irRemoteCode = irReadings.value & 0xFFFF;
@@ -349,7 +349,7 @@ void checkForInput() {
         }
       }
       // if the inner loop had a match, populate inputEvent and break
-      if (irRemoteEvent != NOACTION) {
+      if (irRemoteEvent != 0) {
         inputEvent = irRemoteEvent;
         break;
       }
@@ -704,9 +704,8 @@ void fadeStatusLed(bool isPlaying) {
   }
   // TonUINO is not playing, fade status led in/out
   else {
-    uint64_t statusLedNewMillis = millis();
-    if (statusLedNewMillis - statusLedOldMillis >= 100) {
-      statusLedOldMillis = statusLedNewMillis;
+    if (millis() - statusLedOldMillis >= 100) {
+      statusLedOldMillis = millis();
       if (statusLedDirection) {
         statusLedValue += 10;
         if (statusLedValue >= 255) {
@@ -728,12 +727,11 @@ void fadeStatusLed(bool isPlaying) {
 
 // blink status led every blinkInterval milliseconds
 void blinkStatusLed(uint16_t blinkInterval) {
-  static bool statusLedState;
+  static bool statusLedState = true;
   static uint64_t statusLedOldMillis;
 
-  uint64_t statusLedNewMillis = millis();
-  if (statusLedNewMillis - statusLedOldMillis >= blinkInterval) {
-    statusLedOldMillis = statusLedNewMillis;
+  if (millis() - statusLedOldMillis >= blinkInterval) {
+    statusLedOldMillis = millis();
     statusLedState = !statusLedState;
     digitalWrite(statusLedPin, statusLedState);
   }
@@ -741,7 +739,7 @@ void blinkStatusLed(uint16_t blinkInterval) {
 
 // burst status led 4 times
 void burstStatusLed() {
-  bool statusLedState = true;
+  static bool statusLedState = true;
 
   for (uint8_t i = 0; i < 8; i++) {
     statusLedState = !statusLedState;
@@ -1214,7 +1212,7 @@ void loop() {
       Serial.println(F("pause"));
       mp3.pause();
       // if the current playback mode is story book mode: store the current progress
-      if (nfcTag.playbackMode == 5) {
+      if (nfcTag.playbackMode == STORYBOOK) {
         printModeFolderTrack(playback.playTrack, false);
         Serial.println(F(" > saved"));
         EEPROM.update(nfcTag.assignedFolder, playback.playTrack);
