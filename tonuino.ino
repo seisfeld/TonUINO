@@ -1149,7 +1149,6 @@ void loop() {
                                   0x00, 0x00, 0x00, 0x00             // reserved for future use
                                  };
         uint8_t writeNfcTagStatus = writeNfcTagData(bytesToWrite, sizeof(bytesToWrite));
-        // handle return codes from events that happened during writing to the nfc tag
         if (writeNfcTagStatus == 1) mp3.playMp3FolderTrack(msgSetupNewTagConfirm);
         else mp3.playMp3FolderTrack(msgSetupNewTagError);
         inputEvent = NOACTION;
@@ -1274,7 +1273,6 @@ void loop() {
         uint8_t bytesToWrite[16];
         for (uint8_t i = 0; i < 16; i++) bytesToWrite[i] = 0x00;
         writeNfcTagStatus = writeNfcTagData(bytesToWrite, sizeof(bytesToWrite));
-        // handle return codes from events that happened during erasing the nfc tag
         if (writeNfcTagStatus == 1) mp3.playMp3FolderTrack(msgEraseTagConfirm);
         else mp3.playMp3FolderTrack(msgEraseTagError);
       }
