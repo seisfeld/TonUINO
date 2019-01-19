@@ -161,7 +161,6 @@ const uint8_t button2Pin = A2;                      // left button
 const uint16_t buttonClickDelay = 1000;             // time during which a button click is still a click (in milliseconds)
 const uint16_t buttonShortLongPressDelay = 2000;    // time after which a button press is considered a long press (in milliseconds)
 const uint16_t buttonLongLongPressDelay = 5000;     // longer long press delay for special cases, i.e. to trigger erase nfc tag mode (in milliseconds)
-const uint16_t ledBlinkInterval = 500;              // led blink interval (in milliseconds)
 const uint32_t debugConsoleSpeed = 115200;          // speed for the debug console
 
 // define constants for shutdown feature
@@ -692,7 +691,7 @@ void shutdownTimer(uint8_t timerAction) {
 
 #if defined(STATUSLED)
 // fade in/out status led while beeing idle, during playback set to full brightness
-void fadeStatusLed(bool isPlaying) {
+void statusLedFade(bool isPlaying) {
   static bool statusLedDirection = false;
   static int16_t statusLedValue = 255;
   static uint64_t statusLedOldMillis;
@@ -726,11 +725,11 @@ void fadeStatusLed(bool isPlaying) {
 }
 
 // blink status led every blinkInterval milliseconds
-void blinkStatusLed(uint16_t blinkInterval) {
+void statusLedBlink(uint16_t statusLedBlinkInterval = 500) {
   static bool statusLedState = true;
   static uint64_t statusLedOldMillis;
 
-  if (millis() - statusLedOldMillis >= blinkInterval) {
+  if (millis() - statusLedOldMillis >= statusLedBlinkInterval) {
     statusLedOldMillis = millis();
     statusLedState = !statusLedState;
     digitalWrite(statusLedPin, statusLedState);
@@ -738,7 +737,7 @@ void blinkStatusLed(uint16_t blinkInterval) {
 }
 
 // burst status led 4 times
-void burstStatusLed() {
+void statusLedBurst() {
   static bool statusLedState = true;
 
   for (uint8_t i = 0; i < 8; i++) {
@@ -822,7 +821,7 @@ void setup() {
     for (uint16_t i = 0; i < EEPROM.length(); i++) {
       EEPROM.update(i, 0);
 #if defined(STATUSLED)
-      blinkStatusLed(50);
+      statusLedBlink(50);
 #endif
     }
   }
@@ -838,7 +837,7 @@ void loop() {
   shutdownTimer(CHECK);
 
 #if defined(STATUSLED)
-  fadeStatusLed(isPlaying);
+  statusLedFade(isPlaying);
 #endif
 
 #if defined(LOWVOLTAGE)
@@ -979,7 +978,7 @@ void loop() {
             mp3.playFolderTrack(nfcTag.assignedFolder, 1);
           }
 #if defined(STATUSLED)
-          blinkStatusLed(ledBlinkInterval);
+          statusLedBlink();
 #endif
           mp3.loop();
         }
@@ -1059,7 +1058,7 @@ void loop() {
             return;
           }
 #if defined(STATUSLED)
-          blinkStatusLed(ledBlinkInterval);
+          statusLedBlink();
 #endif
           mp3.loop();
         }
@@ -1124,7 +1123,7 @@ void loop() {
               mp3.playFolderTrack(nfcTag.assignedFolder, nfcTag.assignedTrack);
             }
 #if defined(STATUSLED)
-            blinkStatusLed(ledBlinkInterval);
+            statusLedBlink();
 #endif
             mp3.loop();
           }
@@ -1193,14 +1192,14 @@ void loop() {
       Serial.println(F("box locked"));
       isLocked = true;
 #if defined(STATUSLED)
-      burstStatusLed();
+      statusLedBurst();
 #endif
     }
     else {
       Serial.println(F("box unlocked"));
       isLocked = false;
 #if defined(STATUSLED)
-      burstStatusLed();
+      statusLedBurst();
 #endif
     }
   }
@@ -1321,7 +1320,7 @@ void loop() {
         }
       }
 #if defined(STATUSLED)
-      blinkStatusLed(ledBlinkInterval);
+      statusLedBlink();
 #endif
       mp3.loop();
     }
