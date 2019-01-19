@@ -204,6 +204,7 @@ const uint8_t irRemoteCodeCount = sizeof(irRemoteCodes) / (2 * irRemoteCount);
 
 // define strings
 const char* playbackModeName[] = {"nomode", "story", "album", "party", "single", "story book"};
+const char* nfcStatusMessage[] = {"status", "tag unsupported", "auth failed", "read", "write", "error", "successfull"};
 
 // playback modes
 enum {NOMODE, STORY, ALBUM, PARTY, SINGLE, STORYBOOK};
@@ -547,7 +548,6 @@ void playNextTrack(uint16_t globalTrack, bool directionForward, bool triggeredMa
 
 // reads data from nfc tag
 uint8_t readNfcTagData() {
-  uint8_t returnCode;
   uint8_t mifareBlock = 4;
   uint8_t mifareData[18];
   uint8_t mifareDataSize = sizeof(mifareData);
@@ -559,25 +559,30 @@ uint8_t readNfcTagData() {
   // check if card type is supported
   mifareType = mfrc522.PICC_GetType(mfrc522.uid.sak);
   if (mifareType != MFRC522::PICC_TYPE_MIFARE_MINI && mifareType != MFRC522::PICC_TYPE_MIFARE_1K && mifareType != MFRC522::PICC_TYPE_MIFARE_4K) {
+    Serial.println(nfcStatusMessage[1]);
     mfrc522.PICC_HaltA();
     mfrc522.PCD_StopCrypto1();
-    returnCode = 255;
+    return 0;
   }
   else {
     // check if we can authenticate with mifareKey
     mifareStatus = (MFRC522::StatusCode)mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, mifareBlock, &mifareKey, &(mfrc522.uid));
     if (mifareStatus != MFRC522::STATUS_OK) {
+      Serial.println(nfcStatusMessage[2]);
       mfrc522.PICC_HaltA();
       mfrc522.PCD_StopCrypto1();
-      returnCode = 254;
+      return 0;
     }
     else {
       // read data from nfc tag
       mifareStatus = (MFRC522::StatusCode)mfrc522.MIFARE_Read(mifareBlock, mifareData, &mifareDataSize);
       if (mifareStatus != MFRC522::STATUS_OK) {
+        Serial.print(nfcStatusMessage[3]);
+        Serial.print(F(" "));
+        Serial.println(nfcStatusMessage[5]);
         mfrc522.PICC_HaltA();
         mfrc522.PCD_StopCrypto1();
-        returnCode = 253;
+        return 0;
       }
       else {
         // log data to the console
@@ -613,17 +618,14 @@ uint8_t readNfcTagData() {
           nfcTag.playbackMode = 0;
           nfcTag.assignedTrack = 0;
         }
-        returnCode = 1;
+        return 1;
       }
     }
   }
-
-  return returnCode;
 }
 
 // writes data to nfc tag
 uint8_t writeNfcTagData(uint8_t mifareData[], uint8_t mifareDataSize) {
-  uint8_t returnCode;
   uint8_t mifareBlock = 4;
   uint8_t mifareTrailerBlock = 7;
   MFRC522::StatusCode mifareStatus;
@@ -641,22 +643,42 @@ uint8_t writeNfcTagData(uint8_t mifareData[], uint8_t mifareDataSize) {
 
   // check if card type is supported
   mifareType = mfrc522.PICC_GetType(mfrc522.uid.sak);
-  if (mifareType != MFRC522::PICC_TYPE_MIFARE_MINI && mifareType != MFRC522::PICC_TYPE_MIFARE_1K && mifareType != MFRC522::PICC_TYPE_MIFARE_4K) returnCode = 255;
+  if (mifareType != MFRC522::PICC_TYPE_MIFARE_MINI && mifareType != MFRC522::PICC_TYPE_MIFARE_1K && mifareType != MFRC522::PICC_TYPE_MIFARE_4K) {
+    Serial.println(nfcStatusMessage[1]);
+    mfrc522.PICC_HaltA();
+    mfrc522.PCD_StopCrypto1();
+    return 0;
+  }
   else {
     // check if we can authenticate with mifareKey
     mifareStatus = (MFRC522::StatusCode)mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, mifareTrailerBlock, &mifareKey, &(mfrc522.uid));
-    if (mifareStatus != MFRC522::STATUS_OK) returnCode = 254;
+    if (mifareStatus != MFRC522::STATUS_OK) {
+      Serial.println(nfcStatusMessage[2]);
+      mfrc522.PICC_HaltA();
+      mfrc522.PCD_StopCrypto1();
+      return 0;
+    }
     else {
       // write data to nfc tag
       mifareStatus = (MFRC522::StatusCode)mfrc522.MIFARE_Write(mifareBlock, mifareData, mifareDataSize);
-      if (mifareStatus != MFRC522::STATUS_OK) returnCode = 253;
-      else returnCode = 1;
+      if (mifareStatus != MFRC522::STATUS_OK) {
+        Serial.print(nfcStatusMessage[4]);
+        Serial.print(F(" "));
+        Serial.println(nfcStatusMessage[5]);
+        mfrc522.PICC_HaltA();
+        mfrc522.PCD_StopCrypto1();
+        return 0;
+      }
+      else {
+        Serial.print(nfcStatusMessage[4]);
+        Serial.print(F(" "));
+        Serial.println(nfcStatusMessage[6]);
+        mfrc522.PICC_HaltA();
+        mfrc522.PCD_StopCrypto1();
+        return 1;
+      }
     }
   }
-
-  mfrc522.PICC_HaltA();
-  mfrc522.PCD_StopCrypto1();
-  return returnCode;
 }
 
 // starts, stops and checks the shutdown timer
@@ -918,7 +940,7 @@ void loop() {
       else if (nfcTag.cookie == 0) {
         switchButtonConfiguration(CONFIG);
         shutdownTimer(STOP);
-        Serial.println(F("starting tag setup"));
+        Serial.println(F("tag setup mode"));
         // let user select the folder to assign
         playback.playListMode = false;
         bool setAssignedFolder = false;
@@ -999,50 +1021,14 @@ void loop() {
           // button 1 (right) press or ir remote up / right: next playback mode
           else if (inputEvent == B1P || inputEvent == IRU || inputEvent == IRR) {
             nfcTag.playbackMode = min(nfcTag.playbackMode + 1, 5);
-            Serial.print(playbackModeName[nfcTag.playbackMode]);
-            switch (nfcTag.playbackMode) {
-              case STORY:
-                mp3.playMp3FolderTrack(msgSetupNewTagStoryMode);
-                break;
-              case ALBUM:
-                mp3.playMp3FolderTrack(msgSetupNewTagAlbumMode);
-                break;
-              case PARTY:
-                mp3.playMp3FolderTrack(msgSetupNewTagPartyMode);
-                break;
-              case SINGLE:
-                mp3.playMp3FolderTrack(msgSetupNewTagSingleMode);
-                break;
-              case STORYBOOK:
-                mp3.playMp3FolderTrack(msgSetupNewTagStoryBookMode);
-                break;
-              default:
-                break;
-            }
+            Serial.println(playbackModeName[nfcTag.playbackMode]);
+            mp3.playMp3FolderTrack(300 + (10 * nfcTag.playbackMode));
           }
           // button 2 (left) press or ir remote down / left: previous playback mode
           else if (inputEvent == B2P || inputEvent == IRD || inputEvent == IRL) {
             nfcTag.playbackMode = max(nfcTag.playbackMode - 1, 1);
-            Serial.print(playbackModeName[nfcTag.playbackMode]);
-            switch (nfcTag.playbackMode) {
-              case STORY:
-                mp3.playMp3FolderTrack(msgSetupNewTagStoryMode);
-                break;
-              case ALBUM:
-                mp3.playMp3FolderTrack(msgSetupNewTagAlbumMode);
-                break;
-              case PARTY:
-                mp3.playMp3FolderTrack(msgSetupNewTagPartyMode);
-                break;
-              case SINGLE:
-                mp3.playMp3FolderTrack(msgSetupNewTagSingleMode);
-                break;
-              case STORYBOOK:
-                mp3.playMp3FolderTrack(msgSetupNewTagStoryBookMode);
-                break;
-              default:
-                break;
-            }
+            Serial.println(playbackModeName[nfcTag.playbackMode]);
+            mp3.playMp3FolderTrack(300 + (10 * nfcTag.playbackMode));
           }
           // button 0 (middle) hold for 2 sec or ir remote menu: cancel tag setup
           else if (inputEvent == B0H || inputEvent == IRM) {
@@ -1142,44 +1128,15 @@ void loop() {
                                  };
         uint8_t writeNfcTagStatus = writeNfcTagData(bytesToWrite, sizeof(bytesToWrite));
         // handle return codes from events that happened during writing to the nfc tag
-        switch (writeNfcTagStatus) {
-          case 1:
-            Serial.println(F("write successfull"));
-            mp3.playMp3FolderTrack(msgSetupNewTagConfirm);
-            break;
-          case 253:
-            Serial.println(F("write error"));
-            mp3.playMp3FolderTrack(msgSetupNewTagError);
-            break;
-          case 254:
-            Serial.println(F("authentication failed"));
-            mp3.playMp3FolderTrack(msgSetupNewTagError);
-            break;
-          case 255:
-            Serial.println(F("tag is not supported"));
-            mp3.playMp3FolderTrack(msgSetupNewTagError);
-            break;
-          default:
-            Serial.println(F("unknown error"));
-            mp3.playMp3FolderTrack(msgSetupNewTagError);
-            break;
-        }
+        if (writeNfcTagStatus == 1) mp3.playMp3FolderTrack(msgSetupNewTagConfirm);
+        else mp3.playMp3FolderTrack(msgSetupNewTagError);
         inputEvent = NOACTION;
       }
-
-      // nfc tag is not blank but unknown, ignore
-      else Serial.println(F("tag is not one of ours"));
       // # end - nfc tag does not have our magic cookie 0x1337 0xb347 on it (0)
       // ######################################################################
     }
     // # end - nfc tag is successfully read
     // ####################################
-
-    // handle errors that happened during reading from the nfc tag
-    else if (readNfcTagStatus == 253) Serial.println(F("read error"));
-    else if (readNfcTagStatus == 254) Serial.println(F("authentication failed"));
-    else if (readNfcTagStatus == 255) Serial.println(F("tag is not supported"));
-    else Serial.println(F("unknown error"));
   }
   // # end - main code block
   // #######################
@@ -1296,28 +1253,8 @@ void loop() {
         for (uint8_t i = 0; i < 16; i++) bytesToWrite[i] = 0x00;
         writeNfcTagStatus = writeNfcTagData(bytesToWrite, sizeof(bytesToWrite));
         // handle return codes from events that happened during erasing the nfc tag
-        switch (writeNfcTagStatus) {
-          case 1:
-            Serial.println(F("write successfull"));
-            mp3.playMp3FolderTrack(msgEraseTagConfirm);
-            break;
-          case 253:
-            Serial.println(F("write error"));
-            mp3.playMp3FolderTrack(msgEraseTagError);
-            break;
-          case 254:
-            Serial.println(F("authentication failed"));
-            mp3.playMp3FolderTrack(msgEraseTagError);
-            break;
-          case 255:
-            Serial.println(F("tag is not supported"));
-            mp3.playMp3FolderTrack(msgEraseTagError);
-            break;
-          default:
-            Serial.println(F("unknown error"));
-            mp3.playMp3FolderTrack(msgEraseTagError);
-            break;
-        }
+        if (writeNfcTagStatus == 1) mp3.playMp3FolderTrack(msgEraseTagConfirm);
+        else mp3.playMp3FolderTrack(msgEraseTagError);
       }
 #if defined(STATUSLED)
       statusLedBlink();
