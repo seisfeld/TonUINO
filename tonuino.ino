@@ -203,8 +203,8 @@ const uint8_t irRemoteCount = sizeof(irRemoteCodes) / 14;
 const uint8_t irRemoteCodeCount = sizeof(irRemoteCodes) / (2 * irRemoteCount);
 
 // define strings
-const char* playbackModeName[] = {"nomode", "story", "album", "party", "single", "story book"};
-const char* nfcStatusMessage[] = {"status", "tag unsupported", "auth failed", "read", "write", "error", "successfull"};
+const char* playbackModeName[] = {"-", "story", "album", "party", "single", "story book"};
+const char* nfcStatusMessage[] = {"-", "tag unsupported", "auth", "read", "write", "failed", "successfull"};
 
 // playback modes
 enum {NOMODE, STORY, ALBUM, PARTY, SINGLE, STORYBOOK};
@@ -247,9 +247,21 @@ uint8_t inputEvent = NOACTION;
 
 // ############################################################### no configuration below this line ###############################################################
 
-// this function needs to be declared here for the first time because it's called in class Mp3Notify
-// the function itself is down below
+// declare functions
+void checkForInput();
+void translateButtonInput(AceButton* button, uint8_t eventType, uint8_t /* buttonState */);
+void switchButtonConfiguration(uint8_t buttonMode);
+void waitPlaybackToFinish();
+void printModeFolderTrack(uint8_t playTrack, bool cr);
 void playNextTrack(uint16_t globalTrack, bool directionForward, bool triggeredManually);
+uint8_t readNfcTagData();
+uint8_t writeNfcTagData(uint8_t mifareData[], uint8_t mifareDataSize);
+void shutdownTimer(uint8_t timerAction);
+#if defined(STATUSLED)
+void statusLedFade(bool isPlaying);
+void statusLedBlink(uint16_t statusLedBlinkInterval = 500);
+void statusLedBurst();
+#endif
 
 // used by DFPlayer Mini library during callbacks
 class Mp3Notify {
@@ -466,7 +478,13 @@ void waitPlaybackToFinish() {
 
 // prints current mode, folder and track information
 void printModeFolderTrack(uint8_t playTrack, bool cr) {
-  Serial.print(String(playbackModeName[nfcTag.playbackMode]) + F("-") + String(nfcTag.assignedFolder) + F("-") + String(playTrack) + F("/") + String(playback.folderTrackCount));
+  Serial.print(playbackModeName[nfcTag.playbackMode]);
+  Serial.print(F("-"));
+  Serial.print(nfcTag.assignedFolder);
+  Serial.print(F("-"));
+  Serial.print(playTrack);
+  Serial.print(F("/"));
+  Serial.print(playback.folderTrackCount);
   if (cr) Serial.println();
 }
 
@@ -568,7 +586,9 @@ uint8_t readNfcTagData() {
     // check if we can authenticate with mifareKey
     mifareStatus = (MFRC522::StatusCode)mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, mifareBlock, &mifareKey, &(mfrc522.uid));
     if (mifareStatus != MFRC522::STATUS_OK) {
-      Serial.println(nfcStatusMessage[2]);
+      Serial.print(nfcStatusMessage[2]);
+      Serial.print(F(" "));
+      Serial.println(nfcStatusMessage[5]);
       mfrc522.PICC_HaltA();
       mfrc522.PCD_StopCrypto1();
       return 0;
@@ -653,7 +673,9 @@ uint8_t writeNfcTagData(uint8_t mifareData[], uint8_t mifareDataSize) {
     // check if we can authenticate with mifareKey
     mifareStatus = (MFRC522::StatusCode)mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, mifareTrailerBlock, &mifareKey, &(mfrc522.uid));
     if (mifareStatus != MFRC522::STATUS_OK) {
-      Serial.println(nfcStatusMessage[2]);
+      Serial.print(nfcStatusMessage[2]);
+      Serial.print(F(" "));
+      Serial.println(nfcStatusMessage[5]);
       mfrc522.PICC_HaltA();
       mfrc522.PCD_StopCrypto1();
       return 0;
