@@ -28,7 +28,7 @@ Die Firmware wird "as-is" zur Verfügung gestellt. Wenn jemand die Firmware in s
 
 ## Audio Meldungen
 
-TonUINO funktioniert nur korrekt, wenn ein zur Firmware passendes Set and Audio Meldungen auf der SD Karte vorhanden ist (die Ordner **mp3** und **advert**). Unter MacOS X lässt sich das passende Set an Audio Meldungen mit dem begelegten Script `create_audio_messages.sh` schnell und einfach erzeugen. Benötigt werden dazu die Tools `say` und `ffmpeg`. Zum Download kann ich die Dateien leider nicht anbieten!
+TonUINO funktioniert nur korrekt, wenn ein zur Firmware passendes Set and Audio Meldungen auf der SD Karte vorhanden ist (die Ordner **mp3** und **advert**). Unter MacOS X lässt sich das passende Set an Audio Meldungen mit dem beigelegten Script `create_audio_messages.sh` schnell und einfach erzeugen. Benötigt werden dazu die Tools `say` und `ffmpeg`. Zum Download kann ich die Dateien leider nicht anbieten!
 
 ## Lizenz
 
