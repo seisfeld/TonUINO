@@ -10,14 +10,14 @@
   SPI SCK     SCK          13 / ICSP-3   52        D13        ICSP-3           15
 
   button assignments:
-  -------------------
+  ===================
 
   Button B0 (by default pin A0, middle button on the original TonUINO): play+pause
   Button B1 (by default pin A1, right button on the original TonUINO): volume up
   Button B2 (by default pin A2, left button on the original TonUINO): volume down
 
   additional button actions:
-  --------------------------
+  ==========================
 
   Hold B0 for 5 seconds during idle: Enter erase nfc tag mode
   Hold B0 for 5 seconds during playback in story book mode: Reset progress to track 1
@@ -35,7 +35,7 @@
   Hold B0 + B1 + B2 while powering up: Erase the eeprom contents. (Use with care, eeprom write/erase cycles are limited!)
 
   ir remote:
-  ----------
+  ==========
 
   If a TSOP38238 is connected to pin 5, you can also use an ir remote to remote
   control TonUINO. There are code mappings for the silver apple remote below, but you can
@@ -70,7 +70,7 @@
   menu - cancel
 
   status led:
-  -----------
+  ===========
 
   If a led is connected to pin 6, limited status information is given using that led.
   The led is solid on when TonUINO is playing a track and it is pulsing slowly when
@@ -80,7 +80,7 @@
   define STATUSLED below.
 
   cubiekid:
-  ---------
+  =========
 
   If you happen to have a CubieKid case and the CubieKid circuit board, this firmware
   supports both shutdown methods. They can be configured in the shutdown section below.
@@ -91,22 +91,36 @@
   by Jens Hackel aka DB3JHF and can be found here: https://www.thingiverse.com/thing:3148200
 
   data stored on the nfc tags:
-  ----------------------------
+  ============================
+
+  On MIFARE Classic (Mini, 1k & 4K) tags:
+  ---------------------------------------
 
   Up to 16 bytes of data are stored in sector 1 / block 4, of which the first 8 bytes
   are currently in use.
 
-  13 37 B3 47 01 02 05 11 00 00 00 00 00 00 00 00
+  13 37 B3 47 01 02 04 11 00 00 00 00 00 00 00 00
   ----------- -- -- -- --
        |      |  |  |  |
        |      |  |  |  + assigned track (0x01-0xFF, only used in single mode)
-       |      |  |  + assigned mode (0x01-0x05)
+       |      |  |  + assigned playback mode (0x01-0x05)
        |      |  + assigned folder (0x01-0x63)
        |      + version (currently always 0x01)
        + magic cookie to recognize that a card belongs to TonUINO
 
+  On MIFARE Ultralight / Ultralight C and NTAG213/215/216 tags:
+  -------------------------------------------------------------
+
+  Up to 16 bytes of data are stored in pages 8-11, of which the first 8 bytes
+  are currently in use.
+
+   8   13 37 B3 47 - magic cookie to recognize that a card belongs to TonUINO
+   9   01 02 04 11 - version, assigned folder, assigned playback mode, assigned track
+  10   00 00 00 00
+  11   00 00 00 00
+
   non standard libraries used in this firmware:
-  ---------------------------------------------
+  =============================================
 
   MFRC522.h - https://github.com/miguelbalboa/rfid
   DFMiniMp3.h - https://github.com/Makuna/DFMiniMp3
@@ -203,8 +217,8 @@ const uint8_t irRemoteCount = sizeof(irRemoteCodes) / 14;
 const uint8_t irRemoteCodeCount = sizeof(irRemoteCodes) / (2 * irRemoteCount);
 
 // define strings
-const char* playbackModeName[] = {"-", "story", "album", "party", "single", "story_book"};
-const char* nfcStatusMessage[] = {"-", "tag unsupported", "auth", "read", "write", "failed", "ok"};
+const char* playbackModeName[] = {" ", "story", "album", "party", "single", "story_book"};
+const char* nfcStatusMessage[] = {" ", "read", "write", "ok", "failed"};
 
 // playback modes
 enum {NOMODE, STORY, ALBUM, PARTY, SINGLE, STORYBOOK};
@@ -257,7 +271,8 @@ void waitPlaybackToFinish();
 void printModeFolderTrack(uint8_t playTrack, bool cr);
 void playNextTrack(uint16_t globalTrack, bool directionForward, bool triggeredManually);
 uint8_t readNfcTagData();
-uint8_t writeNfcTagData(uint8_t mifareData[], uint8_t mifareDataSize);
+uint8_t writeNfcTagData(uint8_t *nfcTagWriteBuffer, uint8_t nfcTagWriteBufferSize);
+void printNfcTagData(uint8_t *dataBuffer, uint8_t dataBufferSize, bool cr);
 void shutdownTimer(uint8_t timerAction);
 #if defined(STATUSLED)
 void statusLedFade(bool isPlaying);
@@ -565,141 +580,191 @@ void playNextTrack(uint16_t globalTrack, bool directionForward, bool triggeredMa
 
 // reads data from nfc tag
 uint8_t readNfcTagData() {
-  uint8_t mifareBlock = 4;
-  uint8_t mifareData[18];
-  uint8_t mifareDataSize = sizeof(mifareData);
-  MFRC522::StatusCode mifareStatus;
-  MFRC522::MIFARE_Key mifareKey;
-  MFRC522::PICC_Type mifareType;
-  for (uint8_t i = 0; i < 6; i++) mifareKey.keyByte[i] = 0xFF;
+  uint8_t nfcTagReadBuffer[16];
+  uint8_t piccReadBuffer[18];
+  uint8_t piccReadBufferSize = sizeof(piccReadBuffer);
+  bool nfcTagReadSuccess = false;
+  MFRC522::StatusCode piccStatus;
+  MFRC522::PICC_Type piccType = mfrc522.PICC_GetType(mfrc522.uid.sak);
 
-  // check if card type is supported
-  mifareType = mfrc522.PICC_GetType(mfrc522.uid.sak);
-  if (mifareType != MFRC522::PICC_TYPE_MIFARE_MINI && mifareType != MFRC522::PICC_TYPE_MIFARE_1K && mifareType != MFRC522::PICC_TYPE_MIFARE_4K) {
-    Serial.println(nfcStatusMessage[1]);
+  // decide which code path to take depending on picc type
+  if (piccType == MFRC522::PICC_TYPE_MIFARE_MINI || piccType ==  MFRC522::PICC_TYPE_MIFARE_1K || piccType == MFRC522::PICC_TYPE_MIFARE_4K) {
+    uint8_t classicBlock = 4;
+    MFRC522::MIFARE_Key classicKey;
+    for (uint8_t i = 0; i < 6; i++) classicKey.keyByte[i] = 0xFF;
+
+    // check if we can authenticate with classicKey
+    piccStatus = (MFRC522::StatusCode)mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, classicBlock, &classicKey, &(mfrc522.uid));
+    if (piccStatus == MFRC522::STATUS_OK) {
+      // read 16 bytes from nfc tag (by default sector 1 / block 4)
+      piccStatus = (MFRC522::StatusCode)mfrc522.MIFARE_Read(classicBlock, piccReadBuffer, &piccReadBufferSize);
+      if (piccStatus == MFRC522::STATUS_OK) {
+        nfcTagReadSuccess = true;
+        memcpy(nfcTagReadBuffer, piccReadBuffer, 16);
+      }
+      else Serial.println(mfrc522.GetStatusCodeName(piccStatus));
+    }
+    else Serial.println(mfrc522.GetStatusCodeName(piccStatus));
+  }
+  else if (piccType == MFRC522::PICC_TYPE_MIFARE_UL) {
+    uint8_t ultralightStartPage = 8;
+    uint8_t ultralightACK[] = {0, 0};
+    MFRC522::MIFARE_Key ultralightKey;
+    for (uint8_t i = 0; i < 4; i++) ultralightKey.keyByte[i] = 0xFF;
+
+    // check if we can authenticate with ultralightKey
+    piccStatus = (MFRC522::StatusCode)mfrc522.PCD_NTAG216_AUTH(ultralightKey.keyByte, ultralightACK);
+    if (piccStatus == MFRC522::STATUS_OK) {
+      // read 16 bytes from nfc tag (by default pages 8-11)
+      for (uint8_t ultralightPage = ultralightStartPage; ultralightPage < ultralightStartPage + 4; ultralightPage++) {
+        piccStatus = (MFRC522::StatusCode)mfrc522.MIFARE_Read(ultralightPage, piccReadBuffer, &piccReadBufferSize);
+        if (piccStatus == MFRC522::STATUS_OK) {
+          nfcTagReadSuccess = true;
+          memcpy(nfcTagReadBuffer + ((ultralightPage * 4) - (ultralightStartPage * 4)), piccReadBuffer, 4);
+        }
+        else {
+          nfcTagReadSuccess = false;
+          Serial.println(mfrc522.GetStatusCodeName(piccStatus));
+          break;
+        }
+      }
+    }
+    else Serial.println(mfrc522.GetStatusCodeName(piccStatus));
+  }
+  // picc type is not supported
+  else {
     mfrc522.PICC_HaltA();
     mfrc522.PCD_StopCrypto1();
     return 0;
   }
-  else {
-    // check if we can authenticate with mifareKey
-    mifareStatus = (MFRC522::StatusCode)mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, mifareBlock, &mifareKey, &(mfrc522.uid));
-    if (mifareStatus != MFRC522::STATUS_OK) {
-      Serial.print(nfcStatusMessage[2]);
-      Serial.print(F(" "));
-      Serial.println(nfcStatusMessage[5]);
+
+  Serial.print(nfcStatusMessage[1]);
+  Serial.print(nfcStatusMessage[0]);
+  // read was successfull
+  if (nfcTagReadSuccess) {
+    // log data to the console
+    Serial.print(nfcStatusMessage[3]);
+    printNfcTagData(nfcTagReadBuffer, sizeof(nfcTagReadBuffer), true);
+
+    // convert 4 byte cookie to 32bit decimal for easier handling
+    uint32_t tempCookie;
+    tempCookie  = (uint32_t)nfcTagReadBuffer[0] << 24;
+    tempCookie += (uint32_t)nfcTagReadBuffer[1] << 16;
+    tempCookie += (uint32_t)nfcTagReadBuffer[2] << 8;
+    tempCookie += (uint32_t)nfcTagReadBuffer[3];
+
+    // if cookie is not blank, update ncfTag object with data read from nfc tag
+    if (tempCookie != 0) {
+      nfcTag.cookie = tempCookie;
+      nfcTag.version = nfcTagReadBuffer[4];
+      nfcTag.assignedFolder = nfcTagReadBuffer[5];
+      nfcTag.playbackMode = nfcTagReadBuffer[6];
+      nfcTag.assignedTrack = nfcTagReadBuffer[7];
       mfrc522.PICC_HaltA();
       mfrc522.PCD_StopCrypto1();
-      return 0;
     }
+    // if cookie is blank, clear ncfTag object
     else {
-      // read data from nfc tag
-      mifareStatus = (MFRC522::StatusCode)mfrc522.MIFARE_Read(mifareBlock, mifareData, &mifareDataSize);
-      if (mifareStatus != MFRC522::STATUS_OK) {
-        Serial.print(nfcStatusMessage[3]);
-        Serial.print(F(" "));
-        Serial.println(nfcStatusMessage[5]);
-        mfrc522.PICC_HaltA();
-        mfrc522.PCD_StopCrypto1();
-        return 0;
-      }
-      else {
-        // log data to the console
-        Serial.print(nfcStatusMessage[3]);
-        for (uint8_t i = 0; i < 16; i++) {
-          Serial.print(mifareData[i] < 0x10 ? " 0" : " ");
-          Serial.print(mifareData[i], HEX);
-        }
-        Serial.println();
-
-        // convert 4 byte cookie to 32bit decimal for easier handling
-        uint32_t tempCookie;
-        tempCookie  = (uint32_t)mifareData[0] << 24;
-        tempCookie += (uint32_t)mifareData[1] << 16;
-        tempCookie += (uint32_t)mifareData[2] << 8;
-        tempCookie += (uint32_t)mifareData[3];
-
-        // if cookie is not blank, update ncfTag object with data read from nfc tag
-        if (tempCookie != 0) {
-          mfrc522.PICC_HaltA();
-          mfrc522.PCD_StopCrypto1();
-          nfcTag.cookie = tempCookie;
-          nfcTag.version = mifareData[4];
-          nfcTag.assignedFolder = mifareData[5];
-          nfcTag.playbackMode = mifareData[6];
-          nfcTag.assignedTrack = mifareData[7];
-        }
-        // if cookie is blank, clear ncfTag object
-        else {
-          nfcTag.cookie = 0;
-          nfcTag.version = 0;
-          nfcTag.assignedFolder = 0;
-          nfcTag.playbackMode = 0;
-          nfcTag.assignedTrack = 0;
-        }
-        return 1;
-      }
+      nfcTag = (struct nfcTagObject) {
+        0
+      };
     }
+    return 1;
+  }
+  // read was not successfull
+  else {
+    Serial.println(nfcStatusMessage[4]);
+    mfrc522.PICC_HaltA();
+    mfrc522.PCD_StopCrypto1();
+    return 0;
   }
 }
 
 // writes data to nfc tag
-uint8_t writeNfcTagData(uint8_t mifareData[], uint8_t mifareDataSize) {
-  uint8_t mifareBlock = 4;
-  uint8_t mifareTrailerBlock = 7;
-  MFRC522::StatusCode mifareStatus;
-  MFRC522::MIFARE_Key mifareKey;
-  MFRC522::PICC_Type mifareType;
-  for (uint8_t i = 0; i < 6; i++) mifareKey.keyByte[i] = 0xFF;
+uint8_t writeNfcTagData(uint8_t *nfcTagWriteBuffer, uint8_t nfcTagWriteBufferSize) {
+  uint8_t piccWriteBuffer[16];
+  uint8_t piccWriteBufferSize = sizeof(piccWriteBuffer);
+  bool nfcTagWriteSuccess = false;
+  MFRC522::StatusCode piccStatus;
+  MFRC522::PICC_Type piccType = mfrc522.PICC_GetType(mfrc522.uid.sak);
 
-  // log the data to the console
-  Serial.print(nfcStatusMessage[4]);
-  for (uint8_t i = 0; i < 16; i++) {
-    Serial.print(mifareData[i] < 0x10 ? " 0" : " ");
-    Serial.print(mifareData[i], HEX);
+  // decide which code path to take depending on picc type
+  if (piccType == MFRC522::PICC_TYPE_MIFARE_MINI || piccType ==  MFRC522::PICC_TYPE_MIFARE_1K || piccType == MFRC522::PICC_TYPE_MIFARE_4K) {
+    uint8_t classicBlock = 4;
+    uint8_t classicTrailerBlock = 7;
+    MFRC522::MIFARE_Key classicKey;
+    for (uint8_t i = 0; i < 6; i++) classicKey.keyByte[i] = 0xFF;
+
+    // check if we can authenticate with classicKey
+    piccStatus = (MFRC522::StatusCode)mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, classicTrailerBlock, &classicKey, &(mfrc522.uid));
+    if (piccStatus == MFRC522::STATUS_OK) {
+      // write 16 bytes to nfc tag (by default sector 1 / block 4)
+      memset(piccWriteBuffer, 0, piccWriteBufferSize);
+      memcpy(piccWriteBuffer, nfcTagWriteBuffer, 16);
+      piccStatus = (MFRC522::StatusCode)mfrc522.MIFARE_Write(classicBlock, piccWriteBuffer, piccWriteBufferSize);
+      if (piccStatus == MFRC522::STATUS_OK) nfcTagWriteSuccess = true;
+      else Serial.println(mfrc522.GetStatusCodeName(piccStatus));
+    }
+    else Serial.println(mfrc522.GetStatusCodeName(piccStatus));
   }
-  Serial.println();
+  else if (piccType == MFRC522::PICC_TYPE_MIFARE_UL) {
+    uint8_t ultralightStartPage = 8;
+    uint8_t ultralightACK[] = {0, 0};
+    MFRC522::MIFARE_Key ultralightKey;
+    for (uint8_t i = 0; i < 4; i++) ultralightKey.keyByte[i] = 0xFF;
 
-  // check if card type is supported
-  mifareType = mfrc522.PICC_GetType(mfrc522.uid.sak);
-  if (mifareType != MFRC522::PICC_TYPE_MIFARE_MINI && mifareType != MFRC522::PICC_TYPE_MIFARE_1K && mifareType != MFRC522::PICC_TYPE_MIFARE_4K) {
-    Serial.println(nfcStatusMessage[1]);
+    // check if we can authenticate with ultralightKey
+    piccStatus = (MFRC522::StatusCode)mfrc522.PCD_NTAG216_AUTH(ultralightKey.keyByte, ultralightACK);
+    if (piccStatus == MFRC522::STATUS_OK) {
+      // write 16 bytes to nfc tag (by default pages 8-11)
+      for (uint8_t ultralightPage = ultralightStartPage; ultralightPage < ultralightStartPage + 4; ultralightPage++) {
+        memset(piccWriteBuffer, 0, piccWriteBufferSize);
+        memcpy(piccWriteBuffer, nfcTagWriteBuffer + ((ultralightPage * 4) - (ultralightStartPage * 4)), 4);
+        piccStatus = (MFRC522::StatusCode)mfrc522.MIFARE_Write(ultralightPage, piccWriteBuffer, piccWriteBufferSize);
+        if (piccStatus == MFRC522::STATUS_OK) nfcTagWriteSuccess = true;
+        else {
+          nfcTagWriteSuccess = false;
+          Serial.println(mfrc522.GetStatusCodeName(piccStatus));
+          break;
+        }
+      }
+    }
+    else Serial.println(mfrc522.GetStatusCodeName(piccStatus));
+  }
+  // picc type is not supported
+  else {
     mfrc522.PICC_HaltA();
     mfrc522.PCD_StopCrypto1();
     return 0;
   }
-  else {
-    // check if we can authenticate with mifareKey
-    mifareStatus = (MFRC522::StatusCode)mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, mifareTrailerBlock, &mifareKey, &(mfrc522.uid));
-    if (mifareStatus != MFRC522::STATUS_OK) {
-      Serial.print(nfcStatusMessage[2]);
-      Serial.print(F(" "));
-      Serial.println(nfcStatusMessage[5]);
-      mfrc522.PICC_HaltA();
-      mfrc522.PCD_StopCrypto1();
-      return 0;
-    }
-    else {
-      // write data to nfc tag
-      mifareStatus = (MFRC522::StatusCode)mfrc522.MIFARE_Write(mifareBlock, mifareData, mifareDataSize);
-      if (mifareStatus != MFRC522::STATUS_OK) {
-        Serial.print(nfcStatusMessage[4]);
-        Serial.print(F(" "));
-        Serial.println(nfcStatusMessage[5]);
-        mfrc522.PICC_HaltA();
-        mfrc522.PCD_StopCrypto1();
-        return 0;
-      }
-      else {
-        Serial.print(nfcStatusMessage[4]);
-        Serial.print(F(" "));
-        Serial.println(nfcStatusMessage[6]);
-        mfrc522.PICC_HaltA();
-        mfrc522.PCD_StopCrypto1();
-        return 1;
-      }
-    }
+
+  Serial.print(nfcStatusMessage[2]);
+  Serial.print(nfcStatusMessage[0]);
+  // write was successfull
+  if (nfcTagWriteSuccess) {
+    // log data to the console
+    Serial.print(nfcStatusMessage[3]);
+    printNfcTagData(nfcTagWriteBuffer, nfcTagWriteBufferSize, true);
+    mfrc522.PICC_HaltA();
+    mfrc522.PCD_StopCrypto1();
+    return 1;
   }
+  //write was not successful
+  else {
+    Serial.println(nfcStatusMessage[4]);
+    mfrc522.PICC_HaltA();
+    mfrc522.PCD_StopCrypto1();
+    return 0;
+  }
+}
+
+// prints nfc tag data
+void printNfcTagData(uint8_t *dataBuffer, uint8_t dataBufferSize, bool cr) {
+  for (uint8_t i = 0; i < dataBufferSize; i++) {
+    Serial.print(dataBuffer[i] < 0x10 ? " 0" : " ");
+    Serial.print(dataBuffer[i], HEX);
+  }
+  if (cr) Serial.println();
 }
 
 // starts, stops and checks the shutdown timer
@@ -995,9 +1060,9 @@ void loop() {
             switchButtonConfiguration(PAUSE);
             shutdownTimer(START);
             Serial.println(F("cancel"));
-            nfcTag.assignedFolder = 0;
-            nfcTag.playbackMode = 0;
-            nfcTag.assignedTrack = 0;
+            nfcTag = (struct nfcTagObject) {
+              0
+            };
             mfrc522.PICC_HaltA();
             mfrc522.PCD_StopCrypto1();
             mp3.playMp3FolderTrack(msgSetupNewTagCancel);
@@ -1055,9 +1120,9 @@ void loop() {
             switchButtonConfiguration(PAUSE);
             shutdownTimer(START);
             Serial.println(F("cancel"));
-            nfcTag.assignedFolder = 0;
-            nfcTag.playbackMode = 0;
-            nfcTag.assignedTrack = 0;
+            nfcTag = (struct nfcTagObject) {
+              0
+            };
             mfrc522.PICC_HaltA();
             mfrc522.PCD_StopCrypto1();
             mp3.playMp3FolderTrack(msgSetupNewTagCancel);
@@ -1104,9 +1169,9 @@ void loop() {
               switchButtonConfiguration(PAUSE);
               shutdownTimer(START);
               Serial.println(F("cancel"));
-              nfcTag.assignedFolder = 0;
-              nfcTag.playbackMode = 0;
-              nfcTag.assignedTrack = 0;
+              nfcTag = (struct nfcTagObject) {
+                0
+              };
               mfrc522.PICC_HaltA();
               mfrc522.PCD_StopCrypto1();
               mp3.playMp3FolderTrack(msgSetupNewTagCancel);
@@ -1240,9 +1305,9 @@ void loop() {
   else if (((inputEvent == B0H && !isLocked) || inputEvent == IRM) && !isPlaying) {
     switchButtonConfiguration(CONFIG);
     shutdownTimer(STOP);
+    Serial.println(F(">tag erase"));
     playback.playListMode = false;
     uint8_t writeNfcTagStatus = 0;
-    Serial.println(F(">tag erase"));
     mp3.playMp3FolderTrack(msgEraseTag);
     do {
       checkForInput();

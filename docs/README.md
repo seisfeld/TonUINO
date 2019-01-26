@@ -9,8 +9,11 @@ Die Firmware wird "as-is" zur Verfügung gestellt. Wenn jemand die Firmware in s
 
 - Abspielmodi: Hörspiel, Album, Party, Lieblingsfolge und Hörbuch.
 - Speichert die Ordnerverknüpfungen, Abspielmodi etc. auf den NFC Tags/Karten.
+- Unterstützung für MIFARE Classic (Mini, 1k & 4K) Tags/Karten.
+- Unterstützung für MIFARE Ultralight / Ultralight C Tags/Karten.
+- Unterstützung für NTAG213/215/216 Tags/Karten.
 - Debugausgabe auf der seriellen Konsole.
-- Maximale Lautstärke kann begrenzt werden.
+- Maximale Lautstärke kann eingestellt werden.
 - Konfigurationsdialoge (NFC Tags/Karten anlernen/löschen etc.) können abgebrochen werden.
 - NFC Tags/Karten können komplett wieder gelöscht werden.
 - Nächster/Vorheriger Titel in den Abspielmodi Album, Party und Hörbuch.
