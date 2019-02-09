@@ -273,6 +273,7 @@ void playNextTrack(uint16_t globalTrack, bool directionForward, bool triggeredMa
 uint8_t readNfcTagData();
 uint8_t writeNfcTagData(uint8_t *nfcTagWriteBuffer, uint8_t nfcTagWriteBufferSize);
 void printNfcTagData(uint8_t *dataBuffer, uint8_t dataBufferSize, bool cr);
+void printNfcTagType(MFRC522::PICC_Type nfcTagType);
 void shutdownTimer(uint8_t timerAction);
 #if defined(STATUSLED)
 void statusLedFade(bool isPlaying);
@@ -640,6 +641,7 @@ uint8_t readNfcTagData() {
 
   Serial.print(nfcStatusMessage[1]);
   Serial.print(nfcStatusMessage[0]);
+  printNfcTagType(piccType);
   // read was successfull
   if (nfcTagReadSuccess) {
     // log data to the console
@@ -740,6 +742,7 @@ uint8_t writeNfcTagData(uint8_t *nfcTagWriteBuffer, uint8_t nfcTagWriteBufferSiz
 
   Serial.print(nfcStatusMessage[2]);
   Serial.print(nfcStatusMessage[0]);
+  printNfcTagType(piccType);
   // write was successfull
   if (nfcTagWriteSuccess) {
     // log data to the console
@@ -765,6 +768,24 @@ void printNfcTagData(uint8_t *dataBuffer, uint8_t dataBufferSize, bool cr) {
     Serial.print(dataBuffer[i], HEX);
   }
   if (cr) Serial.println();
+}
+
+// prints nfc tag type
+void printNfcTagType(MFRC522::PICC_Type nfcTagType) {
+  switch (nfcTagType) {
+    case MFRC522::PICC_TYPE_MIFARE_MINI:
+    case MFRC522::PICC_TYPE_MIFARE_1K:
+    case MFRC522::PICC_TYPE_MIFARE_4K:
+      Serial.print(F("cl"));
+      break;
+    case MFRC522::PICC_TYPE_MIFARE_UL:
+      Serial.print(F("ul|nt"));
+      break;
+    default:
+      Serial.print(F("??"));
+      break;
+  }
+  Serial.print(nfcStatusMessage[0]);
 }
 
 // starts, stops and checks the shutdown timer
