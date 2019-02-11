@@ -1,4 +1,4 @@
-###[For english, please click here!](README_EN.md)
+[For english, please click here!](README_EN.md)
 
 Alternative TonUINO Firmware
 ============================

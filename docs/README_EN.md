@@ -57,6 +57,6 @@ When that completed successfully, you can create the audio messages:
 
 The audio message files are not available for download at this point in time.
 
-## Lizenz
+## License
 
 GPL v3. See [LICENSE](../LICENSE.md).
