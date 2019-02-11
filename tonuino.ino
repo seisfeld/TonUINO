@@ -273,6 +273,7 @@ void playNextTrack(uint16_t globalTrack, bool directionForward, bool triggeredMa
 uint8_t readNfcTagData();
 uint8_t writeNfcTagData(uint8_t *nfcTagWriteBuffer, uint8_t nfcTagWriteBufferSize);
 void printNfcTagData(uint8_t *dataBuffer, uint8_t dataBufferSize, bool cr);
+void printNfcTagType(MFRC522::PICC_Type nfcTagType);
 void shutdownTimer(uint8_t timerAction);
 #if defined(STATUSLED)
 void statusLedFade(bool isPlaying);
@@ -640,6 +641,7 @@ uint8_t readNfcTagData() {
 
   Serial.print(nfcStatusMessage[1]);
   Serial.print(nfcStatusMessage[0]);
+  printNfcTagType(piccType);
   // read was successfull
   if (nfcTagReadSuccess) {
     // log data to the console
@@ -740,6 +742,7 @@ uint8_t writeNfcTagData(uint8_t *nfcTagWriteBuffer, uint8_t nfcTagWriteBufferSiz
 
   Serial.print(nfcStatusMessage[2]);
   Serial.print(nfcStatusMessage[0]);
+  printNfcTagType(piccType);
   // write was successfull
   if (nfcTagWriteSuccess) {
     // log data to the console
@@ -765,6 +768,24 @@ void printNfcTagData(uint8_t *dataBuffer, uint8_t dataBufferSize, bool cr) {
     Serial.print(dataBuffer[i], HEX);
   }
   if (cr) Serial.println();
+}
+
+// prints nfc tag type
+void printNfcTagType(MFRC522::PICC_Type nfcTagType) {
+  switch (nfcTagType) {
+    case MFRC522::PICC_TYPE_MIFARE_MINI:
+    case MFRC522::PICC_TYPE_MIFARE_1K:
+    case MFRC522::PICC_TYPE_MIFARE_4K:
+      Serial.print(F("cl"));
+      break;
+    case MFRC522::PICC_TYPE_MIFARE_UL:
+      Serial.print(F("ul|nt"));
+      break;
+    default:
+      Serial.print(F("??"));
+      break;
+  }
+  Serial.print(nfcStatusMessage[0]);
 }
 
 // starts, stops and checks the shutdown timer
@@ -1023,16 +1044,15 @@ void loop() {
       // #######################################################################################################
       // # nfc tag does not have our magic cookie 0x1337 0xb347 on it (0), start setup to configure this nfc tag
       else if (nfcTag.cookie == 0) {
+        playback.playListMode = false;
         switchButtonConfiguration(CONFIG);
         shutdownTimer(STOP);
         Serial.println(F(">tag setup"));
-        // let user select the folder to assign
-        playback.playListMode = false;
-        bool setAssignedFolder = false;
         Serial.println(F(">>folder"));
         mp3.playMp3FolderTrack(msgSetupNewTag);
         // loop until folder is assigned
-        do {
+        bool setAssignedFolder = false;
+        while (!setAssignedFolder) {
           checkForInput();
           // button 0 (middle) press or ir remote play+pause: confirm selected folder
           if (inputEvent == B0P || inputEvent == IRP) {
@@ -1089,14 +1109,12 @@ void loop() {
 #endif
           mp3.loop();
         }
-        while (!setAssignedFolder);
         delay(500);
-        // let user select playback mode
-        bool setPlaybackMode = false;
         Serial.println(F(">>playback mode"));
         mp3.playMp3FolderTrack(msgSetupNewTagFolderAssigned);
         // loop until playback mode is set
-        do {
+        bool setPlaybackMode = false;
+        while (!setPlaybackMode) {
           checkForInput();
           // button 0 (middle) press or ir remote play+pause: confirm selected playback mode
           if (inputEvent == B0P || inputEvent == IRP) {
@@ -1133,15 +1151,14 @@ void loop() {
 #endif
           mp3.loop();
         }
-        while (!setPlaybackMode);
         delay(500);
         // if single mode was selected, let user select the track to assign
         if (nfcTag.playbackMode == SINGLE) {
-          bool setAssignedTrack = false;
           Serial.println(F(">>track"));
           mp3.playMp3FolderTrack(msgSetupNewTagSingleModeCont);
           // loop until track is assigned
-          do {
+          bool setAssignedTrack = false;
+          while (!setAssignedTrack) {
             checkForInput();
             // button 0 (middle) press or ir remote play+pause: confirm selected track
             if (inputEvent == B0P || inputEvent == IRP) {
@@ -1198,7 +1215,6 @@ void loop() {
 #endif
             mp3.loop();
           }
-          while (!setAssignedTrack);
           delay(500);
         }
         switchButtonConfiguration(PAUSE);
@@ -1303,13 +1319,14 @@ void loop() {
   }
   // button 0 (middle) hold for 5 sec or ir remote menu while not playing: erase nfc tag
   else if (((inputEvent == B0H && !isLocked) || inputEvent == IRM) && !isPlaying) {
+    playback.playListMode = false;
     switchButtonConfiguration(CONFIG);
     shutdownTimer(STOP);
     Serial.println(F(">tag erase"));
-    playback.playListMode = false;
-    uint8_t writeNfcTagStatus = 0;
     mp3.playMp3FolderTrack(msgEraseTag);
-    do {
+    // loop until tag is erased
+    uint8_t writeNfcTagStatus = 0;
+    while (!writeNfcTagStatus) {
       checkForInput();
       // button 0 (middle) hold for 2 sec or ir remote menu: cancel erase nfc tag
       if (inputEvent == B0H || inputEvent == IRM) {
@@ -1334,7 +1351,6 @@ void loop() {
 #endif
       mp3.loop();
     }
-    while (!writeNfcTagStatus);
   }
   // # end - handle button or ir remote events during playback or while waiting for nfc tags
   // #######################################################################################
