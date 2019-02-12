@@ -42,14 +42,14 @@ TonUINO funktioniert nur korrekt, wenn ein **zur Firmware passendes** Set and Au
 
 Unter macOS lässt sich das passende Set an Audio Meldungen mit dem beigelegten Shellscript `create_audio_messages.sh` schnell und einfach erzeugen. Benötigt werden dazu zusätzlich noch die Tools `say` (ist Teil von macOS) und `ffmpeg`. Letzteres lässt sich z.B. ganz einfach über Homebrew installieren.
 
-Zur installation von Homebrew folgt ihr einfach den Anweisungen auf der [Homebrew](https://brew.sh) Webseite. Nachdem das erledigt ist, führt ihr folgende Schritte aus:
+Zur installation von Homebrew öffnet Ihr einfach `Terminal.app` und folgt danach den Anweisungen auf der [Homebrew](https://brew.sh) Webseite. Nachdem das erledigt ist, führt ihr im Terminal folgende Schritte aus:
 
 ### Installation von ffmpeg
 
 1. `brew update`
 2. `brew install ffmpeg`
 
-Wenn dies erfolgreich erledigt ist, können die Audio Meldungen erzeugt werden:
+Wenn dies erfolgreich erledigt ist, können die Audio Meldungen erzeugt werden. Dazu im Terminal:
 
 ### Audio Meldungen erzeugen
 

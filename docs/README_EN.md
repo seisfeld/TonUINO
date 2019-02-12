@@ -40,14 +40,14 @@ TonUINO only functions correctly, when there is the correct (**as in matches the
 
 On macOS it's pretty simple, to create the matching set of audio messages, using the `create_audio_messages.sh` script supplied in this repo. It just needs the tools `say` (part of macOS) and `ffmpeg`. The later can quickly be installed via Homebrew.
 
-To install Homebrew follow the instructions on the [Homebrew](https://brew.sh) website. After that, please follow these simple steps:
+To install Homebrew, open `Terminal.app` and follow the instructions on the [Homebrew](https://brew.sh) website. After that, please follow these steps in Terminal:
 
 ### Install ffmpeg
 
 1. `brew update`
 2. `brew install ffmpeg`
 
-When that completed successfully, you can create the audio messages:
+When that completed successfully, you can create the audio messages. In Terminal:
 
 ### Create Audio Messages
 
