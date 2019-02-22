@@ -69,6 +69,14 @@
   center - announce folder number or track number
   menu - cancel
 
+  To obtain codes from an unknown ir remote, uncomment the define TSOP38238DEBUG below
+  and check serial console while pressing the corresponding buttons on your remote.
+
+  For those who need a "short" oneliner to convert decimal codes into hex, the following
+  snipped will print out the complete array to modify/extend the irRemoteCodes matrix below:
+
+    echo -n "Please specify decimal ir remote codes, separated by space: ";read -r up down left right center menu play_pause; printf "{0x%0.4X, 0x%0.4X, 0x%0.4X, 0x%0.4X, 0x%0.4X, 0x%0.4X, 0x%0.4X}\n" $up $down $left $right $center $menu $play_pause
+
   status led:
   ===========
 
@@ -131,6 +139,8 @@
 
 // uncomment the below line to enable ir remote support
 // #define TSOP38238
+// uncomment the below line to enable ir remote debbugging to serial console in addition
+// #define TSOP38238DEBUG
 
 // uncomment the below line to enable status led support
 // #define STATUSLED
@@ -367,6 +377,9 @@ void checkForInput() {
   // poll ir receiver, has precedence over (overwrites) physical buttons
   if (irReceiver.decode(&irReadings)) {
     irRemoteCode = irReadings.value & 0xFFFF;
+#if defined(TSOP38238DEBUG)
+    Serial.println(irRemoteCode);
+#endif
     for (uint8_t i = 0; i < irRemoteCount; i++) {
       for (uint8_t j = 0; j < irRemoteCodeCount; j++) {
         //if we have a match, temporally populate irRemoteEvent and break
