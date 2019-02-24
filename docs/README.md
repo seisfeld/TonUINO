@@ -11,15 +11,16 @@ Dies ist meine alternative Firmware für das wundervolle [TonUINO](https://www.v
 
 - Abspielmodi: Hörspiel, Album, Party, Lieblingsfolge und Hörbuch.
 - Speichert die Ordnerverknüpfungen, Abspielmodi etc. auf den NFC Tags/Karten.
+- Nächster/Vorheriger Titel in den Abspielmodi Album, Party und Hörbuch.
 - Unterstützung für MIFARE Classic (Mini, 1k & 4K) Tags/Karten.
 - Unterstützung für MIFARE Ultralight / Ultralight C Tags/Karten.
 - Unterstützung für NTAG213/215/216 Tags/Karten.
 - Debugausgabe auf der seriellen Konsole.
-- Maximale Lautstärke kann eingestellt werden.
-- Konfigurationsdialoge (NFC Tags/Karten anlernen/löschen etc.) können abgebrochen werden.
-- NFC Tags/Karten können komplett wieder gelöscht werden.
-- Nächster/Vorheriger Titel in den Abspielmodi Album, Party und Hörbuch.
-- Timer zum automatischen abschalten.
+- Konfigurationsdialoge (NFC Tags/Karten anlernen/löschen, Elternmenü etc.) können abgebrochen werden.
+- NFC Tags/Karten können wieder komplett gelöscht werden.
+- Elternmenü um NFC Tags/Karten zu löschen und um Einstellungen wie Startlautstärke, Maximallautstärke, Equalizer und Abschalttimer (benötigt eine externe Schaltung) vorzunehmen.
+- Einstellungen werden im EEPROM gespeichert.
+- Optional: Umstellbar auf 5 Tasten Bedienung.
 - Optional: Fernbedienbar über Infrarotfernbedienung (inkl. Tastensperre).
 - Optional: Unterstützung einer Status LED.
 - Optional: Unterspannungsabschaltung für z.B. die [CubieKid Platine](https://www.thingiverse.com/thing:3148200).
@@ -40,7 +41,7 @@ Es hat sich bewährt, die gesammte Ordnerstruktur auf dem Comupter vorzubereiten
 
 TonUINO funktioniert nur korrekt, wenn ein **zur Firmware passendes** Set and Audio Meldungen auf der SD Karte vorhanden ist (die Ordner **mp3** und **advert**).
 
-Unter macOS lässt sich das passende Set an Audio Meldungen mit dem beigelegten Shellscript `create_audio_messages.sh` schnell und einfach erzeugen. Benötigt werden dazu zusätzlich noch die Tools `say` (ist Teil von macOS) und `ffmpeg`. Letzteres lässt sich z.B. ganz einfach über Homebrew installieren.
+Unter macOS lässt sich das passende Set an Audio Meldungen mit dem beigelegten Shellscript `create_audio_messages.sh` schnell und einfach erzeugen. Benötigt werden dazu zusätzlich noch die Tools `say` (ist Teil von macOS) und `ffmpeg`. Letzteres lässt sich z.B. ganz einfach über Homebrew installieren. Das Script kann sowohl deutsche als auch englische Audio Meldungen erzeugen. Die Beschreibung weiter unten beschreibt *deutsch*.
 
 Zur installation von Homebrew öffnet Ihr einfach `Terminal.app` und folgt danach den Anweisungen auf der [Homebrew](https://brew.sh) Webseite. Nachdem das erledigt ist, führt ihr im Terminal folgende Schritte aus:
 
@@ -54,7 +55,7 @@ Wenn dies erfolgreich erledigt ist, können die Audio Meldungen erzeugt werden. 
 ### Audio Meldungen erzeugen
 
 1. In den Ordner wechseln wo ihr die `.zip` Datei von GitHub entpackt, bzw. das Repository gecloned habt.
-2. `sh create_audio_messages.sh` ausführen.
+2. `sh create_audio_messages.sh de` ausführen.
 3. Kopiert die Ordner **mp3** und **advert** auf die SD Karte.
 
 Zum Download kann ich die Dateien derzeit leider nicht anbieten!

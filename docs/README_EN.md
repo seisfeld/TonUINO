@@ -9,15 +9,16 @@ This is my alternative firmware for the wonderful [TonUINO](https://www.voss.ear
 
 - Playback modes: Story, album, party, single, story book.
 - Saves playback modes etc. directly to the NFC tags/cards.
+- Next/previous track in album, party and story mode.
 - Supports MIFARE Classic (Mini, 1k & 4K) tags/cards.
 - Supports MIFARE Ultralight / Ultralight C tags/cards.
 - Supports NTAG213/215/216 tags/cards.
 - Debug output to the serial console.
-- Setting for maximum volume.
-- Setup dialogues (setup/erase NFC tags/cards etc.) can be aborted.
+- Setup dialogues (setup/erase NFC tags/cards, parents menu etc.) can be aborted.
 - NFC tags/cards can be erased.
-- Next/previous track in album, party and story mode.
-- Idle timer for automatic shutdown.
+- Parents menu to erase NFC tags/cards and to change settings like startup volume, maximum volume, equalizer and shutdown timer (requires an external circuit).
+- Settings are stored in EEPROM.
+- Optional: 5 Buttons.
 - Optional: IR remote control (incl. box lock).
 - Optional: Status LED.
 - Optional: Low voltage shutdown i.e. for the [CubieKid PCB](https://www.thingiverse.com/thing:3148200).
@@ -38,7 +39,7 @@ It has been proven benefitial to prepare the whole folder structure on the compu
 
 TonUINO only functions correctly, when there is the correct (**as in matches the firmware**) set of audio messages on the SD card. These are stored in the folders **mp3** and **advert**.
 
-On macOS it's pretty simple, to create the matching set of audio messages, using the `create_audio_messages.sh` script supplied in this repo. It just needs the tools `say` (part of macOS) and `ffmpeg`. The later can quickly be installed via Homebrew.
+On macOS it's pretty simple, to create the matching set of audio messages, using the `create_audio_messages.sh` script supplied in this repo. It just needs the tools `say` (part of macOS) and `ffmpeg`. The later can quickly be installed via Homebrew. The script can create english and german audio messages. The description down below describes *english*.
 
 To install Homebrew, open `Terminal.app` and follow the instructions on the [Homebrew](https://brew.sh) website. After that, please follow these steps in Terminal:
 
@@ -52,7 +53,7 @@ When that completed successfully, you can create the audio messages. In Terminal
 ### Create Audio Messages
 
 1. Change into the folder where you unzipped the `.zip` from GitHub or where you cloned the repo to.
-2. run `sh create_audio_messages.sh`.
+2. run `sh create_audio_messages.sh en`.
 3. Copy the folders **mp3** und **advert** in one go to the SD Card.
 
 The audio message files are not available for download at this point in time.
