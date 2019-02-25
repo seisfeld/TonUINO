@@ -1,43 +1,43 @@
-mp3/0800.mp3|Los gehts!
-mp3/0801.mp3|Eine neue Karte wurde erkannt. Bitte lasse die Karte auf der Box liegen, bis die Karte konfiguriert ist. Du kannst jetzt mit den Lautstärketasten einen Ordner auswählen. Bestätige mit der Pausetaste.
-mp3/0802.mp3|Ok, Lieblingsfolge. Verwende nun die Lautstärketasten um die Lieblingsfolge auszuwählen, bestätige mit der Pausetaste.
-mp3/0803.mp3|Ok, ich habe die Karte konfiguriert. Viel Spass damit.
-mp3/0804.mp3|Beim konfigurieren der Karte ist leider ein Fehler aufgetreten. Bitte versuche es noch einmal.
-mp3/0805.mp3|Karte konfigurieren abgebrochen.
-mp3/0806.mp3|Oh je, meine Batterie ist alle! Bitte Mama oder Papa, daß sie die Batterie tauschen. Ich schalte mich jetzt ab, bis bald.
-mp3/0807.mp3|Reset durchgeführt.
-mp3/0820.mp3|Ok. Du kannst jetzt mit den Lautstärketasten den Wiedergabemodus auswählen. Bestätige mit der Pausetaste.
-mp3/0821.mp3|Hörspielmodus. Einen zufälligen Titel aus dem Ordner wiedergeben.
-mp3/0822.mp3|Albummodus. Den kompletten Ordner wiedergeben.
-mp3/0823.mp3|Partymodus. Den Ordner zufällig wiedergeben.
-mp3/0824.mp3|Lieblingsfolge. Einen bestimmten Titel aus dem Ordner wiedergeben.
-mp3/0825.mp3|Hörbuchmodus. Den kompletten Ordner wiedergeben und den Fortschritt speichern.
-mp3/0900.mp3|Elternmenü. Du kannst jetzt mit den Lautstärketasten eine Option auswählen. Bestätige mit der Pausetaste.
-mp3/0901.mp3|Einstellung gespeichert.
-mp3/0902.mp3|Elternmenü beendet.
-mp3/0910.mp3|Karte löschen.
-mp3/0911.mp3|Startlautstärke festlegen.
-mp3/0912.mp3|Maximallautstärke festlegen.
-mp3/0913.mp3|Equalizer festlegen.
-mp3/0914.mp3|Shutdown Timer festlegen.
-mp3/0920.mp3|Bitte lege die zu löschende Karte auf die Box und warte auf die Bestätigung.
-mp3/0921.mp3|Ok, ich habe die Karte gelöscht.
-mp3/0922.mp3|Beim löschen der Karte ist leider ein Fehler aufgetreten. Bitte versuche es noch einmal.
-mp3/0923.mp3|Karte löschen abgebrochen.
-mp3/0930.mp3|Mit den Lautstärketasten die Startlautstärke auswählen. Bestätige mit der Pausetaste.
-mp3/0931.mp3|Mit den Lautstärketasten die Maximallautstärke auswählen. Bestätige mit der Pausetaste.
-mp3/0940.mp3|Mit den Lautstärketasten den Equalizer auswählen. Bestätige mit der Pausetaste.
-mp3/0941.mp3|Normal
-mp3/0942.mp3|Pop
-mp3/0943.mp3|Rock
-mp3/0944.mp3|Jazz
-mp3/0945.mp3|Classic
-mp3/0946.mp3|Bass
-mp3/0950.mp3|Mit den Lautstärketasten den Shutdown Timer auswählen. Bestätige mit der Pausetaste.
-mp3/0951.mp3|5 Minuten.
-mp3/0952.mp3|10 Minuten.
-mp3/0953.mp3|15 Minuten.
-mp3/0954.mp3|20 Minuten.
-mp3/0955.mp3|30 Minuten.
-mp3/0956.mp3|60 Minuten.
-mp3/0957.mp3|Shutdown Timer deaktivieren.
+0800.mp3|Los gehts!
+0801.mp3|Eine neue Karte wurde erkannt. Bitte lasse die Karte auf der Box liegen, bis die Karte konfiguriert ist. Du kannst jetzt mit den Lautstärketasten einen Ordner auswählen. Bestätige mit der Pausetaste.
+0802.mp3|Ok, Lieblingsfolge. Verwende nun die Lautstärketasten um die Lieblingsfolge auszuwählen, bestätige mit der Pausetaste.
+0803.mp3|Ok, ich habe die Karte konfiguriert. Viel Spass damit.
+0804.mp3|Beim konfigurieren der Karte ist leider ein Fehler aufgetreten. Bitte versuche es noch einmal.
+0805.mp3|Karte konfigurieren abgebrochen.
+0806.mp3|Oh je, meine Batterie ist alle! Bitte Mama oder Papa, daß sie die Batterie tauschen. Ich schalte mich jetzt ab, bis bald.
+0807.mp3|Reset durchgeführt.
+0820.mp3|Ok. Du kannst jetzt mit den Lautstärketasten den Wiedergabemodus auswählen. Bestätige mit der Pausetaste.
+0821.mp3|Hörspielmodus. Einen zufälligen Titel aus dem Ordner wiedergeben.
+0822.mp3|Albummodus. Den kompletten Ordner wiedergeben.
+0823.mp3|Partymodus. Den Ordner zufällig wiedergeben.
+0824.mp3|Lieblingsfolge. Einen bestimmten Titel aus dem Ordner wiedergeben.
+0825.mp3|Hörbuchmodus. Den kompletten Ordner wiedergeben und den Fortschritt speichern.
+0900.mp3|Elternmenü. Du kannst jetzt mit den Lautstärketasten eine Option auswählen. Bestätige mit der Pausetaste.
+0901.mp3|Einstellung gespeichert.
+0902.mp3|Elternmenü beendet.
+0910.mp3|Karte löschen.
+0911.mp3|Startlautstärke festlegen.
+0912.mp3|Maximallautstärke festlegen.
+0913.mp3|Equalizer festlegen.
+0914.mp3|Shutdown Timer festlegen.
+0920.mp3|Bitte lege die zu löschende Karte auf die Box und warte auf die Bestätigung.
+0921.mp3|Ok, ich habe die Karte gelöscht.
+0922.mp3|Beim löschen der Karte ist leider ein Fehler aufgetreten. Bitte versuche es noch einmal.
+0923.mp3|Karte löschen abgebrochen.
+0930.mp3|Mit den Lautstärketasten die Startlautstärke auswählen. Bestätige mit der Pausetaste.
+0931.mp3|Mit den Lautstärketasten die Maximallautstärke auswählen. Bestätige mit der Pausetaste.
+0940.mp3|Mit den Lautstärketasten den Equalizer auswählen. Bestätige mit der Pausetaste.
+0941.mp3|Normal
+0942.mp3|Pop
+0943.mp3|Rock
+0944.mp3|Jazz
+0945.mp3|Classic
+0946.mp3|Bass
+0950.mp3|Mit den Lautstärketasten den Shutdown Timer auswählen. Bestätige mit der Pausetaste.
+0951.mp3|5 Minuten.
+0952.mp3|10 Minuten.
+0953.mp3|15 Minuten.
+0954.mp3|20 Minuten.
+0955.mp3|30 Minuten.
+0956.mp3|60 Minuten.
+0957.mp3|Shutdown Timer deaktivieren.

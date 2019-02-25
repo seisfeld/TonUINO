@@ -1,43 +1,43 @@
-mp3/0800.mp3|Lets go!
-mp3/0801.mp3|A new card was found, please leave it on the box until its setup. Use the volume keys to pick a folder, confirm with the pause key.
-mp3/0802.mp3|Ok, single track. Use the volume keys to pick a track, confirm with the pause key.
-mp3/0803.mp3|Ok, the card is setup. Have fun.
-mp3/0804.mp3|An error occurred while setting up the card. Please try again.
-mp3/0805.mp3|Card setup canceled.
-mp3/0806.mp3|Oops my batteries died. Please ask mom or dad to swap them. Im powering down now, bye.
-mp3/0807.mp3|Reset done.
-mp3/0820.mp3|Ok, use the volume keys to pick a playback mode, confirm with the pause key.
-mp3/0821.mp3|Story mode. Play one random track from the folder.
-mp3/0822.mp3|Album mode. Play the complete folder.
-mp3/0823.mp3|Party mode. Randomly play the complete folder.
-mp3/0824.mp3|Single mode. Play one particular track from the folder.
-mp3/0825.mp3|Audiobook mode. Play the complete folder and track the progress.
-mp3/0900.mp3|Parents menu. Use the volume keys to pick an option, confirm with the pause key.
-mp3/0901.mp3|Preference saved.
-mp3/0902.mp3|Parents menu terminated.
-mp3/0910.mp3|Erase card.
-mp3/0911.mp3|Setup startup volume.
-mp3/0912.mp3|Setup maximum volume.
-mp3/0913.mp3|Setup equalizer.
-mp3/0914.mp3|Setup shutdown timer.
-mp3/0920.mp3|Please put the card on the box and wait for the confirmation.
-mp3/0921.mp3|Ok, card erased.
-mp3/0922.mp3|Erasing the card failed. Please try again.
-mp3/0923.mp3|Erasing the card canceled.
-mp3/0930.mp3|Use the volume keys to pick the startup volume, confirm with the pause key.
-mp3/0931.mp3|Use the volume keys to pick the maximum volume, confirm with the pause key.
-mp3/0940.mp3|Use the volume keys to pick the equalizer, confirm with the pause key.
-mp3/0941.mp3|Normal
-mp3/0942.mp3|Pop
-mp3/0943.mp3|Rock
-mp3/0944.mp3|Jazz
-mp3/0945.mp3|Classic
-mp3/0946.mp3|Base
-mp3/0950.mp3|Use the volume keys to pick the shutdown timer, confirm with the pause key.
-mp3/0951.mp3|5 minutes.
-mp3/0952.mp3|10 minutes.
-mp3/0953.mp3|15 minutes.
-mp3/0954.mp3|20 minutes.
-mp3/0955.mp3|30 minutes.
-mp3/0956.mp3|60 minutes.
-mp3/0957.mp3|Deactivate shutdown timer.
+0800.mp3|Lets go!
+0801.mp3|A new card was found, please leave it on the box until its setup. Use the volume keys to pick a folder, confirm with the pause key.
+0802.mp3|Ok, single track. Use the volume keys to pick a track, confirm with the pause key.
+0803.mp3|Ok, the card is setup. Have fun.
+0804.mp3|An error occurred while setting up the card. Please try again.
+0805.mp3|Card setup canceled.
+0806.mp3|Oops my batteries died. Please ask mom or dad to swap them. Im powering down now, bye.
+0807.mp3|Reset done.
+0820.mp3|Ok, use the volume keys to pick a playback mode, confirm with the pause key.
+0821.mp3|Story mode. Play one random track from the folder.
+0822.mp3|Album mode. Play the complete folder.
+0823.mp3|Party mode. Randomly play the complete folder.
+0824.mp3|Single mode. Play one particular track from the folder.
+0825.mp3|Audiobook mode. Play the complete folder and track the progress.
+0900.mp3|Parents menu. Use the volume keys to pick an option, confirm with the pause key.
+0901.mp3|Preference saved.
+0902.mp3|Parents menu terminated.
+0910.mp3|Erase card.
+0911.mp3|Setup startup volume.
+0912.mp3|Setup maximum volume.
+0913.mp3|Setup equalizer.
+0914.mp3|Setup shutdown timer.
+0920.mp3|Please put the card on the box and wait for the confirmation.
+0921.mp3|Ok, card erased.
+0922.mp3|Erasing the card failed. Please try again.
+0923.mp3|Erasing the card canceled.
+0930.mp3|Use the volume keys to pick the startup volume, confirm with the pause key.
+0931.mp3|Use the volume keys to pick the maximum volume, confirm with the pause key.
+0940.mp3|Use the volume keys to pick the equalizer, confirm with the pause key.
+0941.mp3|Normal
+0942.mp3|Pop
+0943.mp3|Rock
+0944.mp3|Jazz
+0945.mp3|Classic
+0946.mp3|Base
+0950.mp3|Use the volume keys to pick the shutdown timer, confirm with the pause key.
+0951.mp3|5 minutes.
+0952.mp3|10 minutes.
+0953.mp3|15 minutes.
+0954.mp3|20 minutes.
+0955.mp3|30 minutes.
+0956.mp3|60 minutes.
+0957.mp3|Deactivate shutdown timer.

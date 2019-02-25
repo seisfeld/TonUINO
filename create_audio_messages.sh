@@ -25,4 +25,4 @@ do
   ffmpeg -y -i $j.aiff -acodec libmp3lame -ab 128k -ac 1 advert/$j.mp3 -acodec libmp3lame -ab 128k -ac 1 mp3/$j.mp3
   rm $j.aiff
 done
-awk -F'|' '{system("say -v '$VOICE' -o outfile.aiff " $2 " && ffmpeg -y -i outfile.aiff -acodec libmp3lame -ab 128k -ac 1 " $1 " && rm outfile.aiff")}' < $INPUT
+awk -F'|' '{system("say -v '$VOICE' -o outfile.aiff " $2 " && ffmpeg -y -i outfile.aiff -acodec libmp3lame -ab 128k -ac 1 mp3/" $1 " && rm outfile.aiff")}' < $INPUT
