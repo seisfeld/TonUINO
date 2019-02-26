@@ -92,16 +92,16 @@
   --------------------
   center - announce current option
   play+pause - confirm selection
-  up / down - jump 10 options forward / backwards
-  left / right - previous / next option
+  up / down - next / previous option
+  left / right - jump 10 options backwards / forward
   menu - cancel
 
   During nfc tag setup mode:
   --------------------------
   center - announce current folder, mode or track number
   play+pause - confirm selection
-  up / down - jump 10 folders or tracks forward / backwards
-  left / right - previous / next folder, mode or track
+  up / down - next / previous folder, mode or track
+  left / right - jump 10 folders or tracks backwards / forward
   menu - cancel
 
   status led:
@@ -1005,15 +1005,15 @@ uint8_t prompt(uint8_t promptOptions, uint16_t promptHeading, uint16_t promptOff
       else if (promptPreview && !playback.isPlaying) mp3.playFolderTrack(promptResult, 1);
       else mp3.playMp3FolderTrack(promptResult + promptOffset);
     }
-    // button 1 (right) press or ir remote right: next folder, track number or option
-    else if (inputEvent == B1P || inputEvent == IRR) {
+    // button 1 (right) press or ir remote up: next folder, track number or option
+    else if (inputEvent == B1P || inputEvent == IRU) {
       promptResult = min(promptResult + 1, promptOptions);
       Serial.println(promptResult);
       if (promptPreview) mp3.playFolderTrack(promptResult, 1);
       else mp3.playMp3FolderTrack(promptResult + promptOffset);
     }
-    // button 2 (left) press or ir remote left: previous folder, track number or option
-    else if (inputEvent == B2P || inputEvent == IRL) {
+    // button 2 (left) press or ir remote up: previous folder, track number or option
+    else if (inputEvent == B2P || inputEvent == IRD) {
       promptResult = max(promptResult - 1, 1);
       Serial.println(promptResult);
       if (promptPreview) mp3.playFolderTrack(promptResult, 1);
@@ -1024,14 +1024,14 @@ uint8_t prompt(uint8_t promptOptions, uint16_t promptHeading, uint16_t promptOff
       Serial.println(F("cancel"));
       return 0;
     }
-    // button 1 (right) hold or ir remote up: jump 10 folders, tracks or options forward
-    else if (inputEvent == B1H || inputEvent == IRU) {
+    // button 1 (right) hold or ir remote right: jump 10 folders, tracks or options forward
+    else if (inputEvent == B1H || inputEvent == IRR) {
       promptResult = min(promptResult + 10, promptOptions);
       Serial.println(promptResult);
       mp3.playMp3FolderTrack(promptResult + promptOffset);
     }
-    // button 2 (left) hold or ir remote down: jump 10 folders, tracks or options backwards
-    else if (inputEvent == B2H || inputEvent == IRD) {
+    // button 2 (left) hold or ir remote left: jump 10 folders, tracks or options backwards
+    else if (inputEvent == B2H || inputEvent == IRL) {
       promptResult = max(promptResult - 10, 1);
       Serial.println(promptResult);
       mp3.playMp3FolderTrack(promptResult + promptOffset);
