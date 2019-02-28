@@ -20,6 +20,7 @@
 0912.mp3|Maximallautstärke festlegen.
 0913.mp3|Equalizer festlegen.
 0914.mp3|Shutdown Timer festlegen.
+0915.mp3|Box ausschalten.
 0920.mp3|Bitte lege die zu löschende Karte auf die Box und warte auf die Bestätigung.
 0921.mp3|Ok, ich habe die Karte gelöscht.
 0922.mp3|Beim löschen der Karte ist leider ein Fehler aufgetreten. Bitte versuche es noch einmal.

@@ -1,14 +1,4 @@
-/*-----------------------------------------------------------------------------------------
-              MFRC522      Arduino       Arduino   Arduino    Arduino          Arduino
-              Reader/PCD   Uno/101       Mega      Nano v3    Leonardo/Micro   Pro Micro
-  Signal      Pin          Pin           Pin       Pin        Pin              Pin
-  -----------------------------------------------------------------------------------------
-  RST/Reset   RST          9             5         D9         RESET/ICSP-5     RST
-  SPI SS      SDA(SS)      10            53        D10        10               10
-  SPI MOSI    MOSI         11 / ICSP-4   51        D11        ICSP-4           16
-  SPI MISO    MISO         12 / ICSP-1   50        D12        ICSP-1           14
-  SPI SCK     SCK          13 / ICSP-3   52        D13        ICSP-3           15
-
+/*
   basic button actions:
   =====================
 
@@ -127,7 +117,7 @@
   data stored on the nfc tags:
   ============================
 
-  On MIFARE Classic (Mini, 1k & 4K) tags:
+  On MIFARE Classic (Mini, 1K & 4K) tags:
   ---------------------------------------
 
   Up to 16 bytes of data are stored in sector 1 / block 4, of which the first 8 bytes
@@ -265,7 +255,7 @@ enum {NOACTION,
 enum {INIT, PLAY, PAUSE, CONFIG};
 
 // shutdown timer actions
-enum {START, STOP, CHECK};
+enum {START, STOP, CHECK, SHUTDOWN};
 
 // preference actions
 enum {READ, WRITE, RESET};
@@ -935,15 +925,18 @@ void shutdownTimer(uint8_t timerAction) {
     case CHECK:
       if (shutdownMillis != 0 && millis() > shutdownMillis) {
         Serial.println(F("idle shut"));
-        digitalWrite(statusLedPin, LOW);
-        digitalWrite(shutdownPin, LOW);
-        mfrc522.PCD_AntennaOff();
-        mfrc522.PCD_SoftPowerDown();
-        mp3.sleep();
-        set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-        cli();
-        sleep_mode();
+        shutdownTimer(SHUTDOWN);
       }
+      break;
+    case SHUTDOWN:
+      digitalWrite(statusLedPin, LOW);
+      digitalWrite(shutdownPin, LOW);
+      mfrc522.PCD_AntennaOff();
+      mfrc522.PCD_SoftPowerDown();
+      mp3.sleep();
+      set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+      cli();
+      sleep_mode();
       break;
     default:
       break;
@@ -1451,7 +1444,7 @@ void loop() {
     shutdownTimer(STOP);
     while (true) {
       Serial.println(F("parents"));
-      uint8_t parentsMenu = prompt(5, 900, 909, 0, false);
+      uint8_t parentsMenu = prompt(6, 900, 909, 0, false);
       // cancel
       if (parentsMenu == 0) {
         mp3.playMp3FolderTrack(902);
@@ -1546,6 +1539,11 @@ void loop() {
           mp3.playMp3FolderTrack(901);
           waitPlaybackToFinish(500);
         }
+      }
+      // manual box shutdown
+      else if (parentsMenu == 6) {
+        Serial.println(F("manual shut"));
+        shutdownTimer(SHUTDOWN);
       }
 #ifdef STATUSLED
       statusLedBlink(500);

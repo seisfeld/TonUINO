@@ -12,13 +12,13 @@ Dies ist meine alternative Firmware für das wundervolle [TonUINO](https://www.v
 - Abspielmodi: Hörspiel, Album, Party, Lieblingsfolge und Hörbuch.
 - Speichert die Ordnerverknüpfungen, Abspielmodi etc. auf den NFC Tags/Karten.
 - Nächster/Vorheriger Titel in den Abspielmodi Album, Party und Hörbuch.
-- Unterstützung für MIFARE Classic (Mini, 1k & 4K) Tags/Karten.
+- Unterstützung für MIFARE Classic (Mini, 1K & 4K) Tags/Karten.
 - Unterstützung für MIFARE Ultralight / Ultralight C Tags/Karten.
 - Unterstützung für NTAG213/215/216 Tags/Karten.
 - Debugausgabe auf der seriellen Konsole.
 - Konfigurationsdialoge (NFC Tags/Karten anlernen/löschen, Elternmenü etc.) können abgebrochen werden.
 - NFC Tags/Karten können wieder komplett gelöscht werden.
-- Elternmenü um NFC Tags/Karten zu löschen und um Einstellungen wie Startlautstärke, Maximallautstärke, Equalizer und Abschalttimer (benötigt eine externe Schaltung) vorzunehmen.
+- Elternmenü um NFC Tags/Karten zu löschen und um Einstellungen wie Startlautstärke, Maximallautstärke, Equalizer und Abschalttimer (benötigt eine externe Schaltung) vorzunehmen. Dort kann die Abschaltung auch manuell vorgenommen werden.
 - Einstellungen werden im EEPROM gespeichert.
 - Optional: Umstellbar auf 5 Tasten Bedienung.
 - Optional: Fernbedienbar über Infrarotfernbedienung (inkl. Tastensperre).

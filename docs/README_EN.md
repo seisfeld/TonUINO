@@ -10,13 +10,13 @@ This is my alternative firmware for the wonderful [TonUINO](https://www.voss.ear
 - Playback modes: Story, album, party, single, story book.
 - Saves playback modes etc. directly to the NFC tags/cards.
 - Next/previous track in album, party and story mode.
-- Supports MIFARE Classic (Mini, 1k & 4K) tags/cards.
+- Supports MIFARE Classic (Mini, 1K & 4K) tags/cards.
 - Supports MIFARE Ultralight / Ultralight C tags/cards.
 - Supports NTAG213/215/216 tags/cards.
 - Debug output to the serial console.
 - Setup dialogues (setup/erase NFC tags/cards, parents menu etc.) can be aborted.
 - NFC tags/cards can be erased.
-- Parents menu to erase NFC tags/cards and to change settings like startup volume, maximum volume, equalizer and shutdown timer (requires an external circuit).
+- Parents menu to erase NFC tags/cards and to change settings like startup volume, maximum volume, equalizer and shutdown timer (requires an external circuit). You can manually trigger the shutdown there as well.
 - Settings are stored in EEPROM.
 - Optional: 5 Buttons.
 - Optional: IR remote control (incl. box lock).
