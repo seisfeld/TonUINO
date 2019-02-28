@@ -35,13 +35,14 @@
 0944.mp3|Jazz
 0945.mp3|Classic
 0946.mp3|Bass
-0950.mp3|Drücke auf der Fernbedienung die Lautstärke erhöhen Taste.
-0951.mp3|Drücke auf der Fernbedienung die Lautstärke verringern Taste.
-0952.mp3|Drücke auf der Fernbedienung die vorheriger Titel Taste.
-0953.mp3|Drücke auf der Fernbedienung die nächster Titel Taste.
-0954.mp3|Drücke auf der Fernbedienung die Center Taste.
-0955.mp3|Drücke auf der Fernbedienung die Menü Taste.
-0956.mp3|Drücke auf der Fernbedienung die Play/Pause Taste.
+0950.mp3|Diese Funktion benötigt einen Infrarotempfänger, welcher dann im Programmcode freigeschaltet werden muss.
+0951.mp3|Drücke auf der Fernbedienung die Lautstärke erhöhen Taste.
+0952.mp3|Drücke auf der Fernbedienung die Lautstärke verringern Taste.
+0953.mp3|Drücke auf der Fernbedienung die vorheriger Titel Taste.
+0954.mp3|Drücke auf der Fernbedienung die nächster Titel Taste.
+0955.mp3|Drücke auf der Fernbedienung die Center Taste.
+0956.mp3|Drücke auf der Fernbedienung die Menü Taste.
+0957.mp3|Drücke auf der Fernbedienung die Play/Pause Taste.
 0960.mp3|Mit den Lautstärketasten den Shutdown Timer auswählen. Bestätige mit der Pausetaste.
 0961.mp3|5 Minuten.
 0962.mp3|10 Minuten.

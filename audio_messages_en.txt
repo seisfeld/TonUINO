@@ -19,7 +19,7 @@
 0911.mp3|Setup startup volume.
 0912.mp3|Setup maximum volume.
 0913.mp3|Setup equalizer.
-0914.mp3|Learn IR remote. You need a remote with at least 7 keys.
+0914.mp3|Learn infrared remote. You need a remote with at least 7 keys.
 0915.mp3|Setup shutdown timer.
 0916.mp3|Shutdown box.
 0920.mp3|Please put the card on the box and wait for the confirmation.
@@ -35,13 +35,14 @@
 0944.mp3|Jazz
 0945.mp3|Classic
 0946.mp3|Base
-0950.mp3|Press the volume up key on the remote.
-0951.mp3|Press the volume down key on the remote.
-0952.mp3|Press the previous track key on the remote.
-0953.mp3|Press the next track key on the remote.
-0954.mp3|Press the center key on the remote.
-0955.mp3|Press the menu key on the remote.
-0956.mp3|Press the play/pause key on the remote.
+0950.mp3|This feature needs an infrared receiver, which then needs to be enabled in the program code.
+0951.mp3|Press the volume up key on the remote.
+0952.mp3|Press the volume down key on the remote.
+0953.mp3|Press the previous track key on the remote.
+0954.mp3|Press the next track key on the remote.
+0955.mp3|Press the center key on the remote.
+0956.mp3|Press the menu key on the remote.
+0957.mp3|Press the play/pause key on the remote.
 0960.mp3|Use the volume keys to pick the shutdown timer, confirm with the pause key.
 0961.mp3|5 minutes.
 0962.mp3|10 minutes.

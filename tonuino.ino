@@ -1519,9 +1519,10 @@ void loop() {
       }
       // learn ir remote
       else if (parentsMenu == 5) {
+#ifdef IRREMOTE
         Serial.println(F("learn remote"));
         for (uint8_t i = 0; i < 7; i++) {
-          mp3.playMp3FolderTrack(950 + i);
+          mp3.playMp3FolderTrack(951 + i);
           waitPlaybackToFinish(500);
           // clear ir receive buffer
           irReceiver.resume();
@@ -1544,6 +1545,10 @@ void loop() {
         preferences(WRITE);
         mp3.playMp3FolderTrack(901);
         waitPlaybackToFinish(500);
+#elif
+        mp3.playMp3FolderTrack(950);
+        waitPlaybackToFinish(500);
+#endif
       }
       // shutdown timer
       else if (parentsMenu == 6) {
