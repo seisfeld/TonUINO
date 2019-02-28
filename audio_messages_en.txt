@@ -20,7 +20,7 @@
 0912.mp3|Setup maximum volume.
 0913.mp3|Setup equalizer.
 0914.mp3|Setup shutdown timer.
-0914.mp3|Shutdown box.
+0915.mp3|Shutdown box.
 0920.mp3|Please put the card on the box and wait for the confirmation.
 0921.mp3|Ok, card erased.
 0922.mp3|Erasing the card failed. Please try again.
