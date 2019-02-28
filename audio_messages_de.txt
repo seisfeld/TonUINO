@@ -19,8 +19,9 @@
 0911.mp3|Startlautstärke festlegen.
 0912.mp3|Maximallautstärke festlegen.
 0913.mp3|Equalizer festlegen.
-0914.mp3|Shutdown Timer festlegen.
-0915.mp3|Box ausschalten.
+0914.mp3|Fernbedienung anlernen. Du benötigst eine Fernbedienung mit mindestens 7 Tasten.
+0915.mp3|Shutdown Timer festlegen.
+0916.mp3|Box ausschalten.
 0920.mp3|Bitte lege die zu löschende Karte auf die Box und warte auf die Bestätigung.
 0921.mp3|Ok, ich habe die Karte gelöscht.
 0922.mp3|Beim löschen der Karte ist leider ein Fehler aufgetreten. Bitte versuche es noch einmal.
@@ -34,11 +35,18 @@
 0944.mp3|Jazz
 0945.mp3|Classic
 0946.mp3|Bass
-0950.mp3|Mit den Lautstärketasten den Shutdown Timer auswählen. Bestätige mit der Pausetaste.
-0951.mp3|5 Minuten.
-0952.mp3|10 Minuten.
-0953.mp3|15 Minuten.
-0954.mp3|20 Minuten.
-0955.mp3|30 Minuten.
-0956.mp3|60 Minuten.
-0957.mp3|Shutdown Timer deaktivieren.
+0950.mp3|Drücke auf der Fernbedienung die Lautstärke erhöhen Taste.
+0951.mp3|Drücke auf der Fernbedienung die Lautstärke verringern Taste.
+0952.mp3|Drücke auf der Fernbedienung die vorheriger Titel Taste.
+0953.mp3|Drücke auf der Fernbedienung die nächster Titel Taste.
+0954.mp3|Drücke auf der Fernbedienung die Center Taste.
+0955.mp3|Drücke auf der Fernbedienung die Menü Taste.
+0956.mp3|Drücke auf der Fernbedienung die Play/Pause Taste.
+0960.mp3|Mit den Lautstärketasten den Shutdown Timer auswählen. Bestätige mit der Pausetaste.
+0961.mp3|5 Minuten.
+0962.mp3|10 Minuten.
+0963.mp3|15 Minuten.
+0964.mp3|20 Minuten.
+0965.mp3|30 Minuten.
+0966.mp3|60 Minuten.
+0967.mp3|Shutdown Timer deaktivieren.

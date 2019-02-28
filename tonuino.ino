@@ -54,11 +54,10 @@
   able to support all functions. This feature can be enabled by uncommenting the
   '#define IRREMOTE' below.
 
-  There are three predefined code mappings for the silver apple remote below, but you can
-  change (or extend) them to support different remotes. To obtain codes from an unknown
-  ir remote, uncomment the '#define IRDEBUG' below and check the serial console while pressing
-  the corresponding buttons on your remote. Once you have acquired the codes, put them in
-  the 'irRemoteCodes' array below and comment out the '#define IRDEBUG' again.
+  There are three predefined code mappings for some silver apple remotes below, but you can
+  change (or extend) them to support different remotes. In addition to these hard coded
+  remotes, you can learn in one additional remote using the parents menu, which is then
+  stored in EEPROM.
 
   There is one function, currently only available with the ir remote: Box lock.
   When TonUINO is locked, the buttons on TonUINO as well as the nfc reader are disabled
@@ -159,9 +158,6 @@
 // uncomment the below line to enable ir remote support
 // #define IRREMOTE
 
-// uncomment the below line to enable ir remote debug support
-// #define IRDEBUG
-
 // uncomment the below line to enable status led support
 // #define STATUSLED
 
@@ -208,19 +204,20 @@ const uint16_t buttonShortLongPressDelay = 2000;    // time after which a button
 const uint16_t buttonLongLongPressDelay = 5000;     // longer long press delay for special cases, i.e. to trigger erase nfc tag mode (in milliseconds)
 const uint32_t debugConsoleSpeed = 115200;          // speed for the debug console
 
+// number of mp3 files in advert folder + number of mp3 files in mp3 folder
+const uint16_t msgCount = 562;
+
 // define magic cookie (by default 0x13 0x37 0xb3 0x47)
 const uint8_t magicCookieHex[4] = {0x13, 0x37, 0xb3, 0x47};
 
 // default values for preferences
-uint8_t mp3StartVolumeDefault = 15;
-uint8_t mp3MaxVolumeDefault = 25;
-uint8_t mp3EqualizerDefault = 1;
-uint8_t shutdownMinutesDefault = 10;
+const uint8_t mp3StartVolumeDefault = 15;
+const uint8_t mp3MaxVolumeDefault = 25;
+const uint8_t mp3EqualizerDefault = 1;
+const uint8_t shutdownMinutesDefault = 10;
+const uint16_t irRemoteUserCodesDefault[7] = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
 
-// number of mp3 files in advert folder + number of mp3 files in mp3 folder
-const uint16_t msgCount = 553;
-
-// define codes for ir remotes
+// define hard coded code mappings for ir remotes. these will always work, no matter what is learned in by the user afterwards using the parents menu
 // one remote per line with codes for: up, down, left, right, center, menu, play/pause
 const uint16_t irRemoteCodes[][7] = {
   {0x5057, 0x3057, 0x9057, 0x6057, 0x3A57, 0xC057, 0xFA57},  // silver apple tv remote
@@ -290,6 +287,7 @@ struct preferenceObject {
   uint8_t mp3MaxVolume;
   uint8_t mp3Equalizer;
   uint8_t shutdownMinutes;
+  uint16_t irRemoteUserCodes[7];
 } preference;
 
 // global variables
@@ -412,32 +410,29 @@ void checkForInput() {
 
 
 #ifdef IRREMOTE
-  uint8_t irRemoteEvent = 0;
+  uint8_t irRemoteEvent = NOACTION;
   uint16_t irRemoteCode = 0;
+  static uint64_t irRemoteOldMillis;
 
   // poll ir receiver, has precedence over (overwrites) physical buttons
   if (irReceiver.decode(&irReading)) {
     // on NEC encoding 0xFFFFFFFF means the button is held down, we ignore this
     if (!(irReading.decode_type == NEC && irReading.value == 0xFFFFFFFF)) {
+      // convert irReading.value from 32bit to 16bit
       irRemoteCode = (irReading.value & 0xFFFF);
-#ifdef IRDEBUG
-      Serial.print(F("IRDEBUG: 0x"));
-      Serial.print(irRemoteCode <= 0x0010 ? "0" : "");
-      Serial.print(irRemoteCode <= 0x0100 ? "0" : "");
-      Serial.print(irRemoteCode <= 0x1000 ? "0" : "");
-      Serial.println(irRemoteCode, HEX);
-#endif
       for (uint8_t i = 0; i < irRemoteCount; i++) {
         for (uint8_t j = 0; j < irRemoteCodeCount; j++) {
           //if we have a match, temporally populate irRemoteEvent and break
-          if (irRemoteCode == irRemoteCodes[i][j]) {
+          if (irRemoteCode == irRemoteCodes[i][j] || irRemoteCode == preference.irRemoteUserCodes[j]) {
             // 16 is used as an offset in the button action enum list - 17 is the first ir action
             irRemoteEvent = 16 + j;
             break;
           }
         }
         // if the inner loop had a match, populate inputEvent and break
-        if (irRemoteEvent != 0) {
+        // ir remote key presses are debounced by 250ms
+        if (irRemoteEvent != 0 && millis() - irRemoteOldMillis >= 250) {
+          irRemoteOldMillis = millis();
           inputEvent = irRemoteEvent;
           break;
         }
@@ -967,6 +962,7 @@ void preferences(uint8_t preferenceAction) {
       preference.mp3MaxVolume = mp3MaxVolumeDefault;
       preference.mp3Equalizer = mp3EqualizerDefault;
       preference.shutdownMinutes = shutdownMinutesDefault;
+      memcpy(preference.irRemoteUserCodes, irRemoteUserCodesDefault, 14);
       EEPROM.put(100, preference);
       break;
     default:
@@ -1444,7 +1440,7 @@ void loop() {
     shutdownTimer(STOP);
     while (true) {
       Serial.println(F("parents"));
-      uint8_t parentsMenu = prompt(6, 900, 909, 0, false);
+      uint8_t parentsMenu = prompt(7, 900, 909, 0, false);
       // cancel
       if (parentsMenu == 0) {
         mp3.playMp3FolderTrack(902);
@@ -1521,10 +1517,38 @@ void loop() {
           waitPlaybackToFinish(500);
         }
       }
-      // shutdown timer
+      // learn ir remote
       else if (parentsMenu == 5) {
+        Serial.println(F("learn remote"));
+        for (uint8_t i = 0; i < 7; i++) {
+          mp3.playMp3FolderTrack(950 + i);
+          waitPlaybackToFinish(500);
+          // clear ir receive buffer
+          irReceiver.resume();
+          // wait for ir signal
+          while (!irReceiver.decode(&irReading));
+          // on NEC encoding 0xFFFFFFFF means the button is held down, we ignore this
+          if (!(irReading.decode_type == NEC && irReading.value == 0xFFFFFFFF)) {
+            // convert irReading.value from 32bit to 16bit
+            uint16_t irRemoteCode = (irReading.value & 0xFFFF);
+            Serial.print(F("ir code: 0x"));
+            Serial.print(irRemoteCode <= 0x0010 ? "0" : "");
+            Serial.print(irRemoteCode <= 0x0100 ? "0" : "");
+            Serial.print(irRemoteCode <= 0x1000 ? "0" : "");
+            Serial.println(irRemoteCode, HEX);
+            preference.irRemoteUserCodes[i] = irRemoteCode;
+          }
+          // key was held down on NEC encoding, repeat last question
+          else i--;
+        }
+        preferences(WRITE);
+        mp3.playMp3FolderTrack(901);
+        waitPlaybackToFinish(500);
+      }
+      // shutdown timer
+      else if (parentsMenu == 6) {
         Serial.println(F("timer"));
-        uint8_t promptResult = prompt(7, 950, 950, 0, false);
+        uint8_t promptResult = prompt(7, 960, 960, 0, false);
         if (promptResult != 0) {
           switch (promptResult) {
             case 1: preference.shutdownMinutes = 5; break;
@@ -1541,7 +1565,7 @@ void loop() {
         }
       }
       // manual box shutdown
-      else if (parentsMenu == 6) {
+      else if (parentsMenu == 7) {
         Serial.println(F("manual shut"));
         shutdownTimer(SHUTDOWN);
       }

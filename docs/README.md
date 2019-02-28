@@ -21,7 +21,7 @@ Dies ist meine alternative Firmware für das wundervolle [TonUINO](https://www.v
 - Elternmenü um NFC Tags/Karten zu löschen und um Einstellungen wie Startlautstärke, Maximallautstärke, Equalizer und Abschalttimer (benötigt eine externe Schaltung) vorzunehmen. Dort kann die Abschaltung auch manuell vorgenommen werden.
 - Einstellungen werden im EEPROM gespeichert.
 - Optional: Umstellbar auf 5 Tasten Bedienung.
-- Optional: Fernbedienbar über Infrarotfernbedienung (inkl. Tastensperre).
+- Optional: Fernbedienbar über eine Infrarotfernbedienung (diese muss mindestens 7 Tasten haben), welche über das Elternmenü angelernt werden kann. Über die Fernbedienung ist es dann auch möglich die Tasten von TonUINO zu sperren.
 - Optional: Unterstützung einer Status LED.
 - Optional: Unterspannungsabschaltung für z.B. die [CubieKid Platine](https://www.thingiverse.com/thing:3148200).
 

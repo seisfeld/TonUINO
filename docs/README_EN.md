@@ -19,7 +19,7 @@ This is my alternative firmware for the wonderful [TonUINO](https://www.voss.ear
 - Parents menu to erase NFC tags/cards and to change settings like startup volume, maximum volume, equalizer and shutdown timer (requires an external circuit). You can manually trigger the shutdown there as well.
 - Settings are stored in EEPROM.
 - Optional: 5 Buttons.
-- Optional: IR remote control (incl. box lock).
+- Optional: IR remote control (incl. box lock). The remote (which needs at least 7 keys) can be learned in using the parents menu.
 - Optional: Status LED.
 - Optional: Low voltage shutdown i.e. for the [CubieKid PCB](https://www.thingiverse.com/thing:3148200).
 
