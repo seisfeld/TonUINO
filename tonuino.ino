@@ -1541,6 +1541,7 @@ void loop() {
           }
           // key was held down on NEC encoding, repeat last question
           else i--;
+          mp3.loop();
         }
         preferences(WRITE);
         mp3.playMp3FolderTrack(901);
