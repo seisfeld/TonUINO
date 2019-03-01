@@ -1546,7 +1546,7 @@ void loop() {
         preferences(WRITE);
         mp3.playMp3FolderTrack(901);
         waitPlaybackToFinish(500);
-#elif
+#else
         mp3.playMp3FolderTrack(950);
         waitPlaybackToFinish(500);
 #endif
