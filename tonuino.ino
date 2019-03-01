@@ -205,7 +205,7 @@ const uint16_t buttonLongLongPressDelay = 5000;     // longer long press delay f
 const uint32_t debugConsoleSpeed = 115200;          // speed for the debug console
 
 // number of mp3 files in advert folder + number of mp3 files in mp3 folder
-const uint16_t msgCount = 562;
+const uint16_t msgCount = 563;
 
 // define magic cookie (by default 0x13 0x37 0xb3 0x47)
 const uint8_t magicCookieHex[4] = {0x13, 0x37, 0xb3, 0x47};
