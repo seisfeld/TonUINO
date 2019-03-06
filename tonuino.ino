@@ -185,8 +185,8 @@ using namespace ace_button;
 #endif
 
 // define general configuration constants
-const uint8_t softwareSerialTxPin = 3;              // software serial tx, wired with 1k ohm to rx pin of DFPlayer Mini
-const uint8_t softwareSerialRxPin = 2;              // software serial rx, wired straight to tx pin of DFPlayer Mini
+const uint8_t mp3SerialTxPin = 3;                   // mp3 serial tx, wired with 1k ohm to rx pin of DFPlayer Mini
+const uint8_t mp3SerialRxPin = 2;                   // mp3 serial rx, wired straight to tx pin of DFPlayer Mini
 const uint8_t mp3BusyPin = 4;                       // reports play state of DFPlayer Mini (LOW = playing)
 const uint8_t irReceiverPin = 5;                    // pin used for the ir receiver
 const uint8_t statusLedPin = 6;                     // pin used for status led
@@ -369,9 +369,9 @@ class Mp3Notify {
     }
 };
 
-SoftwareSerial secondarySerial(softwareSerialRxPin, softwareSerialTxPin);     // create SoftwareSerial instance
+SoftwareSerial mp3Serial(mp3SerialRxPin, mp3SerialTxPin);                     // create SoftwareSerial instance
 MFRC522 mfrc522(nfcSlaveSelectPin, nfcResetPin);                              // create MFRC522 instance
-DFMiniMp3<SoftwareSerial, Mp3Notify> mp3(secondarySerial);                    // create DFMiniMp3 instance
+DFMiniMp3<SoftwareSerial, Mp3Notify> mp3(mp3Serial);                          // create DFMiniMp3 instance
 ButtonConfig button0Config;                                                   // create ButtonConfig instance
 ButtonConfig button1Config;                                                   // create ButtonConfig instance
 ButtonConfig button2Config;                                                   // create ButtonConfig instance
@@ -706,11 +706,12 @@ uint8_t readNfcTagData() {
   // decide which code path to take depending on picc type
   if (piccType == MFRC522::PICC_TYPE_MIFARE_MINI || piccType ==  MFRC522::PICC_TYPE_MIFARE_1K || piccType == MFRC522::PICC_TYPE_MIFARE_4K) {
     uint8_t classicBlock = 4;
+    uint8_t classicTrailerBlock = 7;
     MFRC522::MIFARE_Key classicKey;
     for (uint8_t i = 0; i < 6; i++) classicKey.keyByte[i] = 0xFF;
 
     // check if we can authenticate with classicKey
-    piccStatus = (MFRC522::StatusCode)mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, classicBlock, &classicKey, &(mfrc522.uid));
+    piccStatus = (MFRC522::StatusCode)mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, classicTrailerBlock, &classicKey, &(mfrc522.uid));
     if (piccStatus == MFRC522::STATUS_OK) {
       // read 16 bytes from nfc tag (by default sector 1 / block 4)
       piccStatus = (MFRC522::StatusCode)mfrc522.MIFARE_Read(classicBlock, piccReadBuffer, &piccReadBufferSize);
@@ -869,7 +870,7 @@ uint8_t writeNfcTagData(uint8_t *nfcTagWriteBuffer, uint8_t nfcTagWriteBufferSiz
     mfrc522.PCD_StopCrypto1();
     return 1;
   }
-  //write was not successful
+  // write was not successfull
   else {
     Serial.println(nfcStatusMessage[4]);
     mfrc522.PICC_HaltA();
