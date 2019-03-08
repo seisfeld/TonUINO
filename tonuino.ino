@@ -233,9 +233,9 @@ const float shutdownMaxVoltage = 5.0;                        // maximum expected
 const float shutdownVoltageCorrection = 1.0 / 1.0;           // voltage measured by multimeter divided by reported voltage
 
 // define strings
-const char* playbackModeName[] = {" ", "story", "album", "party", "single", "storybook"};
-const char* nfcStatusMessage[] = {" ", "read", "write", "ok", "failed"};
-const char* mp3EqualizerName[] = {" ", "normal", "pop", "rock", "jazz", "classic", "bass"};
+const char *playbackModeName[] = {" ", "story", "album", "party", "single", "storybook"};
+const char *nfcStatusMessage[] = {" ", "read", "write", "ok", "failed"};
+const char *mp3EqualizerName[] = {" ", "normal", "pop", "rock", "jazz", "classic", "bass"};
 
 // playback modes
 enum {NOMODE, STORY, ALBUM, PARTY, SINGLE, STORYBOOK};
@@ -298,14 +298,14 @@ uint32_t magicCookie = 0;
 
 // declare functions
 void checkForInput();
-void translateButtonInput(AceButton* button, uint8_t eventType, uint8_t /* buttonState */);
+void translateButtonInput(AceButton *button, uint8_t eventType, uint8_t /* buttonState */);
 void switchButtonConfiguration(uint8_t buttonMode);
 void waitPlaybackToFinish(uint16_t statusLedBlinkInterval);
 void printModeFolderTrack(uint8_t playTrack, bool cr);
 void playNextTrack(uint16_t globalTrack, bool directionForward, bool triggeredManually);
 uint8_t readNfcTagData();
-uint8_t writeNfcTagData(uint8_t *nfcTagWriteBuffer, uint8_t nfcTagWriteBufferSize);
-void printNfcTagData(uint8_t *dataBuffer, uint8_t dataBufferSize, bool cr);
+uint8_t writeNfcTagData(uint8_t nfcTagWriteBuffer[], uint8_t nfcTagWriteBufferSize);
+void printNfcTagData(uint8_t dataBuffer[], uint8_t dataBufferSize, bool cr);
 void printNfcTagType(MFRC522::PICC_Type nfcTagType);
 void shutdownTimer(uint8_t timerAction);
 void preferences(uint8_t preferenceAction);
@@ -444,7 +444,7 @@ void checkForInput() {
 }
 
 // translates the various button events into enums
-void translateButtonInput(AceButton* button, uint8_t eventType, uint8_t /* buttonState */) {
+void translateButtonInput(AceButton *button, uint8_t eventType, uint8_t /* buttonState */) {
   switch (button->getId()) {
     // button 0 (middle)
     case 0:
@@ -711,13 +711,13 @@ uint8_t readNfcTagData() {
     for (uint8_t i = 0; i < 6; i++) classicKey.keyByte[i] = 0xFF;
 
     // check if we can authenticate with classicKey
-    piccStatus = (MFRC522::StatusCode)mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, classicTrailerBlock, &classicKey, &(mfrc522.uid));
+    piccStatus = (MFRC522::StatusCode)mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, classicTrailerBlock, &classicKey, &mfrc522.uid);
     if (piccStatus == MFRC522::STATUS_OK) {
       // read 16 bytes from nfc tag (by default sector 1 / block 4)
       piccStatus = (MFRC522::StatusCode)mfrc522.MIFARE_Read(classicBlock, piccReadBuffer, &piccReadBufferSize);
       if (piccStatus == MFRC522::STATUS_OK) {
         nfcTagReadSuccess = true;
-        memcpy(nfcTagReadBuffer, piccReadBuffer, 16);
+        memcpy(nfcTagReadBuffer, piccReadBuffer, sizeof(nfcTagReadBuffer));
       }
       else Serial.println(mfrc522.GetStatusCodeName(piccStatus));
     }
@@ -801,9 +801,8 @@ uint8_t readNfcTagData() {
 }
 
 // writes data to nfc tag
-uint8_t writeNfcTagData(uint8_t *nfcTagWriteBuffer, uint8_t nfcTagWriteBufferSize) {
+uint8_t writeNfcTagData(uint8_t nfcTagWriteBuffer[], uint8_t nfcTagWriteBufferSize) {
   uint8_t piccWriteBuffer[16];
-  uint8_t piccWriteBufferSize = sizeof(piccWriteBuffer);
   bool nfcTagWriteSuccess = false;
   MFRC522::StatusCode piccStatus;
   MFRC522::PICC_Type piccType = mfrc522.PICC_GetType(mfrc522.uid.sak);
@@ -816,12 +815,12 @@ uint8_t writeNfcTagData(uint8_t *nfcTagWriteBuffer, uint8_t nfcTagWriteBufferSiz
     for (uint8_t i = 0; i < 6; i++) classicKey.keyByte[i] = 0xFF;
 
     // check if we can authenticate with classicKey
-    piccStatus = (MFRC522::StatusCode)mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, classicTrailerBlock, &classicKey, &(mfrc522.uid));
+    piccStatus = (MFRC522::StatusCode)mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, classicTrailerBlock, &classicKey, &mfrc522.uid);
     if (piccStatus == MFRC522::STATUS_OK) {
       // write 16 bytes to nfc tag (by default sector 1 / block 4)
-      memset(piccWriteBuffer, 0, piccWriteBufferSize);
-      memcpy(piccWriteBuffer, nfcTagWriteBuffer, 16);
-      piccStatus = (MFRC522::StatusCode)mfrc522.MIFARE_Write(classicBlock, piccWriteBuffer, piccWriteBufferSize);
+      memset(piccWriteBuffer, 0, sizeof(piccWriteBuffer));
+      memcpy(piccWriteBuffer, nfcTagWriteBuffer, sizeof(piccWriteBuffer));
+      piccStatus = (MFRC522::StatusCode)mfrc522.MIFARE_Write(classicBlock, piccWriteBuffer, sizeof(piccWriteBuffer));
       if (piccStatus == MFRC522::STATUS_OK) nfcTagWriteSuccess = true;
       else Serial.println(mfrc522.GetStatusCodeName(piccStatus));
     }
@@ -838,9 +837,9 @@ uint8_t writeNfcTagData(uint8_t *nfcTagWriteBuffer, uint8_t nfcTagWriteBufferSiz
     if (piccStatus == MFRC522::STATUS_OK) {
       // write 16 bytes to nfc tag (by default pages 8-11)
       for (uint8_t ultralightPage = ultralightStartPage; ultralightPage < ultralightStartPage + 4; ultralightPage++) {
-        memset(piccWriteBuffer, 0, piccWriteBufferSize);
+        memset(piccWriteBuffer, 0, sizeof(piccWriteBuffer));
         memcpy(piccWriteBuffer, nfcTagWriteBuffer + ((ultralightPage * 4) - (ultralightStartPage * 4)), 4);
-        piccStatus = (MFRC522::StatusCode)mfrc522.MIFARE_Write(ultralightPage, piccWriteBuffer, piccWriteBufferSize);
+        piccStatus = (MFRC522::StatusCode)mfrc522.MIFARE_Write(ultralightPage, piccWriteBuffer, sizeof(piccWriteBuffer));
         if (piccStatus == MFRC522::STATUS_OK) nfcTagWriteSuccess = true;
         else {
           nfcTagWriteSuccess = false;
@@ -880,7 +879,7 @@ uint8_t writeNfcTagData(uint8_t *nfcTagWriteBuffer, uint8_t nfcTagWriteBufferSiz
 }
 
 // prints nfc tag data
-void printNfcTagData(uint8_t *dataBuffer, uint8_t dataBufferSize, bool cr) {
+void printNfcTagData(uint8_t dataBuffer[], uint8_t dataBufferSize, bool cr) {
   for (uint8_t i = 0; i < dataBufferSize; i++) {
     Serial.print(dataBuffer[i] < 0x10 ? " 0" : " ");
     Serial.print(dataBuffer[i], HEX);
