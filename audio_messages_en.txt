@@ -20,14 +20,18 @@
 0912.mp3|Setup maximum volume.
 0913.mp3|Setup equalizer.
 0914.mp3|Learn infrared remote. You need a remote with at least 7 keys.
-0915.mp3|Setup shutdown timer.
-0916.mp3|Shutdown box.
+0915.mp3|Check battery level.
+0916.mp3|Setup shutdown timer.
+0917.mp3|Shutdown box.
 0920.mp3|Please put the card on the box and wait for the confirmation.
 0921.mp3|Ok, card erased.
 0922.mp3|Erasing the card failed. Please try again.
 0923.mp3|Erasing the card canceled.
 0930.mp3|Use the volume keys to pick the startup volume, confirm with the pause key.
 0931.mp3|Use the volume keys to pick the maximum volume, confirm with the pause key.
+0932.mp3|This feature needs to be configured and enabled in the program code.
+0933.mp3|The battery level is.
+0934.mp3|Percent.
 0940.mp3|Use the volume keys to pick the equalizer, confirm with the pause key.
 0941.mp3|Normal
 0942.mp3|Pop

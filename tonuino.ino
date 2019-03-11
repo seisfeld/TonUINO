@@ -108,7 +108,8 @@
   If you happen to have a CubieKid case and the CubieKid circuit board, this firmware
   supports both shutdown methods. The inactivity shutdown timer is enabled by default,
   the shutdown due to low battery voltage (which can be configured in the shutdown
-  section below) can be enabled by uncommenting the '#define LOWVOLTAGE' below.
+  section below) can be enabled by uncommenting the '#define LOWVOLTAGE' below. Once
+  enabled you can check the battery level within the parents menu as well.
 
   The CubieKid case as well as the CubieKid circuit board, have been designed and developed
   by Jens Hackel aka DB3JHF and can be found here: https://www.thingiverse.com/thing:3148200
@@ -193,7 +194,6 @@ const uint8_t statusLedPin = 6;                     // pin used for status led
 const uint8_t shutdownPin = 7;                      // pin used to shutdown the system
 const uint8_t nfcResetPin = 9;                      // used for spi communication to nfc module
 const uint8_t nfcSlaveSelectPin = 10;               // used for spi communication to nfc module
-const uint8_t rngSeedPin = A0;                      // used to seed the random number generator
 const uint8_t button0Pin = A0;                      // middle button
 const uint8_t button1Pin = A1;                      // right button
 const uint8_t button2Pin = A2;                      // left button
@@ -205,7 +205,7 @@ const uint16_t buttonLongLongPressDelay = 5000;     // longer long press delay f
 const uint32_t debugConsoleSpeed = 115200;          // speed for the debug console
 
 // number of mp3 files in advert folder + number of mp3 files in mp3 folder
-const uint16_t msgCount = 563;
+const uint16_t msgCount = 567;
 
 // define magic cookie (by default 0x13 0x37 0xb3 0x47)
 const uint8_t magicCookieHex[4] = {0x13, 0x37, 0xb3, 0x47};
@@ -1107,6 +1107,11 @@ void setup() {
   Serial.println(F("by Thorsten Voß"));
   Serial.println(F("Stephan Eisfeld"));
   Serial.println(F("---------------"));
+  Serial.println(F("flashed"));
+  Serial.print(F("  "));
+  Serial.println(__DATE__);
+  Serial.print(F("  "));
+  Serial.println(__TIME__);
 
   preferences(READ);
 
@@ -1129,9 +1134,6 @@ void setup() {
   Serial.print(F("  tracks "));
   Serial.println(mp3.getTotalTrackCount() - msgCount);
   pinMode(mp3BusyPin, INPUT);
-
-  Serial.println(F("init rng"));
-  randomSeed(analogRead(rngSeedPin));
 
   Serial.print(F("init"));
   pinMode(button0Pin, INPUT_PULLUP);
@@ -1244,6 +1246,7 @@ void loop() {
         switchButtonConfiguration(PLAY);
         shutdownTimer(STOP);
         // prepare playlist for playback
+        randomSeed(micros());
         playback.folderTrackCount = mp3.getFolderTrackCount(nfcTag.assignedFolder);
         for (uint8_t i = 0; i < 255; i++) playback.playList[i] = i + 1 <= playback.folderTrackCount ? i + 1 : 0;
         switch (nfcTag.playbackMode) {
@@ -1440,7 +1443,7 @@ void loop() {
     shutdownTimer(STOP);
     while (true) {
       Serial.println(F("parents"));
-      uint8_t parentsMenu = prompt(7, 900, 909, 0, false);
+      uint8_t parentsMenu = prompt(8, 900, 909, 0, false);
       // cancel
       if (parentsMenu == 0) {
         mp3.playMp3FolderTrack(902);
@@ -1551,8 +1554,25 @@ void loop() {
         waitPlaybackToFinish(500);
 #endif
       }
-      // shutdown timer
+      // check battery level
       else if (parentsMenu == 6) {
+#ifdef LOWVOLTAGE
+        Serial.print(F("batt lvl is "));
+        Serial.print(shutdownVoltage.Read_Perc(shutdownMinVoltage, shutdownMaxVoltage));
+        Serial.println(F("%"));
+        mp3.playMp3FolderTrack(933);
+        waitPlaybackToFinish(500);
+        mp3.playMp3FolderTrack((int)shutdownVoltage.Read_Perc(shutdownMinVoltage, shutdownMaxVoltage));
+        waitPlaybackToFinish(500);
+        mp3.playMp3FolderTrack(934);
+        waitPlaybackToFinish(500);
+#else
+        mp3.playMp3FolderTrack(932);
+        waitPlaybackToFinish(500);
+#endif
+      }
+      // shutdown timer
+      else if (parentsMenu == 7) {
         Serial.println(F("timer"));
         uint8_t promptResult = prompt(7, 960, 960, 0, false);
         if (promptResult != 0) {
@@ -1571,7 +1591,7 @@ void loop() {
         }
       }
       // manual box shutdown
-      else if (parentsMenu == 7) {
+      else if (parentsMenu == 8) {
         Serial.println(F("manual shut"));
         shutdownTimer(SHUTDOWN);
       }
