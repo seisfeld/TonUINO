@@ -29,9 +29,8 @@
 0923.mp3|Karte löschen abgebrochen.
 0930.mp3|Mit den Lautstärketasten die Startlautstärke auswählen. Bestätige mit der Pausetaste.
 0931.mp3|Mit den Lautstärketasten die Maximallautstärke auswählen. Bestätige mit der Pausetaste.
-0932.mp3|Diese Funktion muss im Programmcode erst konfiguriert und freigeschaltet werden.
-0933.mp3|Der Batteriefüllstand ist.
-0934.mp3|Prozent.
+0932.mp3|Diese Funktion muss im Programmcode erst konfiguriert und aktiviert werden.
+0933.mp3|Prozent.
 0940.mp3|Mit den Lautstärketasten den Equalizer auswählen. Bestätige mit der Pausetaste.
 0941.mp3|Normal
 0942.mp3|Pop
@@ -39,7 +38,7 @@
 0944.mp3|Jazz
 0945.mp3|Classic
 0946.mp3|Bass
-0950.mp3|Diese Funktion benötigt einen Infrarotempfänger, welcher dann im Programmcode freigeschaltet werden muss.
+0950.mp3|Diese Funktion benötigt einen Infrarotempfänger, welcher dann im Programmcode aktiviert werden muss.
 0951.mp3|Drücke auf der Fernbedienung die Lautstärke erhöhen Taste.
 0952.mp3|Drücke auf der Fernbedienung die Lautstärke verringern Taste.
 0953.mp3|Drücke auf der Fernbedienung die vorheriger Titel Taste.

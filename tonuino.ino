@@ -1530,7 +1530,7 @@ void loop() {
           // clear ir receive buffer
           irReceiver.resume();
           // wait for ir signal
-          while (!irReceiver.decode(&irReading));
+          while (!irReceiver.decode(&irReading)) statusLedBlink(500);
           // on NEC encoding 0xFFFFFFFF means the button is held down, we ignore this
           if (!(irReading.decode_type == NEC && irReading.value == 0xFFFFFFFF)) {
             // convert irReading.value from 32bit to 16bit
@@ -1560,11 +1560,9 @@ void loop() {
         Serial.print(F("batt lvl is "));
         Serial.print(shutdownVoltage.Read_Perc(shutdownMinVoltage, shutdownMaxVoltage));
         Serial.println(F("%"));
-        mp3.playMp3FolderTrack(933);
-        waitPlaybackToFinish(500);
         mp3.playMp3FolderTrack((int)shutdownVoltage.Read_Perc(shutdownMinVoltage, shutdownMaxVoltage));
         waitPlaybackToFinish(500);
-        mp3.playMp3FolderTrack(934);
+        mp3.playMp3FolderTrack(933);
         waitPlaybackToFinish(500);
 #else
         mp3.playMp3FolderTrack(932);

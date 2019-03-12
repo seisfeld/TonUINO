@@ -30,8 +30,7 @@
 0930.mp3|Use the volume keys to pick the startup volume, confirm with the pause key.
 0931.mp3|Use the volume keys to pick the maximum volume, confirm with the pause key.
 0932.mp3|This feature needs to be configured and enabled in the program code.
-0933.mp3|The battery level is.
-0934.mp3|Percent.
+0933.mp3|Percent.
 0940.mp3|Use the volume keys to pick the equalizer, confirm with the pause key.
 0941.mp3|Normal
 0942.mp3|Pop
