@@ -54,10 +54,9 @@
   able to support all functions. This feature can be enabled by uncommenting the
   '#define IRREMOTE' below.
 
-  There are three predefined code mappings for some silver apple remotes below, but you can
-  change (or extend) them to support different remotes. In addition to these hard coded
-  remotes, you can learn in one additional remote using the parents menu, which is then
-  stored in EEPROM.
+  Down below you can hard code (multiple sets of) code mappings for remotes which will
+  always be recognized. In addition to these hard coded remotes, you can learn in one
+  additional remote using the parents menu, which is then stored in EEPROM.
 
   There is one function, currently only available with the ir remote: Box lock.
   When TonUINO is locked, the buttons on TonUINO as well as the nfc reader are disabled
@@ -197,12 +196,14 @@ const uint8_t nfcSlaveSelectPin = 10;               // used for spi communicatio
 const uint8_t button0Pin = A0;                      // middle button
 const uint8_t button1Pin = A1;                      // right button
 const uint8_t button2Pin = A2;                      // left button
+#ifdef FIVEBUTTONS
 const uint8_t button3Pin = A3;                      // optional 4th button
 const uint8_t button4Pin = A4;                      // optional 5th button
+#endif
 const uint16_t buttonClickDelay = 1000;             // time during which a button click is still a click (in milliseconds)
 const uint16_t buttonShortLongPressDelay = 2000;    // time after which a button press is considered a long press (in milliseconds)
 const uint16_t buttonLongLongPressDelay = 5000;     // longer long press delay for special cases, i.e. to trigger erase nfc tag mode (in milliseconds)
-const uint32_t debugConsoleSpeed = 115200;          // speed for the debug console
+const uint32_t debugConsoleSpeed = 9600;            // speed for the debug console
 
 // number of mp3 files in advert folder + number of mp3 files in mp3 folder
 const uint16_t msgCount = 567;
@@ -217,12 +218,20 @@ const uint8_t mp3EqualizerDefault = 1;
 const uint8_t shutdownMinutesDefault = 10;
 const uint16_t irRemoteUserCodesDefault[7] = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
 
-// define hard coded code mappings for ir remotes. these will always work, no matter what is learned in by the user afterwards using the parents menu
-// one remote per line with codes for: up, down, left, right, center, menu, play/pause
+/*
+  define hard coded (sets of) code mappings for ir remotes.
+  one remote per line with the following order of codes for: up, down, left, right, center, menu, play/pause
+
+  when adding multiple remotes, the array needs to look like this (watch the 'commas'!):
+
+  const uint16_t irRemoteCodes[][7] = {
+    {...},
+    {...},
+    {...}
+  };
+*/
 const uint16_t irRemoteCodes[][7] = {
-  {0x5057, 0x3057, 0x9057, 0x6057, 0x3A57, 0xC057, 0xFA57},  // silver apple tv remote
-  {0x50BF, 0x30BF, 0x90BF, 0x60BF, 0x3ABF, 0xC0BF, 0xFABF},  // another silver apple tv remote
-  {0xD0E4, 0xB0E4, 0x10E4, 0xE0E4, 0xBAE4, 0x40E4, 0x7AE4}   // another silver apple tv remote
+  {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000}   // example, replace 0x0000 with respective codes as per above
 };
 const uint8_t irRemoteCount = sizeof(irRemoteCodes) / 14;
 const uint8_t irRemoteCodeCount = sizeof(irRemoteCodes) / (2 * irRemoteCount);
@@ -257,7 +266,7 @@ enum {START, STOP, CHECK, SHUTDOWN};
 // preference actions
 enum {READ, WRITE, RESET};
 
-// this object stores nfc tag data
+// this object stores the nfc tag data
 struct nfcTagObject {
   uint32_t magicCookie;
   uint8_t version;
@@ -294,7 +303,9 @@ struct preferenceObject {
 uint8_t inputEvent = NOACTION;
 uint32_t magicCookie = 0;
 
+// ################################################################################################################################################################
 // ############################################################### no configuration below this line ###############################################################
+// ################################################################################################################################################################
 
 // declare functions
 void checkForInput();
@@ -393,6 +404,528 @@ decode_results irReading;                                                     //
 #ifdef LOWVOLTAGE
 Vcc shutdownVoltage(shutdownVoltageCorrection);                               // create Vcc instance
 #endif
+
+void setup() {
+  // things we need to do immediately on startup
+  pinMode(shutdownPin, OUTPUT);
+  digitalWrite(shutdownPin, HIGH);
+  magicCookie = (uint32_t)magicCookieHex[0] << 24;
+  magicCookie += (uint32_t)magicCookieHex[1] << 16;
+  magicCookie += (uint32_t)magicCookieHex[2] << 8;
+  magicCookie += (uint32_t)magicCookieHex[3];
+
+  // start normal operation
+  Serial.begin(debugConsoleSpeed);
+  while (!Serial);
+  Serial.println(F("\n\nTonUINO JUKEBOX"));
+  Serial.println(F("by Thorsten Voß"));
+  Serial.println(F("Stephan Eisfeld"));
+  Serial.println(F("---------------"));
+  Serial.println(F("flashed"));
+  Serial.print(F("  "));
+  Serial.println(__DATE__);
+  Serial.print(F("  "));
+  Serial.println(__TIME__);
+
+  preferences(READ);
+
+  Serial.println(F("init nfc"));
+  SPI.begin();
+  mfrc522.PCD_Init();
+  mfrc522.PCD_DumpVersionToSerial();
+
+  Serial.println(F("init mp3"));
+  mp3.begin();
+  delay(2000);
+  Serial.print(F("   start "));
+  Serial.println(preference.mp3StartVolume);
+  mp3.setVolume(playback.mp3CurrentVolume = preference.mp3StartVolume);
+  Serial.print(F("     max "));
+  Serial.println(preference.mp3MaxVolume);
+  Serial.print(F("      eq "));
+  Serial.println(mp3EqualizerName[preference.mp3Equalizer]);
+  mp3.setEq((DfMp3_Eq)(preference.mp3Equalizer - 1));
+  Serial.print(F("  tracks "));
+  Serial.println(mp3.getTotalTrackCount() - msgCount);
+  pinMode(mp3BusyPin, INPUT);
+
+  Serial.print(F("init"));
+  pinMode(button0Pin, INPUT_PULLUP);
+  pinMode(button1Pin, INPUT_PULLUP);
+  pinMode(button2Pin, INPUT_PULLUP);
+  button0.init(button0Pin, HIGH, 0);
+  button1.init(button1Pin, HIGH, 1);
+  button2.init(button2Pin, HIGH, 2);
+#ifdef FIVEBUTTONS
+  pinMode(button3Pin, INPUT_PULLUP);
+  pinMode(button4Pin, INPUT_PULLUP);
+  button3.init(button3Pin, HIGH, 3);
+  button4.init(button4Pin, HIGH, 4);
+  Serial.print(F(" 5"));
+#else
+  Serial.print(F(" 3"));
+#endif
+  Serial.println(F(" buttons"));
+  switchButtonConfiguration(INIT);
+
+  Serial.print(F("init "));
+  Serial.print(preference.shutdownMinutes);
+  Serial.println(F("m timer"));
+  shutdownTimer(START);
+
+#ifdef IRREMOTE
+  Serial.println(F("init ir"));
+  irReceiver.enableIRIn();
+#endif
+
+#ifdef STATUSLED
+  Serial.println(F("init led"));
+  pinMode(statusLedPin, OUTPUT);
+  digitalWrite(statusLedPin, HIGH);
+#endif
+
+#ifdef LOWVOLTAGE
+  Serial.println(F("init vm"));
+  Serial.print(F("  ex-"));
+  Serial.print(shutdownMaxVoltage);
+  Serial.print(F("V"));
+  Serial.print(F(" sh-"));
+  Serial.print(shutdownMinVoltage);
+  Serial.print(F("V"));
+  Serial.print(F(" cu-"));
+  Serial.print(shutdownVoltage.Read_Volts());
+  Serial.print(F("V ("));
+  Serial.print(shutdownVoltage.Read_Perc(shutdownMinVoltage, shutdownMaxVoltage));
+  Serial.println(F("%)"));
+#endif
+
+  // hold down all three buttons while powering up: erase the eeprom contents
+  if (button0.isPressedRaw() && button1.isPressedRaw() && button2.isPressedRaw()) {
+    Serial.println(F("init eeprom"));
+    for (uint16_t i = 0; i < EEPROM.length(); i++) {
+      EEPROM.update(i, 0);
+#ifdef STATUSLED
+      statusLedBlink(50);
+#endif
+    }
+    preferences(RESET);
+    mp3.setVolume(playback.mp3CurrentVolume = preference.mp3StartVolume);
+    mp3.setEq((DfMp3_Eq)(preference.mp3Equalizer - 1));
+    mp3.playMp3FolderTrack(807);
+    waitPlaybackToFinish(50);
+    shutdownTimer(START);
+  }
+
+  Serial.println(F("ready"));
+  mp3.playMp3FolderTrack(800);
+  switchButtonConfiguration(PAUSE);
+}
+
+void loop() {
+  playback.isPlaying = !digitalRead(mp3BusyPin);
+  checkForInput();
+  shutdownTimer(CHECK);
+
+#ifdef STATUSLED
+  statusLedFade();
+#endif
+
+#ifdef LOWVOLTAGE
+  // if low voltage level is reached, store progress and shutdown
+  if (shutdownVoltage.Read_Volts() <= shutdownMinVoltage) {
+    if (nfcTag.playbackMode == STORYBOOK) EEPROM.update(nfcTag.assignedFolder, playback.playTrack);
+    mp3.playMp3FolderTrack(806);
+    waitPlaybackToFinish(50);
+    Serial.println(F("lv shut"));
+    digitalWrite(shutdownPin, LOW);
+  }
+#endif
+
+  // ################################################################################
+  // # main code block, if nfc tag is detected and TonUINO is not locked do something
+  if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial() && !playback.isLocked) {
+    // if the current playback mode is story book mode, only while playing: store the current progress
+    if (nfcTag.playbackMode == STORYBOOK && playback.isPlaying) {
+      Serial.print(F("save "));
+      printModeFolderTrack(playback.playTrack, true);
+      EEPROM.update(nfcTag.assignedFolder, playback.playTrack);
+    }
+    uint8_t readNfcTagStatus = readNfcTagData();
+    // ##############################
+    // # nfc tag is successfully read
+    if (readNfcTagStatus == 1) {
+      // #############################################################################
+      // # nfc tag has our magic cookie on it, use data from nfc tag to start playback
+      if (nfcTag.magicCookie == magicCookie) {
+        switchButtonConfiguration(PLAY);
+        shutdownTimer(STOP);
+        // prepare playlist for playback
+        randomSeed(micros());
+        playback.folderTrackCount = mp3.getFolderTrackCount(nfcTag.assignedFolder);
+        for (uint8_t i = 0; i < 255; i++) playback.playList[i] = i + 1 <= playback.folderTrackCount ? i + 1 : 0;
+        switch (nfcTag.playbackMode) {
+          case STORY:
+            playback.playTrack = random(1, playback.folderTrackCount + 1);
+            break;
+          case ALBUM:
+            playback.playTrack = 1;
+            break;
+          case PARTY:
+            playback.playTrack = 1;
+            // shuffle playlist
+            for (uint8_t i = 0; i < playback.folderTrackCount; i++) {
+              uint8_t j = random(0, playback.folderTrackCount);
+              uint8_t temp = playback.playList[i];
+              playback.playList[i] = playback.playList[j];
+              playback.playList[j] = temp;
+            }
+            break;
+          case SINGLE:
+            playback.playTrack = nfcTag.assignedTrack;
+            break;
+          case STORYBOOK:
+            playback.storedTrack = EEPROM.read(nfcTag.assignedFolder);
+            // don't resume from eeprom, play from the beginning
+            if (playback.storedTrack == 0 || playback.storedTrack > playback.folderTrackCount) playback.playTrack = 1;
+            // resume from eeprom
+            else {
+              playback.playTrack = playback.storedTrack;
+              Serial.print(F("resume "));
+            }
+            break;
+          default:
+            break;
+        }
+        playback.firstTrack = true;
+        playback.playListMode = true;
+        printModeFolderTrack(playback.playList[playback.playTrack - 1], true);
+        mp3.playFolderTrack(nfcTag.assignedFolder, playback.playList[playback.playTrack - 1]);
+      }
+      // # end - nfc tag has our magic cookie on it
+      // ##########################################
+
+      // #####################################################################################
+      // # nfc tag does not have our magic cookie on it, start setup to configure this nfc tag
+      else if (nfcTag.magicCookie == 0) {
+        bool tagSetupSuccessfull = false;
+        playback.playListMode = false;
+        switchButtonConfiguration(CONFIG);
+        shutdownTimer(STOP);
+        while (true) {
+          Serial.println(F("setup tag"));
+          Serial.println(F("folder"));
+          nfcTag.assignedFolder = prompt(99, 801, 0, 0, true);
+          if (nfcTag.assignedFolder == 0) {
+            mp3.playMp3FolderTrack(805);
+            break;
+          }
+          Serial.println(F("mode"));
+          nfcTag.playbackMode = prompt(5, 820, 820, 0, false);
+          if (nfcTag.playbackMode == 0) {
+            mp3.playMp3FolderTrack(805);
+            break;
+          }
+          else if (nfcTag.playbackMode == SINGLE) {
+            Serial.println(F("track"));
+            nfcTag.assignedTrack = prompt(255, 802, 0, 0, true);
+            if (nfcTag.assignedTrack == 0) {
+              mp3.playMp3FolderTrack(805);
+              break;
+            }
+          }
+          uint8_t bytesToWrite[] = {magicCookieHex[0],                 // 1st byte of magic cookie (by default 0x13)
+                                    magicCookieHex[1],                 // 2nd byte of magic cookie (by default 0x37)
+                                    magicCookieHex[2],                 // 3rd byte of magic cookie (by default 0xb3)
+                                    magicCookieHex[3],                 // 4th byte of magic cookie (by default 0x47)
+                                    0x01,                              // version 1
+                                    nfcTag.assignedFolder,             // the folder selected by the user
+                                    nfcTag.playbackMode,               // the playback mode selected by the user
+                                    nfcTag.assignedTrack,              // the track selected by the user
+                                    0x00, 0x00, 0x00, 0x00,            // reserved for future use
+                                    0x00, 0x00, 0x00, 0x00             // reserved for future use
+                                   };
+          uint8_t writeNfcTagStatus = writeNfcTagData(bytesToWrite, sizeof(bytesToWrite));
+          if (writeNfcTagStatus == 1) {
+            tagSetupSuccessfull = true;
+            mp3.playMp3FolderTrack(803);
+          }
+          else mp3.playMp3FolderTrack(804);
+          break;
+        }
+        if (!tagSetupSuccessfull) {
+          nfcTag.magicCookie = 0;
+          nfcTag.version = 0;
+          nfcTag.assignedFolder = 0;
+          nfcTag.playbackMode = 0;
+          nfcTag.assignedTrack = 0;
+        }
+        mfrc522.PICC_HaltA();
+        mfrc522.PCD_StopCrypto1();
+        switchButtonConfiguration(PAUSE);
+        shutdownTimer(START);
+        inputEvent = NOACTION;
+      }
+      // # end - nfc tag does not have our magic cookie on it
+      // ####################################################
+    }
+    // # end - nfc tag is successfully read
+    // ####################################
+  }
+  // # end - main code block
+  // #######################
+
+  // ##################################################################################
+  // # handle button and ir remote events during playback or while waiting for nfc tags
+  // ir remote center: toggle box lock
+  if (inputEvent == IRC) {
+    if (!playback.isLocked) {
+      Serial.println(F("lock"));
+      playback.isLocked = true;
+#ifdef STATUSLED
+      statusLedBurst();
+#endif
+    }
+    else {
+      Serial.println(F("unlock"));
+      playback.isLocked = false;
+#ifdef STATUSLED
+      statusLedBurst();
+#endif
+    }
+  }
+  // button 0 (middle) press or ir remote play+pause: toggle playback
+  else if ((inputEvent == B0P && !playback.isLocked) || inputEvent == IRP) {
+    if (playback.isPlaying) {
+      switchButtonConfiguration(PAUSE);
+      shutdownTimer(START);
+      Serial.println(F("pause"));
+      mp3.pause();
+      // if the current playback mode is story book mode: store the current progress
+      if (nfcTag.playbackMode == STORYBOOK) {
+        Serial.print(F("save "));
+        printModeFolderTrack(playback.playTrack, true);
+        EEPROM.update(nfcTag.assignedFolder, playback.playTrack);
+      }
+    }
+    else {
+      if (playback.playListMode) {
+        switchButtonConfiguration(PLAY);
+        shutdownTimer(STOP);
+        Serial.println(F("play"));
+        mp3.start();
+      }
+    }
+  }
+  // button 1 (right) press or ir remote up while playing: increase volume
+  else if (((inputEvent == B1P && !playback.isLocked) || inputEvent == IRU) && playback.isPlaying) {
+    if (playback.mp3CurrentVolume < preference.mp3MaxVolume) {
+      mp3.setVolume(++playback.mp3CurrentVolume);
+      Serial.print(F("volume "));
+      Serial.println(playback.mp3CurrentVolume);
+    }
+  }
+  // button 2 (left) press or ir remote down while playing: decrease volume
+  else if (((inputEvent == B2P && !playback.isLocked) || inputEvent == IRD) && playback.isPlaying) {
+    if (playback.mp3CurrentVolume > 0) {
+      mp3.setVolume(--playback.mp3CurrentVolume);
+      Serial.print(F("volume "));
+      Serial.println(playback.mp3CurrentVolume);
+    }
+  }
+  // button 1 (right) hold for 2 sec or button 5 press or ir remote right, only during album, party and story book mode while playing: next track
+  else if ((((inputEvent == B1H || inputEvent == B4P) && !playback.isLocked) || inputEvent == IRR) && (nfcTag.playbackMode == ALBUM || nfcTag.playbackMode == PARTY || nfcTag.playbackMode == STORYBOOK) && playback.isPlaying) {
+    Serial.println(F("next"));
+    playNextTrack(random(65536), true, true);
+  }
+  // button 2 (left) hold for 2 sec or button 4 press or ir remote left, only during album, party and story book mode while playing: previous track
+  else if ((((inputEvent == B2H || inputEvent == B3P) && !playback.isLocked) || inputEvent == IRL) && (nfcTag.playbackMode == ALBUM || nfcTag.playbackMode == PARTY || nfcTag.playbackMode == STORYBOOK) && playback.isPlaying) {
+    Serial.println(F("prev"));
+    playNextTrack(random(65536), false, true);
+  }
+  // button 0 (middle) hold for 5 sec or ir remote menu, only during story book mode while playing: reset progress
+  else if (((inputEvent == B0H && !playback.isLocked) || inputEvent == IRM) && nfcTag.playbackMode == STORYBOOK && playback.isPlaying) {
+    playback.playTrack = 1;
+    Serial.print(F("reset "));
+    printModeFolderTrack(playback.playTrack, true);
+    EEPROM.update(nfcTag.assignedFolder, 0);
+    mp3.playFolderTrack(nfcTag.assignedFolder, playback.playTrack);
+  }
+  // button 0 (middle) hold for 5 sec or ir remote menu while not playing: parents menu
+  else if (((inputEvent == B0H && !playback.isLocked) || inputEvent == IRM) && !playback.isPlaying) {
+    playback.playListMode = false;
+    switchButtonConfiguration(CONFIG);
+    shutdownTimer(STOP);
+    while (true) {
+      Serial.println(F("parents"));
+      uint8_t parentsMenu = prompt(8, 900, 909, 0, false);
+      // cancel
+      if (parentsMenu == 0) {
+        mp3.playMp3FolderTrack(902);
+        break;
+      }
+      // erase tag
+      else if (parentsMenu == 1) {
+        Serial.println(F("erase tag"));
+        mp3.playMp3FolderTrack(920);
+        // loop until tag is erased
+        uint8_t writeNfcTagStatus = 0;
+        while (!writeNfcTagStatus) {
+          checkForInput();
+          // button 0 (middle) hold for 2 sec or ir remote menu: cancel erase nfc tag
+          if (inputEvent == B0H || inputEvent == IRM) {
+            Serial.println(F("cancel"));
+            mp3.playMp3FolderTrack(923);
+            waitPlaybackToFinish(500);
+            break;
+          }
+          // wait for nfc tag, erase once detected
+          if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
+            uint8_t bytesToWrite[16];
+            for (uint8_t i = 0; i < 16; i++) bytesToWrite[i] = 0x00;
+            writeNfcTagStatus = writeNfcTagData(bytesToWrite, sizeof(bytesToWrite));
+            if (writeNfcTagStatus == 1) {
+              mp3.playMp3FolderTrack(921);
+              waitPlaybackToFinish(500);
+            }
+            else mp3.playMp3FolderTrack(922);
+          }
+#ifdef STATUSLED
+          statusLedBlink(500);
+#endif
+          mp3.loop();
+        }
+      }
+      // startup volume
+      else if (parentsMenu == 2) {
+        Serial.println(F("start vol"));
+        uint8_t promptResult = prompt(30, 930, 0, preference.mp3StartVolume, false);
+        if (promptResult != 0) {
+          // startup volume can't be higher than maximum volume
+          preference.mp3StartVolume = min(promptResult, preference.mp3MaxVolume);
+          preferences(WRITE);
+          mp3.playMp3FolderTrack(901);
+          waitPlaybackToFinish(500);
+        }
+      }
+      // maximum volume
+      else if (parentsMenu == 3) {
+        Serial.println(F("max vol"));
+        uint8_t promptResult = prompt(30, 931, 0, preference.mp3MaxVolume, false);
+        if (promptResult != 0) {
+          preference.mp3MaxVolume = promptResult;
+          // startup volume can't be higher than maximum volume
+          preference.mp3StartVolume = min(preference.mp3StartVolume, preference.mp3MaxVolume);
+          // current volume can't be higher than maximum volume
+          mp3.setVolume(playback.mp3CurrentVolume = min(playback.mp3CurrentVolume, preference.mp3MaxVolume));
+          preferences(WRITE);
+          mp3.playMp3FolderTrack(901);
+          waitPlaybackToFinish(500);
+        }
+      }
+      // equalizer
+      else if (parentsMenu == 4) {
+        Serial.println(F("eq"));
+        uint8_t promptResult = prompt(6, 940, 940, preference.mp3Equalizer, false);
+        if (promptResult != 0) {
+          preference.mp3Equalizer = promptResult;
+          mp3.setEq((DfMp3_Eq)(preference.mp3Equalizer - 1));
+          preferences(WRITE);
+          mp3.playMp3FolderTrack(901);
+          waitPlaybackToFinish(500);
+        }
+      }
+      // learn ir remote
+      else if (parentsMenu == 5) {
+#ifdef IRREMOTE
+        Serial.println(F("learn remote"));
+        for (uint8_t i = 0; i < 7; i++) {
+          mp3.playMp3FolderTrack(951 + i);
+          waitPlaybackToFinish(500);
+          // clear ir receive buffer
+          irReceiver.resume();
+          // wait for ir signal
+          while (!irReceiver.decode(&irReading)) statusLedBlink(500);
+          // on NEC encoding 0xFFFFFFFF means the button is held down, we ignore this
+          if (!(irReading.decode_type == NEC && irReading.value == 0xFFFFFFFF)) {
+            // convert irReading.value from 32bit to 16bit
+            uint16_t irRemoteCode = (irReading.value & 0xFFFF);
+            Serial.print(F("ir code: 0x"));
+            Serial.print(irRemoteCode <= 0x0010 ? "0" : "");
+            Serial.print(irRemoteCode <= 0x0100 ? "0" : "");
+            Serial.print(irRemoteCode <= 0x1000 ? "0" : "");
+            Serial.println(irRemoteCode, HEX);
+            preference.irRemoteUserCodes[i] = irRemoteCode;
+          }
+          // key was held down on NEC encoding, repeat last question
+          else i--;
+          mp3.loop();
+        }
+        preferences(WRITE);
+        mp3.playMp3FolderTrack(901);
+        waitPlaybackToFinish(500);
+#else
+        mp3.playMp3FolderTrack(950);
+        waitPlaybackToFinish(500);
+#endif
+      }
+      // check battery level
+      else if (parentsMenu == 6) {
+#ifdef LOWVOLTAGE
+        Serial.print(F("batt lvl is "));
+        Serial.print(shutdownVoltage.Read_Perc(shutdownMinVoltage, shutdownMaxVoltage));
+        Serial.println(F("%"));
+        mp3.playMp3FolderTrack((int)shutdownVoltage.Read_Perc(shutdownMinVoltage, shutdownMaxVoltage));
+        waitPlaybackToFinish(500);
+        mp3.playMp3FolderTrack(933);
+        waitPlaybackToFinish(500);
+#else
+        mp3.playMp3FolderTrack(932);
+        waitPlaybackToFinish(500);
+#endif
+      }
+      // shutdown timer
+      else if (parentsMenu == 7) {
+        Serial.println(F("timer"));
+        uint8_t promptResult = prompt(7, 960, 960, 0, false);
+        if (promptResult != 0) {
+          switch (promptResult) {
+            case 1: preference.shutdownMinutes = 5; break;
+            case 2: preference.shutdownMinutes = 10; break;
+            case 3: preference.shutdownMinutes = 15; break;
+            case 4: preference.shutdownMinutes = 20; break;
+            case 5: preference.shutdownMinutes = 30; break;
+            case 6: preference.shutdownMinutes = 60; break;
+            case 7: preference.shutdownMinutes = 0; break;
+          }
+          preferences(WRITE);
+          mp3.playMp3FolderTrack(901);
+          waitPlaybackToFinish(500);
+        }
+      }
+      // manual box shutdown
+      else if (parentsMenu == 8) {
+        Serial.println(F("manual shut"));
+        shutdownTimer(SHUTDOWN);
+      }
+#ifdef STATUSLED
+      statusLedBlink(500);
+#endif
+      mp3.loop();
+    }
+    switchButtonConfiguration(PAUSE);
+    shutdownTimer(START);
+    inputEvent = NOACTION;
+    Serial.println(F("ready"));
+  }
+  // # end - handle button or ir remote events during playback or while waiting for nfc tags
+  // #######################################################################################
+
+  mp3.loop();
+}
+
+// ################################################################################################################################################################
+// ################################################################ functions are below this line! ################################################################
+// ################################################################################################################################################################
 
 // checks all input sources and populates the global inputEvent variable
 void checkForInput() {
@@ -940,10 +1473,10 @@ void shutdownTimer(uint8_t timerAction) {
 
 // reads, writes and resets preferences in eeprom
 void preferences(uint8_t preferenceAction) {
-  Serial.print(F("prefs"));
+  Serial.print(F("prefs "));
   switch (preferenceAction) {
     case READ:
-      Serial.println(F(" read"));
+      Serial.println(F("read"));
       EEPROM.get(100, preference);
       if (preference.magicCookie != magicCookie) {
         Serial.println(F("  null"));
@@ -951,11 +1484,11 @@ void preferences(uint8_t preferenceAction) {
       }
       break;
     case WRITE:
-      Serial.println(F(" write"));
+      Serial.println(F("write"));
       EEPROM.put(100, preference);
       break;
     case RESET:
-      Serial.println(F(" reset"));
+      Serial.println(F("reset"));
       preference.magicCookie = magicCookie;
       preference.version = 1;
       preference.mp3StartVolume = mp3StartVolumeDefault;
@@ -1090,521 +1623,3 @@ void statusLedBurst() {
   }
 }
 #endif
-
-void setup() {
-  // things we need to do immediately on startup
-  pinMode(shutdownPin, OUTPUT);
-  digitalWrite(shutdownPin, HIGH);
-  magicCookie = (uint32_t)magicCookieHex[0] << 24;
-  magicCookie += (uint32_t)magicCookieHex[1] << 16;
-  magicCookie += (uint32_t)magicCookieHex[2] << 8;
-  magicCookie += (uint32_t)magicCookieHex[3];
-
-  // start normal operation
-  Serial.begin(debugConsoleSpeed);
-  while (!Serial);
-  Serial.println(F("\n\nTonUINO JUKEBOX"));
-  Serial.println(F("by Thorsten Voß"));
-  Serial.println(F("Stephan Eisfeld"));
-  Serial.println(F("---------------"));
-  Serial.println(F("flashed"));
-  Serial.print(F("  "));
-  Serial.println(__DATE__);
-  Serial.print(F("  "));
-  Serial.println(__TIME__);
-
-  preferences(READ);
-
-  Serial.println(F("init nfc"));
-  SPI.begin();
-  mfrc522.PCD_Init();
-  mfrc522.PCD_DumpVersionToSerial();
-
-  Serial.println(F("init mp3"));
-  mp3.begin();
-  delay(2000);
-  Serial.print(F("   start "));
-  Serial.println(preference.mp3StartVolume);
-  mp3.setVolume(playback.mp3CurrentVolume = preference.mp3StartVolume);
-  Serial.print(F("     max "));
-  Serial.println(preference.mp3MaxVolume);
-  Serial.print(F("      eq "));
-  Serial.println(mp3EqualizerName[preference.mp3Equalizer]);
-  mp3.setEq((DfMp3_Eq)(preference.mp3Equalizer - 1));
-  Serial.print(F("  tracks "));
-  Serial.println(mp3.getTotalTrackCount() - msgCount);
-  pinMode(mp3BusyPin, INPUT);
-
-  Serial.print(F("init"));
-  pinMode(button0Pin, INPUT_PULLUP);
-  pinMode(button1Pin, INPUT_PULLUP);
-  pinMode(button2Pin, INPUT_PULLUP);
-  button0.init(button0Pin, HIGH, 0);
-  button1.init(button1Pin, HIGH, 1);
-  button2.init(button2Pin, HIGH, 2);
-#ifdef FIVEBUTTONS
-  pinMode(button3Pin, INPUT_PULLUP);
-  pinMode(button4Pin, INPUT_PULLUP);
-  button3.init(button3Pin, HIGH, 3);
-  button4.init(button4Pin, HIGH, 4);
-  Serial.print(F(" 5"));
-#else
-  Serial.print(F(" 3"));
-#endif
-  Serial.println(F(" buttons"));
-  switchButtonConfiguration(INIT);
-
-  Serial.print(F("init "));
-  Serial.print(preference.shutdownMinutes);
-  Serial.println(F("m timer"));
-  shutdownTimer(START);
-
-#ifdef IRREMOTE
-  Serial.println(F("init ir"));
-  irReceiver.enableIRIn();
-#endif
-
-#ifdef STATUSLED
-  Serial.println(F("init led"));
-  pinMode(statusLedPin, OUTPUT);
-  digitalWrite(statusLedPin, HIGH);
-#endif
-
-#ifdef LOWVOLTAGE
-  Serial.println(F("init vm"));
-  Serial.print(F("  ex-"));
-  Serial.print(shutdownMaxVoltage);
-  Serial.print(F("V"));
-  Serial.print(F(" sh-"));
-  Serial.print(shutdownMinVoltage);
-  Serial.print(F("V"));
-  Serial.print(F(" cu-"));
-  Serial.print(shutdownVoltage.Read_Volts());
-  Serial.print(F("V ("));
-  Serial.print(shutdownVoltage.Read_Perc(shutdownMinVoltage, shutdownMaxVoltage));
-  Serial.println(F("%)"));
-#endif
-
-  // hold down all three buttons while powering up: erase the eeprom contents
-  if (digitalRead(button0Pin) == LOW && digitalRead(button1Pin) == LOW && digitalRead(button2Pin) == LOW) {
-    Serial.println(F("init eeprom"));
-    for (uint16_t i = 0; i < EEPROM.length(); i++) {
-      EEPROM.update(i, 0);
-#ifdef STATUSLED
-      statusLedBlink(50);
-#endif
-    }
-    preferences(RESET);
-    mp3.setVolume(playback.mp3CurrentVolume = preference.mp3StartVolume);
-    mp3.setEq((DfMp3_Eq)(preference.mp3Equalizer - 1));
-    mp3.playMp3FolderTrack(807);
-    waitPlaybackToFinish(50);
-    shutdownTimer(START);
-  }
-
-  Serial.println(F("ready"));
-  mp3.playMp3FolderTrack(800);
-  switchButtonConfiguration(PAUSE);
-}
-
-void loop() {
-  playback.isPlaying = !digitalRead(mp3BusyPin);
-  checkForInput();
-  shutdownTimer(CHECK);
-
-#ifdef STATUSLED
-  statusLedFade();
-#endif
-
-#ifdef LOWVOLTAGE
-  // if low voltage level is reached, store progress and shutdown
-  if (shutdownVoltage.Read_Volts() <= shutdownMinVoltage) {
-    if (nfcTag.playbackMode == STORYBOOK) EEPROM.update(nfcTag.assignedFolder, playback.playTrack);
-    mp3.playMp3FolderTrack(806);
-    waitPlaybackToFinish(50);
-    Serial.println(F("lv shut"));
-    digitalWrite(shutdownPin, LOW);
-  }
-#endif
-
-  // ################################################################################
-  // # main code block, if nfc tag is detected and TonUINO is not locked do something
-  if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial() && !playback.isLocked) {
-    // if the current playback mode is story book mode, only while playing: store the current progress
-    if (nfcTag.playbackMode == STORYBOOK && playback.isPlaying) {
-      Serial.print(F("save "));
-      printModeFolderTrack(playback.playTrack, true);
-      EEPROM.update(nfcTag.assignedFolder, playback.playTrack);
-    }
-    uint8_t readNfcTagStatus = readNfcTagData();
-    // ##############################
-    // # nfc tag is successfully read
-    if (readNfcTagStatus == 1) {
-      // #############################################################################
-      // # nfc tag has our magic cookie on it, use data from nfc tag to start playback
-      if (nfcTag.magicCookie == magicCookie) {
-        switchButtonConfiguration(PLAY);
-        shutdownTimer(STOP);
-        // prepare playlist for playback
-        randomSeed(micros());
-        playback.folderTrackCount = mp3.getFolderTrackCount(nfcTag.assignedFolder);
-        for (uint8_t i = 0; i < 255; i++) playback.playList[i] = i + 1 <= playback.folderTrackCount ? i + 1 : 0;
-        switch (nfcTag.playbackMode) {
-          case STORY:
-            playback.playTrack = random(1, playback.folderTrackCount + 1);
-            break;
-          case ALBUM:
-            playback.playTrack = 1;
-            break;
-          case PARTY:
-            playback.playTrack = 1;
-            // shuffle playlist
-            for (uint8_t i = 0; i < playback.folderTrackCount; i++) {
-              uint8_t j = random(0, playback.folderTrackCount);
-              uint8_t temp = playback.playList[i];
-              playback.playList[i] = playback.playList[j];
-              playback.playList[j] = temp;
-            }
-            break;
-          case SINGLE:
-            playback.playTrack = nfcTag.assignedTrack;
-            break;
-          case STORYBOOK:
-            playback.storedTrack = EEPROM.read(nfcTag.assignedFolder);
-            // don't resume from eeprom, play from the beginning
-            if (playback.storedTrack == 0 || playback.storedTrack > playback.folderTrackCount) playback.playTrack = 1;
-            // resume from eeprom
-            else {
-              playback.playTrack = playback.storedTrack;
-              Serial.print(F("resume "));
-            }
-            break;
-          default:
-            break;
-        }
-        playback.firstTrack = true;
-        playback.playListMode = true;
-        printModeFolderTrack(playback.playList[playback.playTrack - 1], true);
-        mp3.playFolderTrack(nfcTag.assignedFolder, playback.playList[playback.playTrack - 1]);
-      }
-      // # end - nfc tag has our magic cookie on it
-      // ##########################################
-
-      // #####################################################################################
-      // # nfc tag does not have our magic cookie on it, start setup to configure this nfc tag
-      else if (nfcTag.magicCookie == 0) {
-        bool tagSetupSuccessfull = false;
-        playback.playListMode = false;
-        switchButtonConfiguration(CONFIG);
-        shutdownTimer(STOP);
-        while (true) {
-          Serial.println(F("setup tag"));
-          Serial.println(F("folder"));
-          nfcTag.assignedFolder = prompt(99, 801, 0, 0, true);
-          if (nfcTag.assignedFolder == 0) {
-            mp3.playMp3FolderTrack(805);
-            break;
-          }
-          Serial.println(F("mode"));
-          nfcTag.playbackMode = prompt(5, 820, 820, 0, false);
-          if (nfcTag.playbackMode == 0) {
-            mp3.playMp3FolderTrack(805);
-            break;
-          }
-          else if (nfcTag.playbackMode == SINGLE) {
-            Serial.println(F("track"));
-            nfcTag.assignedTrack = prompt(255, 802, 0, 0, true);
-            if (nfcTag.assignedTrack == 0) {
-              mp3.playMp3FolderTrack(805);
-              break;
-            }
-          }
-          uint8_t bytesToWrite[] = {magicCookieHex[0],                 // 1st byte of magic cookie (by default 0x13)
-                                    magicCookieHex[1],                 // 2nd byte of magic cookie (by default 0x37)
-                                    magicCookieHex[2],                 // 3rd byte of magic cookie (by default 0xb3)
-                                    magicCookieHex[3],                 // 4th byte of magic cookie (by default 0x47)
-                                    0x01,                              // version 1
-                                    nfcTag.assignedFolder,             // the folder selected by the user
-                                    nfcTag.playbackMode,               // the playback mode selected by the user
-                                    nfcTag.assignedTrack,              // the track selected by the user
-                                    0x00, 0x00, 0x00, 0x00,            // reserved for future use
-                                    0x00, 0x00, 0x00, 0x00             // reserved for future use
-                                   };
-          uint8_t writeNfcTagStatus = writeNfcTagData(bytesToWrite, sizeof(bytesToWrite));
-          if (writeNfcTagStatus == 1) {
-            tagSetupSuccessfull = true;
-            mp3.playMp3FolderTrack(803);
-          }
-          else mp3.playMp3FolderTrack(804);
-          break;
-        }
-        if (!tagSetupSuccessfull) {
-          nfcTag.magicCookie = 0;
-          nfcTag.version = 0;
-          nfcTag.assignedFolder = 0;
-          nfcTag.playbackMode = 0;
-          nfcTag.assignedTrack = 0;
-        }
-        mfrc522.PICC_HaltA();
-        mfrc522.PCD_StopCrypto1();
-        switchButtonConfiguration(PAUSE);
-        shutdownTimer(START);
-        inputEvent = NOACTION;
-      }
-      // # end - nfc tag does not have our magic cookie on it
-      // ####################################################
-    }
-    // # end - nfc tag is successfully read
-    // ####################################
-  }
-  // # end - main code block
-  // #######################
-
-  // ##################################################################################
-  // # handle button and ir remote events during playback or while waiting for nfc tags
-  // ir remote center: toggle box lock
-  if (inputEvent == IRC) {
-    if (!playback.isLocked) {
-      Serial.println(F("lock"));
-      playback.isLocked = true;
-#ifdef STATUSLED
-      statusLedBurst();
-#endif
-    }
-    else {
-      Serial.println(F("unlock"));
-      playback.isLocked = false;
-#ifdef STATUSLED
-      statusLedBurst();
-#endif
-    }
-  }
-  // button 0 (middle) press or ir remote play+pause: toggle playback
-  else if ((inputEvent == B0P && !playback.isLocked) || inputEvent == IRP) {
-    if (playback.isPlaying) {
-      switchButtonConfiguration(PAUSE);
-      shutdownTimer(START);
-      Serial.println(F("pause"));
-      mp3.pause();
-      // if the current playback mode is story book mode: store the current progress
-      if (nfcTag.playbackMode == STORYBOOK) {
-        Serial.print(F("save "));
-        printModeFolderTrack(playback.playTrack, true);
-        EEPROM.update(nfcTag.assignedFolder, playback.playTrack);
-      }
-    }
-    else {
-      if (playback.playListMode) {
-        switchButtonConfiguration(PLAY);
-        shutdownTimer(STOP);
-        Serial.println(F("play"));
-        mp3.start();
-      }
-    }
-  }
-  // button 1 (right) press or ir remote up while playing: increase volume
-  else if (((inputEvent == B1P && !playback.isLocked) || inputEvent == IRU) && playback.isPlaying) {
-    if (playback.mp3CurrentVolume < preference.mp3MaxVolume) {
-      mp3.setVolume(++playback.mp3CurrentVolume);
-      Serial.print(F("volume "));
-      Serial.println(playback.mp3CurrentVolume);
-    }
-  }
-  // button 2 (left) press or ir remote down while playing: decrease volume
-  else if (((inputEvent == B2P && !playback.isLocked) || inputEvent == IRD) && playback.isPlaying) {
-    if (playback.mp3CurrentVolume > 0) {
-      mp3.setVolume(--playback.mp3CurrentVolume);
-      Serial.print(F("volume "));
-      Serial.println(playback.mp3CurrentVolume);
-    }
-  }
-  // button 1 (right) hold for 2 sec or button 5 press or ir remote right, only during album, party and story book mode while playing: next track
-  else if ((((inputEvent == B1H || inputEvent == B4P) && !playback.isLocked) || inputEvent == IRR) && (nfcTag.playbackMode == ALBUM || nfcTag.playbackMode == PARTY || nfcTag.playbackMode == STORYBOOK) && playback.isPlaying) {
-    Serial.println(F("next"));
-    playNextTrack(random(65536), true, true);
-  }
-  // button 2 (left) hold for 2 sec or button 4 press or ir remote left, only during album, party and story book mode while playing: previous track
-  else if ((((inputEvent == B2H || inputEvent == B3P) && !playback.isLocked) || inputEvent == IRL) && (nfcTag.playbackMode == ALBUM || nfcTag.playbackMode == PARTY || nfcTag.playbackMode == STORYBOOK) && playback.isPlaying) {
-    Serial.println(F("prev"));
-    playNextTrack(random(65536), false, true);
-  }
-  // button 0 (middle) hold for 5 sec or ir remote menu, only during story book mode while playing: reset progress
-  else if (((inputEvent == B0H && !playback.isLocked) || inputEvent == IRM) && nfcTag.playbackMode == STORYBOOK && playback.isPlaying) {
-    playback.playTrack = 1;
-    Serial.print(F("reset "));
-    printModeFolderTrack(playback.playTrack, true);
-    EEPROM.update(nfcTag.assignedFolder, 0);
-    mp3.playFolderTrack(nfcTag.assignedFolder, playback.playTrack);
-  }
-  // button 0 (middle) hold for 5 sec or ir remote menu while not playing: parents menu
-  else if (((inputEvent == B0H && !playback.isLocked) || inputEvent == IRM) && !playback.isPlaying) {
-    playback.playListMode = false;
-    switchButtonConfiguration(CONFIG);
-    shutdownTimer(STOP);
-    while (true) {
-      Serial.println(F("parents"));
-      uint8_t parentsMenu = prompt(8, 900, 909, 0, false);
-      // cancel
-      if (parentsMenu == 0) {
-        mp3.playMp3FolderTrack(902);
-        break;
-      }
-      // erase tag
-      else if (parentsMenu == 1) {
-        Serial.println(F("erase tag"));
-        mp3.playMp3FolderTrack(920);
-        // loop until tag is erased
-        uint8_t writeNfcTagStatus = 0;
-        while (!writeNfcTagStatus) {
-          checkForInput();
-          // button 0 (middle) hold for 2 sec or ir remote menu: cancel erase nfc tag
-          if (inputEvent == B0H || inputEvent == IRM) {
-            Serial.println(F("cancel"));
-            mp3.playMp3FolderTrack(923);
-            waitPlaybackToFinish(500);
-            break;
-          }
-          // wait for nfc tag, erase once detected
-          if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
-            uint8_t bytesToWrite[16];
-            for (uint8_t i = 0; i < 16; i++) bytesToWrite[i] = 0x00;
-            writeNfcTagStatus = writeNfcTagData(bytesToWrite, sizeof(bytesToWrite));
-            if (writeNfcTagStatus == 1) {
-              mp3.playMp3FolderTrack(921);
-              waitPlaybackToFinish(500);
-            }
-            else mp3.playMp3FolderTrack(922);
-          }
-#ifdef STATUSLED
-          statusLedBlink(500);
-#endif
-          mp3.loop();
-        }
-      }
-      // startup volume
-      else if (parentsMenu == 2) {
-        Serial.println(F("start vol"));
-        uint8_t promptResult = prompt(30, 930, 0, preference.mp3StartVolume, false);
-        if (promptResult != 0) {
-          // startup volume can't be higher than maximum volume
-          preference.mp3StartVolume = min(promptResult, preference.mp3MaxVolume);
-          preferences(WRITE);
-          mp3.playMp3FolderTrack(901);
-          waitPlaybackToFinish(500);
-        }
-      }
-      // maximum volume
-      else if (parentsMenu == 3) {
-        Serial.println(F("max vol"));
-        uint8_t promptResult = prompt(30, 931, 0, preference.mp3MaxVolume, false);
-        if (promptResult != 0) {
-          preference.mp3MaxVolume = promptResult;
-          // startup volume can't be higher than maximum volume
-          preference.mp3StartVolume = min(preference.mp3StartVolume, preference.mp3MaxVolume);
-          // current volume can't be higher than maximum volume
-          mp3.setVolume(playback.mp3CurrentVolume = min(playback.mp3CurrentVolume, preference.mp3MaxVolume));
-          preferences(WRITE);
-          mp3.playMp3FolderTrack(901);
-          waitPlaybackToFinish(500);
-        }
-      }
-      // equalizer
-      else if (parentsMenu == 4) {
-        Serial.println(F("eq"));
-        uint8_t promptResult = prompt(6, 940, 940, preference.mp3Equalizer, false);
-        if (promptResult != 0) {
-          preference.mp3Equalizer = promptResult;
-          mp3.setEq((DfMp3_Eq)(preference.mp3Equalizer - 1));
-          preferences(WRITE);
-          mp3.playMp3FolderTrack(901);
-          waitPlaybackToFinish(500);
-        }
-      }
-      // learn ir remote
-      else if (parentsMenu == 5) {
-#ifdef IRREMOTE
-        Serial.println(F("learn remote"));
-        for (uint8_t i = 0; i < 7; i++) {
-          mp3.playMp3FolderTrack(951 + i);
-          waitPlaybackToFinish(500);
-          // clear ir receive buffer
-          irReceiver.resume();
-          // wait for ir signal
-          while (!irReceiver.decode(&irReading)) statusLedBlink(500);
-          // on NEC encoding 0xFFFFFFFF means the button is held down, we ignore this
-          if (!(irReading.decode_type == NEC && irReading.value == 0xFFFFFFFF)) {
-            // convert irReading.value from 32bit to 16bit
-            uint16_t irRemoteCode = (irReading.value & 0xFFFF);
-            Serial.print(F("ir code: 0x"));
-            Serial.print(irRemoteCode <= 0x0010 ? "0" : "");
-            Serial.print(irRemoteCode <= 0x0100 ? "0" : "");
-            Serial.print(irRemoteCode <= 0x1000 ? "0" : "");
-            Serial.println(irRemoteCode, HEX);
-            preference.irRemoteUserCodes[i] = irRemoteCode;
-          }
-          // key was held down on NEC encoding, repeat last question
-          else i--;
-          mp3.loop();
-        }
-        preferences(WRITE);
-        mp3.playMp3FolderTrack(901);
-        waitPlaybackToFinish(500);
-#else
-        mp3.playMp3FolderTrack(950);
-        waitPlaybackToFinish(500);
-#endif
-      }
-      // check battery level
-      else if (parentsMenu == 6) {
-#ifdef LOWVOLTAGE
-        Serial.print(F("batt lvl is "));
-        Serial.print(shutdownVoltage.Read_Perc(shutdownMinVoltage, shutdownMaxVoltage));
-        Serial.println(F("%"));
-        mp3.playMp3FolderTrack((int)shutdownVoltage.Read_Perc(shutdownMinVoltage, shutdownMaxVoltage));
-        waitPlaybackToFinish(500);
-        mp3.playMp3FolderTrack(933);
-        waitPlaybackToFinish(500);
-#else
-        mp3.playMp3FolderTrack(932);
-        waitPlaybackToFinish(500);
-#endif
-      }
-      // shutdown timer
-      else if (parentsMenu == 7) {
-        Serial.println(F("timer"));
-        uint8_t promptResult = prompt(7, 960, 960, 0, false);
-        if (promptResult != 0) {
-          switch (promptResult) {
-            case 1: preference.shutdownMinutes = 5; break;
-            case 2: preference.shutdownMinutes = 10; break;
-            case 3: preference.shutdownMinutes = 15; break;
-            case 4: preference.shutdownMinutes = 20; break;
-            case 5: preference.shutdownMinutes = 30; break;
-            case 6: preference.shutdownMinutes = 60; break;
-            case 7: preference.shutdownMinutes = 0; break;
-          }
-          preferences(WRITE);
-          mp3.playMp3FolderTrack(901);
-          waitPlaybackToFinish(500);
-        }
-      }
-      // manual box shutdown
-      else if (parentsMenu == 8) {
-        Serial.println(F("manual shut"));
-        shutdownTimer(SHUTDOWN);
-      }
-#ifdef STATUSLED
-      statusLedBlink(500);
-#endif
-      mp3.loop();
-    }
-    switchButtonConfiguration(PAUSE);
-    shutdownTimer(START);
-    inputEvent = NOACTION;
-    Serial.println(F("ready"));
-  }
-  // # end - handle button or ir remote events during playback or while waiting for nfc tags
-  // #######################################################################################
-
-  mp3.loop();
-}
