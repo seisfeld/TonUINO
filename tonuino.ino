@@ -844,7 +844,11 @@ void loop() {
           // clear ir receive buffer
           irReceiver.resume();
           // wait for ir signal
-          while (!irReceiver.decode(&irReading)) statusLedBlink(500);
+          while (!irReceiver.decode(&irReading)) {
+#ifdef STATUSLED
+            statusLedBlink(500);
+#endif
+          }
           // on NEC encoding 0xFFFFFFFF means the button is held down, we ignore this
           if (!(irReading.decode_type == NEC && irReading.value == 0xFFFFFFFF)) {
             // convert irReading.value from 32bit to 16bit
