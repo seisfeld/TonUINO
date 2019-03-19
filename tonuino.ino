@@ -320,7 +320,7 @@ void printNfcTagData(uint8_t dataBuffer[], uint8_t dataBufferSize, bool cr);
 void printNfcTagType(MFRC522::PICC_Type nfcTagType);
 void shutdownTimer(uint8_t timerAction);
 void preferences(uint8_t preferenceAction);
-uint8_t prompt(uint8_t promptOptions, uint16_t promptHeading, uint16_t promptOffset, uint8_t promptCurrent, bool promptPreview);
+uint8_t prompt(uint8_t promptOptions, uint16_t promptHeading, uint16_t promptOffset, uint8_t promptCurrent, uint8_t promptFolder, bool promptPreview);
 #ifdef STATUSLED
 void statusLedFade();
 void statusLedBlink(uint16_t statusLedBlinkInterval);
@@ -614,20 +614,20 @@ void loop() {
         while (true) {
           Serial.println(F("setup tag"));
           Serial.println(F("folder"));
-          nfcTag.assignedFolder = prompt(99, 801, 0, 0, true);
+          nfcTag.assignedFolder = prompt(99, 801, 0, 0, 0, true);
           if (nfcTag.assignedFolder == 0) {
             mp3.playMp3FolderTrack(805);
             break;
           }
           Serial.println(F("mode"));
-          nfcTag.playbackMode = prompt(5, 820, 820, 0, false);
+          nfcTag.playbackMode = prompt(5, 820, 820, 0, 0, false);
           if (nfcTag.playbackMode == 0) {
             mp3.playMp3FolderTrack(805);
             break;
           }
           else if (nfcTag.playbackMode == SINGLE) {
             Serial.println(F("track"));
-            nfcTag.assignedTrack = prompt(255, 802, 0, 0, true);
+            nfcTag.assignedTrack = prompt(mp3.getFolderTrackCount(nfcTag.assignedFolder), 802, 0, 0, nfcTag.assignedFolder, true);
             if (nfcTag.assignedTrack == 0) {
               mp3.playMp3FolderTrack(805);
               break;
@@ -735,12 +735,12 @@ void loop() {
   // button 1 (right) hold for 2 sec or button 5 press or ir remote right, only during album, party and story book mode while playing: next track
   else if ((((inputEvent == B1H || inputEvent == B4P) && !playback.isLocked) || inputEvent == IRR) && (nfcTag.playbackMode == ALBUM || nfcTag.playbackMode == PARTY || nfcTag.playbackMode == STORYBOOK) && playback.isPlaying) {
     Serial.println(F("next"));
-    playNextTrack(random(65536), true, true);
+    playNextTrack(0, true, true);
   }
   // button 2 (left) hold for 2 sec or button 4 press or ir remote left, only during album, party and story book mode while playing: previous track
   else if ((((inputEvent == B2H || inputEvent == B3P) && !playback.isLocked) || inputEvent == IRL) && (nfcTag.playbackMode == ALBUM || nfcTag.playbackMode == PARTY || nfcTag.playbackMode == STORYBOOK) && playback.isPlaying) {
     Serial.println(F("prev"));
-    playNextTrack(random(65536), false, true);
+    playNextTrack(0, false, true);
   }
   // button 0 (middle) hold for 5 sec or ir remote menu, only during story book mode while playing: reset progress
   else if (((inputEvent == B0H && !playback.isLocked) || inputEvent == IRM) && nfcTag.playbackMode == STORYBOOK && playback.isPlaying) {
@@ -757,7 +757,7 @@ void loop() {
     shutdownTimer(STOP);
     while (true) {
       Serial.println(F("parents"));
-      uint8_t parentsMenu = prompt(8, 900, 909, 0, false);
+      uint8_t parentsMenu = prompt(8, 900, 909, 0, 0, false);
       // cancel
       if (parentsMenu == 0) {
         mp3.playMp3FolderTrack(902);
@@ -798,7 +798,7 @@ void loop() {
       // startup volume
       else if (parentsMenu == 2) {
         Serial.println(F("start vol"));
-        uint8_t promptResult = prompt(30, 930, 0, preference.mp3StartVolume, false);
+        uint8_t promptResult = prompt(30, 930, 0, preference.mp3StartVolume, 0, false);
         if (promptResult != 0) {
           // startup volume can't be higher than maximum volume
           preference.mp3StartVolume = min(promptResult, preference.mp3MaxVolume);
@@ -810,7 +810,7 @@ void loop() {
       // maximum volume
       else if (parentsMenu == 3) {
         Serial.println(F("max vol"));
-        uint8_t promptResult = prompt(30, 931, 0, preference.mp3MaxVolume, false);
+        uint8_t promptResult = prompt(30, 931, 0, preference.mp3MaxVolume, 0, false);
         if (promptResult != 0) {
           preference.mp3MaxVolume = promptResult;
           // startup volume can't be higher than maximum volume
@@ -825,7 +825,7 @@ void loop() {
       // equalizer
       else if (parentsMenu == 4) {
         Serial.println(F("eq"));
-        uint8_t promptResult = prompt(6, 940, 940, preference.mp3Equalizer, false);
+        uint8_t promptResult = prompt(6, 940, 940, preference.mp3Equalizer, 0, false);
         if (promptResult != 0) {
           preference.mp3Equalizer = promptResult;
           mp3.setEq((DfMp3_Eq)(preference.mp3Equalizer - 1));
@@ -890,7 +890,7 @@ void loop() {
       // shutdown timer
       else if (parentsMenu == 7) {
         Serial.println(F("timer"));
-        uint8_t promptResult = prompt(7, 960, 960, 0, false);
+        uint8_t promptResult = prompt(7, 960, 960, 0, 0, false);
         if (promptResult != 0) {
           switch (promptResult) {
             case 1: preference.shutdownMinutes = 5; break;
@@ -1189,8 +1189,8 @@ void playNextTrack(uint16_t globalTrack, bool directionForward, bool triggeredMa
       playback.firstTrack = false;
       lastCallTrack = 0;
     }
-    // check if we get called with the same track number twice in a row, if yes return immediately
-    if (lastCallTrack == globalTrack) return;
+    // check if we automatically get called with the same track number twice in a row, if yes return immediately
+    if (lastCallTrack == globalTrack && !triggeredManually) return;
     else lastCallTrack = globalTrack;
 
     // play next track?
@@ -1508,7 +1508,7 @@ void preferences(uint8_t preferenceAction) {
 }
 
 // interactively prompts the user for options
-uint8_t prompt(uint8_t promptOptions, uint16_t promptHeading, uint16_t promptOffset, uint8_t promptCurrent, bool promptPreview) {
+uint8_t prompt(uint8_t promptOptions, uint16_t promptHeading, uint16_t promptOffset, uint8_t promptCurrent, uint8_t promptFolder, bool promptPreview) {
   uint8_t promptResult = promptCurrent;
 
   mp3.playMp3FolderTrack(promptHeading);
@@ -1524,25 +1524,40 @@ uint8_t prompt(uint8_t promptOptions, uint16_t promptHeading, uint16_t promptOff
       }
     }
     // button 0 (middle) press or ir remote play+pause: confirm selection
-    if ((inputEvent == B0P || inputEvent == IRP) && promptResult != 0) return promptResult;
+    if ((inputEvent == B0P || inputEvent == IRP) && promptResult != 0) {
+      if (promptPreview && !playback.isPlaying) {
+        if (promptFolder == 0) mp3.playFolderTrack(promptResult, 1);
+        else mp3.playFolderTrack(promptFolder, promptResult);
+      }
+      else return promptResult;
+    }
     // button 0 (middle) double click or ir remote center: announce current folder, track number or option
     else if ((inputEvent == B0D || inputEvent == IRC) && promptResult != 0) {
       if (promptPreview && playback.isPlaying) mp3.playAdvertisement(promptResult);
-      else if (promptPreview && !playback.isPlaying) mp3.playFolderTrack(promptResult, 1);
+      else if (promptPreview && !playback.isPlaying) {
+        if (promptFolder == 0) mp3.playFolderTrack(promptResult, 1);
+        else mp3.playFolderTrack(promptFolder, promptResult);
+      }
       else mp3.playMp3FolderTrack(promptResult + promptOffset);
     }
     // button 1 (right) press or ir remote up: next folder, track number or option
     else if (inputEvent == B1P || inputEvent == IRU) {
       promptResult = min(promptResult + 1, promptOptions);
       Serial.println(promptResult);
-      if (promptPreview) mp3.playFolderTrack(promptResult, 1);
+      if (promptPreview) {
+        if (promptFolder == 0) mp3.playFolderTrack(promptResult, 1);
+        else mp3.playFolderTrack(promptFolder, promptResult);
+      }
       else mp3.playMp3FolderTrack(promptResult + promptOffset);
     }
     // button 2 (left) press or ir remote up: previous folder, track number or option
     else if (inputEvent == B2P || inputEvent == IRD) {
       promptResult = max(promptResult - 1, 1);
       Serial.println(promptResult);
-      if (promptPreview) mp3.playFolderTrack(promptResult, 1);
+      if (promptPreview) {
+        if (promptFolder == 0) mp3.playFolderTrack(promptResult, 1);
+        else mp3.playFolderTrack(promptFolder, promptResult);
+      }
       else mp3.playMp3FolderTrack(promptResult + promptOffset);
     }
     // button 0 (middle) hold for 2 sec or ir remote menu: cancel
