@@ -188,8 +188,12 @@ using namespace ace_button;
 const uint8_t mp3SerialTxPin = 3;                   // mp3 serial tx, wired with 1k ohm to rx pin of DFPlayer Mini
 const uint8_t mp3SerialRxPin = 2;                   // mp3 serial rx, wired straight to tx pin of DFPlayer Mini
 const uint8_t mp3BusyPin = 4;                       // reports play state of DFPlayer Mini (LOW = playing)
+#ifdef IRREMOTE
 const uint8_t irReceiverPin = 5;                    // pin used for the ir receiver
+#endif
+#ifdef STATUSLED
 const uint8_t statusLedPin = 6;                     // pin used for status led
+#endif
 const uint8_t shutdownPin = 7;                      // pin used to shutdown the system
 const uint8_t nfcResetPin = 9;                      // used for spi communication to nfc module
 const uint8_t nfcSlaveSelectPin = 10;               // used for spi communication to nfc module
@@ -945,7 +949,6 @@ void checkForInput() {
   button4.check();
 #endif
 
-
 #ifdef IRREMOTE
   uint8_t irRemoteEvent = NOACTION;
   uint16_t irRemoteCode = 0;
@@ -1461,7 +1464,9 @@ void shutdownTimer(uint8_t timerAction) {
       }
       break;
     case SHUTDOWN:
+#ifdef STATUSLED
       digitalWrite(statusLedPin, LOW);
+#endif
       digitalWrite(shutdownPin, LOW);
       mfrc522.PCD_AntennaOff();
       mfrc522.PCD_SoftPowerDown();
