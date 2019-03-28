@@ -41,37 +41,37 @@ Es hat sich bewährt, die gesammte Ordnerstruktur auf dem Comupter vorzubereiten
 
 TonUINO funktioniert nur korrekt, wenn ein **zur Firmware passendes** Set and Audio Meldungen auf der SD Karte vorhanden ist (die Ordner **mp3** und **advert**).
 
-Das passende Set an Audio Meldungen lässt sich mit dem beigelegten Script `create_audio_messages.py` erzeugen. Das Script kann sowohl deutsche als auch englische Audio Meldungen erzeugen. Die Beschreibung weiter unten beschreibt *deutsch*.
+Das passende Set an Audio Meldungen lässt sich mit dem beigelegten Python Script `create_audio_messages.py` erzeugen. Das Script kann sowohl *deutsche* als auch *englische* Audio Meldungen erzeugen. Die Beschreibung weiter unten beschreibt *deutsch*.
 
-Dabei gibt es zwei Möglichkeiten:
+Das Skript bietet dabei zwei Möglichkeiten:
 
-  - Unter macOS mit den Tools `say` (ist Teil von macOS) und `ffmpeg`. Sofern man einen Mac hat ist dieser Weg schnell und einfach.
-  - Mit Hilfe des Google-Service Text-to-speech. Hierzu muss man erst einen kostenfreien API Key besorgen. Dafür klingt das Ergebnis besser.
+  1. Mit den Tools `say` (benötigt macOS) und `ffmpeg`. Sofern man einen Mac hat ist dieser Weg schnell und einfach.
+  2. Mit Hilfe des Google text-to-speech Service. Hierzu muss man erst einen (für die Anzahl der benötigten Meldungen) kostenfreien API Key besorgen, dafür klingt das Ergebnis besser als Möglichkeit Eins.
 
 Zum Download kann ich die Dateien derzeit leider nicht anbieten!
 
-## Audio Meldungen mit `say` erzeugen
+### Audio Meldungen mit `say` erzeugen (Möglichkeit Eins)
 
 Neben dem Tool `say` (ist Teil von macOS) wird hier noch `ffmpeg` benötigt. Letzteres lässt sich z.B. ganz einfach über Homebrew installieren.
 
 Zur Installation von Homebrew öffnet Ihr einfach `Terminal.app` und folgt danach den Anweisungen auf der [Homebrew](https://brew.sh) Webseite. Nachdem das erledigt ist, führt ihr im Terminal folgende Schritte aus:
 
-### Installation von ffmpeg
+#### Installation von ffmpeg
 
 1. `brew update`
 2. `brew install ffmpeg`
 
 Wenn dies erfolgreich erledigt ist, können die Audio Meldungen erzeugt werden. Dazu im Terminal:
 
-### Audio Meldungen erzeugen
+#### Audio Meldungen erzeugen
 
 1. In den Ordner wechseln wo ihr die `.zip` Datei von GitHub entpackt, bzw. das Repository gecloned habt.
 2. `python create_audio_messages.py de` ausführen.
 3. Kopiert den Inhalt des Ordners **sd-card** auf die SD Karte.
 
-## Audio Meldungen mit Google text-to-speech erzeugen
+### Audio Meldungen mit Google text-to-speech erzeugen (Möglichkeit Zwei)
 
-1. Auf der [Google text-to-speech Seite](https://cloud.google.com/text-to-speech/) einen Account anlegen und einen API-Key erzeugen.
+1. Auf [Googles text-to-speech Seite](https://cloud.google.com/text-to-speech/) einen Account anlegen und einen API-Key erzeugen.
 2. In den Ordner wechseln wo ihr die `.zip` Datei von GitHub entpackt, bzw. das Repository gecloned habt.
 3. Die Datei `create_audio_messages.py` öffnen und darin bei `googleApiKey=` den API-Key eintragen und das Kommentarzeichen `#` am Anfang der Zeile entfernen.
 4. `python create_audio_messages.py de` ausführen.
