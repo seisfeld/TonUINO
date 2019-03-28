@@ -39,7 +39,18 @@ It has been proven benefitial to prepare the whole folder structure on the compu
 
 TonUINO only functions correctly, when there is the correct (**as in matches the firmware**) set of audio messages on the SD card. These are stored in the folders **mp3** and **advert**.
 
-On macOS it's pretty simple, to create the matching set of audio messages, using the `create_audio_messages.sh` script supplied in this repo. It just needs the tools `say` (part of macOS) and `ffmpeg`. The later can quickly be installed via Homebrew. The script can create english and german audio messages. The description down below describes *english*.
+You can create the matching set of audio messages, using the `create_audio_messages.py` script supplied in this repo. The script can create english and german audio messages. The description down below describes *english*.
+
+There are two ways to do this:
+
+  - On macOS using the tools `say` (part of macOS) and `ffmpeg`. If you have a Mac this way is pretty simple.
+  - Using the Google service text-to-speech. For this way you need an API key (which is free for the amount of messages you need). Although the result sounds better.
+
+The audio message files are not available for download at this point in time.
+
+## How to create audio messages using `say`
+
+Besides the tool `say` (part of macOS) you also need `ffmpeg`. The later can quickly be installed via Homebrew.
 
 To install Homebrew, open `Terminal.app` and follow the instructions on the [Homebrew](https://brew.sh) website. After that, please follow these steps in Terminal:
 
@@ -53,10 +64,16 @@ When that completed successfully, you can create the audio messages. In Terminal
 ### Create Audio Messages
 
 1. Change into the folder where you unzipped the `.zip` from GitHub or where you cloned the repo to.
-2. run `sh create_audio_messages.sh en`.
-3. Copy the folders **mp3** und **advert** in one go to the SD Card.
+2. Run `python create_audio_messages.py en`.
+3. Copy the contents of the folder **d-card** to the SD Card.
 
-The audio message files are not available for download at this point in time.
+## How to create audio messages using Google text-to-speech
+
+1. Go to the [Google text-to-speech website](https://cloud.google.com/text-to-speech/) and create an account and an API key.
+2. Change into the folder where you unzipped the `.zip` from GitHub or where you cloned the repo to.
+3. Open the file `create_audio_messages.py` and enter your API key at the line with `googleApiKey=`. Then remove the comment character `#` at the begining of the line
+4. Run `python create_audio_messages.py en`.
+5. Copy the contents of the folder **d-card** to the SD Card.
 
 ## License
 
