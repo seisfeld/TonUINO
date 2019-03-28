@@ -98,8 +98,10 @@
   If a led is connected to pin 6, limited status information is given using that led.
   The led is solid on when TonUINO is playing a track and it is pulsing slowly when
   TonUINO is idle. When TonUINO is doing anything interactive, the led is blinking every
-  500ms. And last but not not least, the led bursts 4 times when TonUINO is locked or
-  unlocked. This feature can be enabled by uncommenting the '#define STATUSLED' below.
+  500ms. If the LOWVOLTAGE feature (see cubiekid section below) is enabled, the led is
+  flashing every 100ms when the operating volatage drops below a certain value. And last
+  but not not least, the led bursts 4 times when TonUINO is locked or unlocked. This
+  feature can be enabled by uncommenting the '#define STATUSLED' below.
 
   cubiekid:
   =========
@@ -107,8 +109,7 @@
   If you happen to have a CubieKid case and the CubieKid circuit board, this firmware
   supports both shutdown methods. The inactivity shutdown timer is enabled by default,
   the shutdown due to low battery voltage (which can be configured in the shutdown
-  section below) can be enabled by uncommenting the '#define LOWVOLTAGE' below. Once
-  enabled you can check the battery level within the parents menu as well.
+  section below) can be enabled by uncommenting the '#define LOWVOLTAGE' below.
 
   The CubieKid case as well as the CubieKid circuit board, have been designed and developed
   by Jens Hackel aka DB3JHF and can be found here: https://www.thingiverse.com/thing:3148200
@@ -210,7 +211,7 @@ const uint16_t buttonLongLongPressDelay = 5000;     // longer long press delay f
 const uint32_t debugConsoleSpeed = 9600;            // speed for the debug console
 
 // number of mp3 files in advert folder + number of mp3 files in mp3 folder
-const uint16_t msgCount = 567;
+const uint16_t msgCount = 564;
 
 // define magic cookie (by default 0x13 0x37 0xb3 0x47)
 const uint8_t magicCookieHex[4] = {0x13, 0x37, 0xb3, 0x47};
@@ -240,10 +241,13 @@ const uint16_t irRemoteCodes[][7] = {
 const uint8_t irRemoteCount = sizeof(irRemoteCodes) / 14;
 const uint8_t irRemoteCodeCount = sizeof(irRemoteCodes) / (2 * irRemoteCount);
 
+#ifdef LOWVOLTAGE
 // define constants for shutdown feature
 const float shutdownMinVoltage = 4.4;                        // minimum expected voltage level (in volts)
+const float shutdownWarnVoltage = 4.8;                       // warning voltage level (in volts)
 const float shutdownMaxVoltage = 5.0;                        // maximum expected voltage level (in volts)
 const float shutdownVoltageCorrection = 1.0 / 1.0;           // voltage measured by multimeter divided by reported voltage
+#endif
 
 // define strings
 const char *playbackModeName[] = {" ", "story", "album", "party", "single", "storybook"};
@@ -489,9 +493,12 @@ void setup() {
 #endif
 
 #ifdef LOWVOLTAGE
-  Serial.println(F("init vm"));
+  Serial.println(F("init lvm"));
   Serial.print(F("  ex-"));
   Serial.print(shutdownMaxVoltage);
+  Serial.print(F("V"));
+  Serial.print(F(" wa-"));
+  Serial.print(shutdownWarnVoltage);
   Serial.print(F("V"));
   Serial.print(F(" sh-"));
   Serial.print(shutdownMinVoltage);
@@ -530,10 +537,6 @@ void loop() {
   checkForInput();
   shutdownTimer(CHECK);
 
-#ifdef STATUSLED
-  statusLedFade();
-#endif
-
 #ifdef LOWVOLTAGE
   // if low voltage level is reached, store progress and shutdown
   if (shutdownVoltage.Read_Volts() <= shutdownMinVoltage) {
@@ -543,6 +546,20 @@ void loop() {
     Serial.println(F("lv shut"));
     digitalWrite(shutdownPin, LOW);
   }
+  else if (shutdownVoltage.Read_Volts() <= shutdownWarnVoltage) {
+#ifdef STATUSLED
+    statusLedBlink(100);
+#endif
+  }
+  else {
+#ifdef STATUSLED
+    statusLedFade();
+#endif
+  }
+#else
+#ifdef STATUSLED
+  statusLedFade();
+#endif
 #endif
 
   // ################################################################################
@@ -761,7 +778,7 @@ void loop() {
     shutdownTimer(STOP);
     while (true) {
       Serial.println(F("parents"));
-      uint8_t parentsMenu = prompt(8, 900, 909, 0, 0, false);
+      uint8_t parentsMenu = prompt(7, 900, 909, 0, 0, false);
       // cancel
       if (parentsMenu == 0) {
         mp3.playMp3FolderTrack(902);
@@ -876,23 +893,8 @@ void loop() {
         waitPlaybackToFinish(500);
 #endif
       }
-      // check battery level
-      else if (parentsMenu == 6) {
-#ifdef LOWVOLTAGE
-        Serial.print(F("batt lvl is "));
-        Serial.print(shutdownVoltage.Read_Perc(shutdownMinVoltage, shutdownMaxVoltage));
-        Serial.println(F("%"));
-        mp3.playMp3FolderTrack((int)shutdownVoltage.Read_Perc(shutdownMinVoltage, shutdownMaxVoltage));
-        waitPlaybackToFinish(500);
-        mp3.playMp3FolderTrack(933);
-        waitPlaybackToFinish(500);
-#else
-        mp3.playMp3FolderTrack(932);
-        waitPlaybackToFinish(500);
-#endif
-      }
       // shutdown timer
-      else if (parentsMenu == 7) {
+      else if (parentsMenu == 6) {
         Serial.println(F("timer"));
         uint8_t promptResult = prompt(7, 960, 960, 0, 0, false);
         if (promptResult != 0) {
@@ -911,7 +913,7 @@ void loop() {
         }
       }
       // manual box shutdown
-      else if (parentsMenu == 8) {
+      else if (parentsMenu == 7) {
         Serial.println(F("manual shut"));
         shutdownTimer(SHUTDOWN);
       }

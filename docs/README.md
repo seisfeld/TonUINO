@@ -23,7 +23,7 @@ Dies ist meine alternative Firmware für das wundervolle [TonUINO](https://www.v
 - Optional: Umstellbar auf 5 Tasten Bedienung.
 - Optional: Fernbedienbar über eine Infrarotfernbedienung (diese muss mindestens 7 Tasten haben), welche über das Elternmenü angelernt werden kann. Über die Fernbedienung ist es dann auch möglich die Tasten von TonUINO zu sperren.
 - Optional: Unterstützung einer Status LED.
-- Optional: Unterspannungsabschaltung für z.B. die [CubieKid Platine](https://www.thingiverse.com/thing:3148200). Desweiteren ist es dann auch möglich sich den aktuellen Batteriefüllstand im Elternmenü ansagen zu lassen.
+- Optional: Unterspannungsabschaltung für z.B. die [CubieKid Platine](https://www.thingiverse.com/thing:3148200).
 
 ## Tastenbelegung
 

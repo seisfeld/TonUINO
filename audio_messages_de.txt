@@ -29,8 +29,6 @@
 0923.mp3|Karte löschen abgebrochen.
 0930.mp3|Mit den Lautstärketasten die Startlautstärke auswählen. Bestätige mit der Pausetaste.
 0931.mp3|Mit den Lautstärketasten die Maximallautstärke auswählen. Bestätige mit der Pausetaste.
-0932.mp3|Diese Funktion muss im Programmcode erst konfiguriert und aktiviert werden.
-0933.mp3|Prozent.
 0940.mp3|Mit den Lautstärketasten den Equalizer auswählen. Bestätige mit der Pausetaste.
 0941.mp3|Normal
 0942.mp3|Pop
