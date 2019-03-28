@@ -39,7 +39,7 @@ Es hat sich bewährt, die gesammte Ordnerstruktur auf dem Comupter vorzubereiten
 
 ## Audio Meldungen
 
-TonUINO funktioniert nur korrekt, wenn ein **zur Firmware passendes** Set and Audio Meldungen auf der SD Karte vorhanden ist (die Ordner **mp3** und **advert**).
+TonUINO funktioniert nur korrekt, wenn ein **zur Firmware passendes** Set an Audio Meldungen auf der SD Karte vorhanden ist (die Ordner **mp3** und **advert**).
 
 Das passende Set an Audio Meldungen lässt sich mit dem beigelegten Python Script `create_audio_messages.py` erzeugen. Das Script kann sowohl *deutsche* als auch *englische* Audio Meldungen erzeugen. Die Beschreibung weiter unten beschreibt *deutsch*.
 
@@ -69,7 +69,7 @@ Wenn dies erfolgreich erledigt ist, können die Audio Meldungen erzeugt werden. 
 2. `python create_audio_messages.py de` ausführen.
 3. Kopiert den Inhalt des Ordners **sd-card** auf die SD Karte.
 
-### Audio Meldungen mit Google text-to-speech erzeugen (Möglichkeit Zwei)
+### Audio Meldungen mit Googles text-to-speech Service erzeugen (Möglichkeit Zwei)
 
 1. Auf [Googles text-to-speech Seite](https://cloud.google.com/text-to-speech/) einen Account anlegen und einen API-Key erzeugen.
 2. In den Ordner wechseln wo ihr die `.zip` Datei von GitHub entpackt, bzw. das Repository gecloned habt.
