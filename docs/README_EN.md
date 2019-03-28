@@ -39,7 +39,7 @@ It has been proven benefitial to prepare the whole folder structure on the compu
 
 TonUINO only functions correctly, when there is the correct (**as in matches the firmware**) set of audio messages on the SD card. These are stored in the folders **mp3** and **advert**.
 
-You can create the matching set of audio messages, using the `create_audio_messages.py` script supplied in this repo.
+You can create the matching set of audio messages, using the `create_audio_messages.py` script supplied in this repo. The script can create english and german audio messages. The description down below describes *english*.
 
 There are two ways to do this:
 
@@ -50,7 +50,7 @@ The audio message files are not available for download at this point in time.
 
 ## How to create audio messages using `say`
 
-Besides the tool `say` (part of macOS) you also need `ffmpeg`. The later can quickly be installed via Homebrew. The script can create english and german audio messages. The description down below describes *english*.
+Besides the tool `say` (part of macOS) you also need `ffmpeg`. The later can quickly be installed via Homebrew.
 
 To install Homebrew, open `Terminal.app` and follow the instructions on the [Homebrew](https://brew.sh) website. After that, please follow these steps in Terminal:
 
@@ -73,12 +73,6 @@ When that completed successfully, you can create the audio messages. In Terminal
 2. Change into the folder where you unzipped the `.zip` from GitHub or where you cloned the repo to.
 3. Open the file `create_audio_messages.py` and enter your API key at the line with `googleApiKey=`. Then remove the comment character `#` at the begining of the line
 4. Run `python create_audio_messages.py en`.
-
-
-
-2. In den Ordner wechseln wo ihr die `.zip` Datei von GitHub entpackt, bzw. das Repository gecloned habt.
-3. Die Datei `create_audio_messages.py` öffnen und darin bei `googleApiKey=` den API-Key eintragen und das Kommentarzeichen `#` am Anfang der Zeile entfernen.
-4. `python create_audio_messages.py de` ausführen.
 5. Copy the contents of the folder **d-card** to the SD Card.
 
 ## License

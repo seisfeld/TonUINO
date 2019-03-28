@@ -41,7 +41,7 @@ Es hat sich bewährt, die gesammte Ordnerstruktur auf dem Comupter vorzubereiten
 
 TonUINO funktioniert nur korrekt, wenn ein **zur Firmware passendes** Set and Audio Meldungen auf der SD Karte vorhanden ist (die Ordner **mp3** und **advert**).
 
-Das passende Set an Audio Meldungen lässt sich mit dem beigelegten Script `create_audio_messages.py` erzeugen.
+Das passende Set an Audio Meldungen lässt sich mit dem beigelegten Script `create_audio_messages.py` erzeugen. Das Script kann sowohl deutsche als auch englische Audio Meldungen erzeugen. Die Beschreibung weiter unten beschreibt *deutsch*.
 
 Dabei gibt es zwei Möglichkeiten:
 
@@ -52,7 +52,7 @@ Zum Download kann ich die Dateien derzeit leider nicht anbieten!
 
 ## Audio Meldungen mit `say` erzeugen
 
-Neben dem Tool `say` (ist Teil von macOS) wird hier noch `ffmpeg` benötigt. Letzteres lässt sich z.B. ganz einfach über Homebrew installieren. Das Script kann sowohl deutsche als auch englische Audio Meldungen erzeugen. Die Beschreibung weiter unten beschreibt *deutsch*.
+Neben dem Tool `say` (ist Teil von macOS) wird hier noch `ffmpeg` benötigt. Letzteres lässt sich z.B. ganz einfach über Homebrew installieren.
 
 Zur Installation von Homebrew öffnet Ihr einfach `Terminal.app` und folgt danach den Anweisungen auf der [Homebrew](https://brew.sh) Webseite. Nachdem das erledigt ist, führt ihr im Terminal folgende Schritte aus:
 
@@ -69,9 +69,9 @@ Wenn dies erfolgreich erledigt ist, können die Audio Meldungen erzeugt werden. 
 2. `python create_audio_messages.py de` ausführen.
 3. Kopiert den Inhalt des Ordners **sd-card** auf die SD Karte.
 
-## Audio Meldungen mit Google Text-to-speech erzeugen
+## Audio Meldungen mit Google text-to-speech erzeugen
 
-1. Auf der [Google Text-to-speech-Seite](https://cloud.google.com/text-to-speech/) einen Account anlegen und einen API-Key erzeugen.
+1. Auf der [Google text-to-speech Seite](https://cloud.google.com/text-to-speech/) einen Account anlegen und einen API-Key erzeugen.
 2. In den Ordner wechseln wo ihr die `.zip` Datei von GitHub entpackt, bzw. das Repository gecloned habt.
 3. Die Datei `create_audio_messages.py` öffnen und darin bei `googleApiKey=` den API-Key eintragen und das Kommentarzeichen `#` am Anfang der Zeile entfernen.
 4. `python create_audio_messages.py de` ausführen.
