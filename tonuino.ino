@@ -219,6 +219,7 @@ const uint8_t magicCookieHex[4] = {0x13, 0x37, 0xb3, 0x47};
 // default values for preferences
 const uint8_t mp3StartVolumeDefault = 15;
 const uint8_t mp3MaxVolumeDefault = 25;
+const uint8_t mp3MenuVolumeDefault = 15;
 const uint8_t mp3EqualizerDefault = 1;
 const uint8_t shutdownMinutesDefault = 10;
 const uint16_t irRemoteUserCodesDefault[7] = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
@@ -302,6 +303,7 @@ struct preferenceObject {
   uint8_t version;
   uint8_t mp3StartVolume;
   uint8_t mp3MaxVolume;
+  uint8_t mp3MenuVolume;
   uint8_t mp3Equalizer;
   uint8_t shutdownMinutes;
   uint16_t irRemoteUserCodes[7];
@@ -450,6 +452,8 @@ void setup() {
   mp3.setVolume(playback.mp3CurrentVolume = preference.mp3StartVolume);
   Serial.print(F("     max "));
   Serial.println(preference.mp3MaxVolume);
+  Serial.print(F("    menu "));
+  Serial.println(preference.mp3MenuVolume);
   Serial.print(F("      eq "));
   Serial.println(mp3EqualizerName[preference.mp3Equalizer]);
   mp3.setEq((DfMp3_Eq)(preference.mp3Equalizer - 1));
@@ -638,12 +642,14 @@ void loop() {
           nfcTag.assignedFolder = prompt(99, 801, 0, 0, 0, true);
           if (nfcTag.assignedFolder == 0) {
             mp3.playMp3FolderTrack(805);
+            waitPlaybackToFinish(500);
             break;
           }
           Serial.println(F("mode"));
           nfcTag.playbackMode = prompt(5, 820, 820, 0, 0, false);
           if (nfcTag.playbackMode == 0) {
             mp3.playMp3FolderTrack(805);
+            waitPlaybackToFinish(500);
             break;
           }
           else if (nfcTag.playbackMode == SINGLE) {
@@ -651,6 +657,7 @@ void loop() {
             nfcTag.assignedTrack = prompt(mp3.getFolderTrackCount(nfcTag.assignedFolder), 802, 0, 0, nfcTag.assignedFolder, true);
             if (nfcTag.assignedTrack == 0) {
               mp3.playMp3FolderTrack(805);
+              waitPlaybackToFinish(500);
               break;
             }
           }
@@ -669,8 +676,10 @@ void loop() {
           if (writeNfcTagStatus == 1) {
             tagSetupSuccessfull = true;
             mp3.playMp3FolderTrack(803);
+            waitPlaybackToFinish(500);
           }
           else mp3.playMp3FolderTrack(804);
+          waitPlaybackToFinish(500);
           break;
         }
         if (!tagSetupSuccessfull) {
@@ -682,6 +691,8 @@ void loop() {
         }
         mfrc522.PICC_HaltA();
         mfrc522.PCD_StopCrypto1();
+        // restore playback volume, can't be higher than maximum volume
+        mp3.setVolume(playback.mp3CurrentVolume = min(playback.mp3CurrentVolume, preference.mp3MaxVolume));
         switchButtonConfiguration(PAUSE);
         shutdownTimer(START);
         inputEvent = NOACTION;
@@ -778,10 +789,11 @@ void loop() {
     shutdownTimer(STOP);
     while (true) {
       Serial.println(F("parents"));
-      uint8_t parentsMenu = prompt(7, 900, 909, 0, 0, false);
+      uint8_t parentsMenu = prompt(8, 900, 909, 0, 0, false);
       // cancel
       if (parentsMenu == 0) {
         mp3.playMp3FolderTrack(902);
+        waitPlaybackToFinish(500);
         break;
       }
       // erase tag
@@ -836,15 +848,24 @@ void loop() {
           preference.mp3MaxVolume = promptResult;
           // startup volume can't be higher than maximum volume
           preference.mp3StartVolume = min(preference.mp3StartVolume, preference.mp3MaxVolume);
-          // current volume can't be higher than maximum volume
-          mp3.setVolume(playback.mp3CurrentVolume = min(playback.mp3CurrentVolume, preference.mp3MaxVolume));
+          preferences(WRITE);
+          mp3.playMp3FolderTrack(901);
+          waitPlaybackToFinish(500);
+        }
+      }
+      // parents volume
+      else if (parentsMenu == 4) {
+        Serial.println(F("menu vol"));
+        uint8_t promptResult = prompt(30, 932, 0, preference.mp3MenuVolume, 0, false);
+        if (promptResult != 0) {
+          preference.mp3MenuVolume = promptResult;
           preferences(WRITE);
           mp3.playMp3FolderTrack(901);
           waitPlaybackToFinish(500);
         }
       }
       // equalizer
-      else if (parentsMenu == 4) {
+      else if (parentsMenu == 5) {
         Serial.println(F("eq"));
         uint8_t promptResult = prompt(6, 940, 940, preference.mp3Equalizer, 0, false);
         if (promptResult != 0) {
@@ -856,7 +877,7 @@ void loop() {
         }
       }
       // learn ir remote
-      else if (parentsMenu == 5) {
+      else if (parentsMenu == 6) {
 #ifdef IRREMOTE
         Serial.println(F("learn remote"));
         for (uint8_t i = 0; i < 7; i++) {
@@ -894,7 +915,7 @@ void loop() {
 #endif
       }
       // shutdown timer
-      else if (parentsMenu == 6) {
+      else if (parentsMenu == 7) {
         Serial.println(F("timer"));
         uint8_t promptResult = prompt(7, 960, 960, 0, 0, false);
         if (promptResult != 0) {
@@ -913,7 +934,7 @@ void loop() {
         }
       }
       // manual box shutdown
-      else if (parentsMenu == 7) {
+      else if (parentsMenu == 8) {
         Serial.println(F("manual shut"));
         shutdownTimer(SHUTDOWN);
       }
@@ -922,6 +943,8 @@ void loop() {
 #endif
       mp3.loop();
     }
+    // restore playback volume, can't be higher than maximum volume
+    mp3.setVolume(playback.mp3CurrentVolume = min(playback.mp3CurrentVolume, preference.mp3MaxVolume));
     switchButtonConfiguration(PAUSE);
     shutdownTimer(START);
     inputEvent = NOACTION;
@@ -1124,6 +1147,8 @@ void switchButtonConfiguration(uint8_t buttonMode) {
       button0Config.setFeature(ButtonConfig::kFeatureSuppressClickBeforeDoubleClick);
       button0Config.setFeature(ButtonConfig::kFeatureSuppressAfterDoubleClick);
       button0Config.setLongPressDelay(buttonShortLongPressDelay);
+      // set volume to menu volume
+      mp3.setVolume(preference.mp3MenuVolume);
       break;
     default:
       break;
@@ -1504,6 +1529,7 @@ void preferences(uint8_t preferenceAction) {
       preference.version = 1;
       preference.mp3StartVolume = mp3StartVolumeDefault;
       preference.mp3MaxVolume = mp3MaxVolumeDefault;
+      preference.mp3MenuVolume = mp3MenuVolumeDefault;
       preference.mp3Equalizer = mp3EqualizerDefault;
       preference.shutdownMinutes = shutdownMinutesDefault;
       memcpy(preference.irRemoteUserCodes, irRemoteUserCodesDefault, 14);

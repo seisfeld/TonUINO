@@ -18,9 +18,9 @@
 0910.mp3|Erase card.
 0911.mp3|Setup startup volume.
 0912.mp3|Setup maximum volume.
-0913.mp3|Setup equalizer.
-0914.mp3|Learn infrared remote. You need a remote with at least 7 keys.
-0915.mp3|Check battery level.
+0913.mp3|Setup menu volume.
+0914.mp3|Setup equalizer.
+0915.mp3|Learn infrared remote. You need a remote with at least 7 keys.
 0916.mp3|Setup shutdown timer.
 0917.mp3|Shutdown box.
 0920.mp3|Please put the card on the box and wait for the confirmation.
@@ -29,6 +29,7 @@
 0923.mp3|Erasing the card canceled.
 0930.mp3|Use the volume keys to pick the startup volume, confirm with the pause key.
 0931.mp3|Use the volume keys to pick the maximum volume, confirm with the pause key.
+0932.mp3|Use the volume keys to pick the menu volume, confirm with the pause key.
 0940.mp3|Use the volume keys to pick the equalizer, confirm with the pause key.
 0941.mp3|Normal
 0942.mp3|Pop

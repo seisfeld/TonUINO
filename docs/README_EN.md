@@ -16,7 +16,7 @@ This is my alternative firmware for the wonderful [TonUINO](https://www.voss.ear
 - Debug output to the serial console.
 - Setup dialogues (setup/erase NFC tags/cards, parents menu etc.) can be aborted.
 - NFC tags/cards can be erased.
-- Parents menu to erase NFC tags/cards and to change settings like startup volume, maximum volume, equalizer and shutdown timer (requires an external circuit). You can manually trigger the shutdown there as well.
+- Parents menu to erase NFC tags/cards and to change settings like startup volume, maximum volume, menu volume, equalizer and shutdown timer (requires an external circuit). You can manually trigger the shutdown there as well.
 - Settings are stored in EEPROM.
 - Optional: 5 Buttons.
 - Optional: IR remote control (incl. box lock). The remote (which needs at least 7 keys) can be learned in using the parents menu.

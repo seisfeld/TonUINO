@@ -18,9 +18,9 @@
 0910.mp3|Karte löschen.
 0911.mp3|Startlautstärke festlegen.
 0912.mp3|Maximallautstärke festlegen.
-0913.mp3|Equalizer festlegen.
-0914.mp3|Fernbedienung anlernen. Du benötigst eine Fernbedienung mit mindestens 7 Tasten.
-0915.mp3|Batteriefüllstand ansagen.
+0913.mp3|Menülautstärke festlegen.
+0914.mp3|Equalizer festlegen.
+0915.mp3|Fernbedienung anlernen. Du benötigst eine Fernbedienung mit mindestens 7 Tasten.
 0916.mp3|Shutdown Timer festlegen.
 0917.mp3|Box ausschalten.
 0920.mp3|Bitte lege die zu löschende Karte auf die Box und warte auf die Bestätigung.
@@ -29,6 +29,7 @@
 0923.mp3|Karte löschen abgebrochen.
 0930.mp3|Mit den Lautstärketasten die Startlautstärke auswählen. Bestätige mit der Pausetaste.
 0931.mp3|Mit den Lautstärketasten die Maximallautstärke auswählen. Bestätige mit der Pausetaste.
+0932.mp3|Mit den Lautstärketasten die Menülautstärke auswählen. Bestätige mit der Pausetaste.
 0940.mp3|Mit den Lautstärketasten den Equalizer auswählen. Bestätige mit der Pausetaste.
 0941.mp3|Normal
 0942.mp3|Pop

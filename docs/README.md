@@ -18,7 +18,7 @@ Dies ist meine alternative Firmware für das wundervolle [TonUINO](https://www.v
 - Debugausgabe auf der seriellen Konsole.
 - Konfigurationsdialoge (NFC Tags/Karten anlernen/löschen, Elternmenü etc.) können abgebrochen werden.
 - NFC Tags/Karten können wieder komplett gelöscht werden.
-- Elternmenü um NFC Tags/Karten zu löschen und um Einstellungen wie Startlautstärke, Maximallautstärke, Equalizer und Abschalttimer (benötigt eine externe Schaltung) vorzunehmen. Dort kann die Abschaltung auch manuell vorgenommen werden.
+- Elternmenü um NFC Tags/Karten zu löschen und um Einstellungen wie Startlautstärke, Maximallautstärke, Menülautstärke, Equalizer und Abschalttimer (benötigt eine externe Schaltung) vorzunehmen. Dort kann TonUINO auch von Hand abgeschaltet werden.
 - Einstellungen werden im EEPROM gespeichert.
 - Optional: Umstellbar auf 5 Tasten Bedienung.
 - Optional: Fernbedienbar über eine Infrarotfernbedienung (diese muss mindestens 7 Tasten haben), welche über das Elternmenü angelernt werden kann. Über die Fernbedienung ist es dann auch möglich die Tasten von TonUINO zu sperren.
