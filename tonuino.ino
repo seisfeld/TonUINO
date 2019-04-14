@@ -553,7 +553,7 @@ void setup() {
     if (enterPinCode()) {
 #endif
       Serial.println(F("init eeprom"));
-      for (uint16_t i = 0; i <= EEPROM.length(); i++) {
+      for (uint16_t i = 0; i < EEPROM.length(); i++) {
         EEPROM.update(i, 0);
 #ifdef STATUSLED
         statusLedBlink(50);
