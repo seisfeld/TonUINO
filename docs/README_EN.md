@@ -14,10 +14,11 @@ This is my alternative firmware for the wonderful [TonUINO](https://www.voss.ear
 - Supports MIFARE Ultralight / Ultralight C tags/cards.
 - Supports NTAG213/215/216 tags/cards.
 - Debug output to the serial console.
+- Preferences are stored in EEPROM.
 - Setup dialogues (setup/erase NFC tags/cards, parents menu etc.) can be aborted.
 - NFC tags/cards can be erased.
-- Parents menu to erase NFC tags/cards and to change settings like startup volume, maximum volume, menu volume, equalizer and shutdown timer (requires an external circuit). You can manually trigger the shutdown there as well.
-- Settings are stored in EEPROM.
+- Parents menu to erase NFC tags/cards and to change preferences like startup volume, maximum volume, menu volume, equalizer and shutdown timer (requires an external circuit or compatible power bank). You can also manually trigger the shutdown there and reset the story book progress and preferences.
+- Optional: PIN to protect the parents menu.
 - Optional: 5 Buttons.
 - Optional: IR remote control (incl. box lock). The remote (which needs at least 7 keys) can be learned in using the parents menu.
 - Optional: Status LED.
@@ -26,6 +27,15 @@ This is my alternative firmware for the wonderful [TonUINO](https://www.voss.ear
 ## Button Cheat Sheet
 
 ![Tastenbelegung](usage_cheat_sheet_en.png)
+
+## PIN Code
+
+The (optional) PIN Code to secure some parental functions is by default
+
+* for the buttons on the box: `play/pause, vol-, vol+, play/pause`
+* on the IR remote: `center, vol-, vol+, center`
+
+Both can be changed in the sketch before compile time.
 
 ## SD Card Folder Structure
 
@@ -44,7 +54,7 @@ You can create the matching set of audio messages, using the `create_audio_messa
 The script offers two options to do this:
 
   1. Using the tools `say` (requires macOS) and `ffmpeg`. If you have a Mac this way is pretty simple.
-  2. Using the Google text-to-speech service. For this option you need an API key (which is free for the amount of messages you need), but the result sounds better than option one.
+  2. Using Googles text-to-speech service. For this option you need an API key (which is free for the amount of messages you need), but the result sounds better than option one.
 
 The audio message files are not available for download at this point in time.
 

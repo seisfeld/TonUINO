@@ -5,7 +5,8 @@
 0804.mp3|An error occurred while setting up the card. Please try again.
 0805.mp3|Card setup canceled.
 0806.mp3|Oops my batteries died. Please ask mom or dad to swap them. Im powering down now, bye.
-0807.mp3|Reset done.
+0807.mp3|Reset completed.
+0808.mp3|Please enter PIN.
 0820.mp3|Ok, use the volume keys to pick a playback mode, confirm with the pause key.
 0821.mp3|Story mode. Play one random track from the folder.
 0822.mp3|Album mode. Play the complete folder.
@@ -14,7 +15,9 @@
 0825.mp3|Audiobook mode. Play the complete folder and track the progress.
 0900.mp3|Parents menu. Use the volume keys to pick an option, confirm with the pause key.
 0901.mp3|Preference saved.
-0902.mp3|Parents menu terminated.
+0902.mp3|Audiobook progress reset completed.
+0903.mp3|Preferences reset completed.
+0904.mp3|Parents menu terminated.
 0910.mp3|Erase card.
 0911.mp3|Setup startup volume.
 0912.mp3|Setup maximum volume.
@@ -22,7 +25,9 @@
 0914.mp3|Setup equalizer.
 0915.mp3|Learn infrared remote. You need a remote with at least 7 keys.
 0916.mp3|Setup shutdown timer.
-0917.mp3|Shutdown box.
+0917.mp3|Reset audiobook progress.
+0918.mp3|Reset preferences.
+0919.mp3|Shutdown box.
 0920.mp3|Please put the card on the box and wait for the confirmation.
 0921.mp3|Ok, card erased.
 0922.mp3|Erasing the card failed. Please try again.

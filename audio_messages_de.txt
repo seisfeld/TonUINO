@@ -6,6 +6,7 @@
 0805.mp3|Karte konfigurieren abgebrochen.
 0806.mp3|Oh je, meine Batterie ist alle! Bitte Mama oder Papa, daß sie die Batterie tauschen. Ich schalte mich jetzt ab, bis bald.
 0807.mp3|Reset durchgeführt.
+0808.mp3|Bitte PIN eingeben.
 0820.mp3|Ok. Du kannst jetzt mit den Lautstärketasten den Wiedergabemodus auswählen. Bestätige mit der Pausetaste.
 0821.mp3|Hörspielmodus. Einen zufälligen Titel aus dem Ordner wiedergeben.
 0822.mp3|Albummodus. Den kompletten Ordner wiedergeben.
@@ -14,7 +15,9 @@
 0825.mp3|Hörbuchmodus. Den kompletten Ordner wiedergeben und den Fortschritt speichern.
 0900.mp3|Elternmenü. Du kannst jetzt mit den Lautstärketasten eine Option auswählen. Bestätige mit der Pausetaste.
 0901.mp3|Einstellung gespeichert.
-0902.mp3|Elternmenü beendet.
+0902.mp3|Fortschritte vom Hörbuchmodus zurückgesetzt.
+0903.mp3|Einstellungen zurückgesetzt.
+0904.mp3|Elternmenü beendet.
 0910.mp3|Karte löschen.
 0911.mp3|Startlautstärke festlegen.
 0912.mp3|Maximallautstärke festlegen.
@@ -22,7 +25,9 @@
 0914.mp3|Equalizer festlegen.
 0915.mp3|Fernbedienung anlernen. Du benötigst eine Fernbedienung mit mindestens 7 Tasten.
 0916.mp3|Shutdown Timer festlegen.
-0917.mp3|Box ausschalten.
+0917.mp3|Fortschritte vom Hörbuchmodus zurücksetzen.
+0918.mp3|Einstellungen zurücksetzen.
+0919.mp3|Box ausschalten.
 0920.mp3|Bitte lege die zu löschende Karte auf die Box und warte auf die Bestätigung.
 0921.mp3|Ok, ich habe die Karte gelöscht.
 0922.mp3|Beim löschen der Karte ist leider ein Fehler aufgetreten. Bitte versuche es noch einmal.

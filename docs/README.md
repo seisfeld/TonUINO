@@ -16,10 +16,11 @@ Dies ist meine alternative Firmware für das wundervolle [TonUINO](https://www.v
 - Unterstützung für MIFARE Ultralight / Ultralight C Tags/Karten.
 - Unterstützung für NTAG213/215/216 Tags/Karten.
 - Debugausgabe auf der seriellen Konsole.
+- Einstellungen werden im EEPROM gespeichert.
 - Konfigurationsdialoge (NFC Tags/Karten anlernen/löschen, Elternmenü etc.) können abgebrochen werden.
 - NFC Tags/Karten können wieder komplett gelöscht werden.
-- Elternmenü um NFC Tags/Karten zu löschen und um Einstellungen wie Startlautstärke, Maximallautstärke, Menülautstärke, Equalizer und Abschalttimer (benötigt eine externe Schaltung) vorzunehmen. Dort kann TonUINO auch von Hand abgeschaltet werden.
-- Einstellungen werden im EEPROM gespeichert.
+- Elternmenü um NFC Tags/Karten zu löschen und um Einstellungen wie Startlautstärke, Maximallautstärke, Menülautstärke, Equalizer und Abschalttimer (benötigt eine externe Schaltung oder eine passende Powerbank) vorzunehmen. Dort kann TonUINO auch von Hand abgeschaltet werden und es lassen sich der Hörbuchfortschritt und die Einstellugen zurücksetzen.
+- Optional: PIN Code um das Elternmenü zu schützen.
 - Optional: Umstellbar auf 5 Tasten Bedienung.
 - Optional: Fernbedienbar über eine Infrarotfernbedienung (diese muss mindestens 7 Tasten haben), welche über das Elternmenü angelernt werden kann. Über die Fernbedienung ist es dann auch möglich die Tasten von TonUINO zu sperren.
 - Optional: Unterstützung einer Status LED.
@@ -28,6 +29,15 @@ Dies ist meine alternative Firmware für das wundervolle [TonUINO](https://www.v
 ## Tastenbelegung
 
 ![Tastenbelegung](usage_cheat_sheet_de.png)
+
+## PIN Code
+
+Der (optional einschaltbare) PIN Code um einige Elternfunktionen abzusichern lautet standard mässig
+
+* für die Tasten an der Box: `play/pause, vol-, vol+, play/pause`
+* auf der Fernbedienung: `center, vol-, vol+, center`
+
+Beide können im Sketch vor dem kompilieren geändert werden.
 
 ## Ordnerstruktur auf der SD Karte
 
@@ -46,7 +56,7 @@ Das passende Set an Audio Meldungen lässt sich mit dem beigelegten Python Scrip
 Das Skript bietet dabei zwei Möglichkeiten:
 
   1. Mit den Tools `say` (benötigt macOS) und `ffmpeg`. Sofern man einen Mac hat ist dieser Weg schnell und einfach.
-  2. Mit Hilfe des Google text-to-speech Service. Hierzu muss man erst einen (für die Anzahl der benötigten Meldungen) kostenfreien API Key besorgen, dafür klingt das Ergebnis besser als Möglichkeit Eins.
+  2. Mit Hilfe des text-to-speech Service von Google. Hierzu muss man erst einen (für die Anzahl der benötigten Meldungen) kostenfreien API Key besorgen, dafür klingt das Ergebnis besser als Möglichkeit Eins.
 
 Zum Download kann ich die Dateien derzeit leider nicht anbieten!
 
@@ -69,7 +79,7 @@ Wenn dies erfolgreich erledigt ist, können die Audio Meldungen erzeugt werden. 
 2. `python create_audio_messages.py de` ausführen.
 3. Kopiert den Inhalt des Ordners **sd-card** auf die SD Karte.
 
-### Audio Meldungen mit Googles text-to-speech Service erzeugen (Möglichkeit Zwei)
+### Audio Meldungen mit dem text-to-speech Service von Google erzeugen (Möglichkeit Zwei)
 
 1. Auf [Googles text-to-speech Seite](https://cloud.google.com/text-to-speech/) einen Account anlegen und einen API-Key erzeugen.
 2. In den Ordner wechseln wo ihr die `.zip` Datei von GitHub entpackt, bzw. das Repository gecloned habt.
