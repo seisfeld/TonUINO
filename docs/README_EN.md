@@ -18,7 +18,7 @@ This is my alternative firmware for the wonderful [TonUINO](https://www.voss.ear
 - Setup dialogues (setup/erase NFC tags/cards, parents menu etc.) can be aborted.
 - NFC tags/cards can be erased.
 - Parents menu to erase NFC tags/cards and to change preferences like startup volume, maximum volume, menu volume, equalizer and shutdown timer (requires an external circuit or compatible power bank). You can also manually trigger the shutdown there and reset the story book progress and preferences.
-- Optional: PIN to protect the parents menu.
+- Optional: PIN to protect parental functions.
 - Optional: 5 Buttons.
 - Optional: IR remote control (incl. box lock). The remote (which needs at least 7 keys) can be learned in using the parents menu.
 - Optional: Status LED.
@@ -30,12 +30,11 @@ This is my alternative firmware for the wonderful [TonUINO](https://www.voss.ear
 
 ## PIN Code
 
-The (optional) PIN Code to secure some parental functions is by default
+The (optional) PIN Code to secure the parental functions is by default
 
-* for the buttons on the box: `play/pause, vol-, vol+, play/pause`
-* on the IR remote: `center, vol-, vol+, center`
+* `play/pause, vol-, vol+, play/pause`
 
-Both can be changed in the sketch before compile time.
+and can be changed in the sketch before compile time.
 
 ## SD Card Folder Structure
 

@@ -1,19 +1,20 @@
 0800.mp3|Los gehts!
-0801.mp3|Eine neue Karte wurde erkannt. Bitte lasse die Karte auf der Box liegen, bis die Karte konfiguriert ist. Du kannst jetzt mit den Lautstärketasten einen Ordner auswählen. Bestätige mit der Pausetaste.
-0802.mp3|Ok, Lieblingsfolge. Verwende nun die Lautstärketasten um die Lieblingsfolge auszuwählen, bestätige mit der Pausetaste.
+0801.mp3|Eine neue Karte wurde erkannt. Bitte lasse die Karte auf der Box liegen, bis die Karte konfiguriert ist. Du kannst jetzt mit den Lautstärketasten einen Ordner auswählen und mit der Pausetaste bestätigen. Durch gedrückt halten der Pausetaste kannst du abbrechen.
+0802.mp3|Ok, Lieblingsfolge. Du kannst jetzt mit den Lautstärketasten eine Lieblingsfolge auswählen und mit der Pausetaste bestätigen. Durch gedrückt halten der Pausetaste kannst du abbrechen.
 0803.mp3|Ok, ich habe die Karte konfiguriert. Viel Spass damit.
 0804.mp3|Beim konfigurieren der Karte ist leider ein Fehler aufgetreten. Bitte versuche es noch einmal.
 0805.mp3|Karte konfigurieren abgebrochen.
 0806.mp3|Oh je, meine Batterie ist alle! Bitte Mama oder Papa, daß sie die Batterie tauschen. Ich schalte mich jetzt ab, bis bald.
 0807.mp3|Reset durchgeführt.
 0808.mp3|Bitte PIN eingeben.
-0820.mp3|Ok. Du kannst jetzt mit den Lautstärketasten den Wiedergabemodus auswählen. Bestätige mit der Pausetaste.
+0809.mp3|PIN Eingabe abgebrochen.
+0820.mp3|Ok. Du kannst jetzt mit den Lautstärketasten den Wiedergabemodus auswählen und mit der Pausetaste bestätigen. Durch gedrückt halten der Pausetaste kannst du abbrechen.
 0821.mp3|Hörspielmodus. Einen zufälligen Titel aus dem Ordner wiedergeben.
 0822.mp3|Albummodus. Den kompletten Ordner wiedergeben.
 0823.mp3|Partymodus. Den Ordner zufällig wiedergeben.
 0824.mp3|Lieblingsfolge. Einen bestimmten Titel aus dem Ordner wiedergeben.
 0825.mp3|Hörbuchmodus. Den kompletten Ordner wiedergeben und den Fortschritt speichern.
-0900.mp3|Elternmenü. Du kannst jetzt mit den Lautstärketasten eine Option auswählen. Bestätige mit der Pausetaste.
+0900.mp3|Elternmenü. Du kannst jetzt mit den Lautstärketasten eine Option auswählen und mit der Pausetaste bestätigen. Durch gedrückt halten der Pausetaste kannst du abbrechen.
 0901.mp3|Einstellung gespeichert.
 0902.mp3|Fortschritte vom Hörbuchmodus zurückgesetzt.
 0903.mp3|Einstellungen zurückgesetzt.
@@ -32,10 +33,10 @@
 0921.mp3|Ok, ich habe die Karte gelöscht.
 0922.mp3|Beim löschen der Karte ist leider ein Fehler aufgetreten. Bitte versuche es noch einmal.
 0923.mp3|Karte löschen abgebrochen.
-0930.mp3|Mit den Lautstärketasten die Startlautstärke auswählen. Bestätige mit der Pausetaste.
-0931.mp3|Mit den Lautstärketasten die Maximallautstärke auswählen. Bestätige mit der Pausetaste.
-0932.mp3|Mit den Lautstärketasten die Menülautstärke auswählen. Bestätige mit der Pausetaste.
-0940.mp3|Mit den Lautstärketasten den Equalizer auswählen. Bestätige mit der Pausetaste.
+0930.mp3|Mit den Lautstärketasten die Startlautstärke auswählen und mit der Pausetaste bestätigen. Durch gedrückt halten der Pausetaste kannst du abbrechen.
+0931.mp3|Mit den Lautstärketasten die Maximallautstärke auswählen und mit der Pausetaste bestätigen. Durch gedrückt halten der Pausetaste kannst du abbrechen.
+0932.mp3|Mit den Lautstärketasten die Menülautstärke auswählen und mit der Pausetaste bestätigen. Durch gedrückt halten der Pausetaste kannst du abbrechen.
+0940.mp3|Mit den Lautstärketasten den Equalizer auswählen und mit der Pausetaste bestätigen. Durch gedrückt halten der Pausetaste kannst du abbrechen.
 0941.mp3|Normal
 0942.mp3|Pop
 0943.mp3|Rock
@@ -50,7 +51,7 @@
 0955.mp3|Drücke auf der Fernbedienung die Center Taste.
 0956.mp3|Drücke auf der Fernbedienung die Menü Taste.
 0957.mp3|Drücke auf der Fernbedienung die Play/Pause Taste.
-0960.mp3|Mit den Lautstärketasten den Shutdown Timer auswählen. Bestätige mit der Pausetaste.
+0960.mp3|Mit den Lautstärketasten den Shutdown Timer auswählen und mit der Pausetaste bestätigen. Durch gedrückt halten der Pausetaste kannst du abbrechen.
 0961.mp3|5 Minuten.
 0962.mp3|10 Minuten.
 0963.mp3|15 Minuten.

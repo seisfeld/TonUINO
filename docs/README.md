@@ -20,7 +20,7 @@ Dies ist meine alternative Firmware für das wundervolle [TonUINO](https://www.v
 - Konfigurationsdialoge (NFC Tags/Karten anlernen/löschen, Elternmenü etc.) können abgebrochen werden.
 - NFC Tags/Karten können wieder komplett gelöscht werden.
 - Elternmenü um NFC Tags/Karten zu löschen und um Einstellungen wie Startlautstärke, Maximallautstärke, Menülautstärke, Equalizer und Abschalttimer (benötigt eine externe Schaltung oder eine passende Powerbank) vorzunehmen. Dort kann TonUINO auch von Hand abgeschaltet werden und es lassen sich der Hörbuchfortschritt und die Einstellugen zurücksetzen.
-- Optional: PIN Code um das Elternmenü zu schützen.
+- Optional: PIN Code um Elternfunktionen zu schützen.
 - Optional: Umstellbar auf 5 Tasten Bedienung.
 - Optional: Fernbedienbar über eine Infrarotfernbedienung (diese muss mindestens 7 Tasten haben), welche über das Elternmenü angelernt werden kann. Über die Fernbedienung ist es dann auch möglich die Tasten von TonUINO zu sperren.
 - Optional: Unterstützung einer Status LED.
@@ -32,12 +32,11 @@ Dies ist meine alternative Firmware für das wundervolle [TonUINO](https://www.v
 
 ## PIN Code
 
-Der (optional einschaltbare) PIN Code um einige Elternfunktionen abzusichern lautet standard mässig
+Der (optional einschaltbare) PIN Code um die Elternfunktionen abzusichern lautet standard mässig
 
-* für die Tasten an der Box: `play/pause, vol-, vol+, play/pause`
-* auf der Fernbedienung: `center, vol-, vol+, center`
+* `play/pause, vol-, vol+, play/pause`
 
-Beide können im Sketch vor dem kompilieren geändert werden.
+und kann im Sketch vor dem kompilieren geändert werden.
 
 ## Ordnerstruktur auf der SD Karte
 

@@ -97,11 +97,9 @@
 
   The complete erase of the eeprom contents (hold vol-, play/pause, vol+ during startup)
   as well as the parents menu can be secured with a pin code of variable length. It is
-  defined (and can be changed, just make sure button and ir pins are the same length) in
-  the configuration section below, the default pin codes are:
+  defined (and can be changed) in the configuration section below, the default pin code is:
 
-  * for the buttons on the box: play/pause, vol-, vol+, play/pause
-  * on the IR remote: center, vol-, vol+, center
+                     ===> play/pause, vol-, vol+, play/pause <===
 
   Once the pin code entry is triggered, you have (by default) 10s to enter the pin code
   before it times out. It repeats when entered incorrectly. See status led section
@@ -250,19 +248,17 @@ const uint16_t buttonLongLongPressDelay = 5000;     // longer long press delay f
 const uint32_t debugConsoleSpeed = 9600;            // speed for the debug console
 
 // number of mp3 files in advert folder + number of mp3 files in mp3 folder
-const uint16_t msgCount = 570;
+const uint16_t msgCount = 571;
 
 // define magic cookie (by default 0x13 0x37 0xb3 0x47)
 const uint8_t magicCookieHex[4] = {0x13, 0x37, 0xb3, 0x47};
 
 #ifdef PINCODE
-// define pin codes, code length for the ir code needs to be the same as the button code
-// allowed enums for pinCodeButtons : B0P, B1P, B2P (plus B3P & B4P if FIVEBUTTONS is enabled)
-// allowed enums for pinCodeIR: IRU, IRD, IRL, IRR, IRC, IRP (IRM cancels and is therefore not allowed)
-const uint8_t pinCodeButtons[] = {B0P, B2P, B1P, B0P};    // for example play/pause, vol-, vol+, play/pause
-const uint8_t pinCodeIR[] = {IRC, IRD, IRU, IRC};         // for example center, vol-, vol+, center
-const uint8_t pinCodeLength = sizeof(pinCodeButtons);
-const uint64_t enterPinCodeTimeout = 10000;               // time to enter the pin code (in milliseconds)
+// define pin code, allowed enums for pinCode[]: B0P, B1P, B2P (plus B3P & B4P if FIVEBUTTONS is enabled)
+const uint8_t pinCode[] = {B0P, B2P, B1P, B0P};     // for example play/pause, vol-, vol+, play/pause
+const uint8_t pinCodeLength = sizeof(pinCode);
+const uint8_t pinCodeIrToButtonMapping[] = {B1P, B2P, B3P, B4P, NOACTION, IRM, B0P};
+const uint64_t enterPinCodeTimeout = 10000;         // time to enter the pin code (in milliseconds)
 #endif
 
 // default values for preferences
@@ -723,7 +719,6 @@ void loop() {
           if (writeNfcTagStatus == 1) {
             tagSetupSuccessfull = true;
             mp3.playMp3FolderTrack(803);
-            waitPlaybackToFinish(500);
           }
           else mp3.playMp3FolderTrack(804);
           waitPlaybackToFinish(500);
@@ -834,11 +829,7 @@ void loop() {
   }
   // button 0 (middle) hold for 5 sec or ir remote menu while not playing: parents menu
   else if (((inputEvent == B0H && !playback.isLocked) || inputEvent == IRM) && !playback.isPlaying) {
-#ifdef PINCODE
-    if (enterPinCode()) parentsMenu();
-#else
     parentsMenu();
-#endif
     Serial.println(F("ready"));
   }
   // # end - handle button or ir remote events during playback or while waiting for nfc tags
@@ -1524,6 +1515,10 @@ uint8_t prompt(uint8_t promptOptions, uint16_t promptHeading, uint16_t promptOff
 
 // parents menu, offers various settings only parents do
 void parentsMenu() {
+#ifdef PINCODE
+  if (!enterPinCode()) return;
+#endif
+
   playback.playListMode = false;
 
   // set volume to menu volume
@@ -1717,8 +1712,7 @@ bool enterPinCode() {
   uint8_t pinCodeEntered[pinCodeLength];
   uint8_t pinCodeSlot = 0;
   uint64_t cancelEnterPinCodeMillis = millis() + enterPinCodeTimeout;
-  bool pinCodeButtonsMatch = true;
-  bool pinCodeIRMatch = true;
+  bool pinCodeMatch = true;
   playback.playListMode = false;
 
   // set volume to menu volume
@@ -1731,9 +1725,13 @@ bool enterPinCode() {
   mp3.playMp3FolderTrack(808);
   while (true) {
     checkForInput();
-    // record button presses, button 0 (middle) hold for 2 sec or ir remote menu: cancel
+    // map ir inputs to corresponding button inputs
+    if (inputEvent >= 16) inputEvent = pinCodeIrToButtonMapping[inputEvent - 16];
+    // button 0 (middle) hold for 2 sec or ir remote menu: cancel
     if (inputEvent == B0H || inputEvent == IRM || millis() > cancelEnterPinCodeMillis) {
       Serial.println(F("cancel"));
+      mp3.playMp3FolderTrack(809);
+      waitPlaybackToFinish(500);
 
       // restore playback volume, can't be higher than maximum volume
       mp3.setVolume(playback.mp3CurrentVolume = min(playback.mp3CurrentVolume, preference.mp3MaxVolume));
@@ -1744,15 +1742,14 @@ bool enterPinCode() {
 
       return false;
     }
-    else if (inputEvent != NOACTION) pinCodeEntered[pinCodeSlot++] = inputEvent;
-    // if the complete pin code has been recorded, compare with stored button and ir pin code
+    // record inputs
+    if (inputEvent != NOACTION) pinCodeEntered[pinCodeSlot++] = inputEvent;
+    // if the complete pin code has been recorded
     if (pinCodeSlot == pinCodeLength) {
-      for (uint8_t i = 0; i < pinCodeLength; i++) {
-        if (pinCodeButtons[i] != pinCodeEntered[i]) pinCodeButtonsMatch = false;
-        if (pinCodeIR[i] != pinCodeEntered[i]) pinCodeIRMatch = false;
-      }
+      // compare entered with stored pin code
+      for (uint8_t i = 0; i < pinCodeLength; i++) if (pinCode[i] != pinCodeEntered[i]) pinCodeMatch = false;
       // we have a match, exit
-      if (pinCodeButtonsMatch || pinCodeIRMatch) {
+      if (pinCodeMatch) {
         // restore playback volume, can't be higher than maximum volume
         mp3.setVolume(playback.mp3CurrentVolume = min(playback.mp3CurrentVolume, preference.mp3MaxVolume));
 
@@ -1765,10 +1762,10 @@ bool enterPinCode() {
       // we don't have a match, repeat
       else {
         Serial.println(F("pin?"));
+        mp3.playMp3FolderTrack(808);
         cancelEnterPinCodeMillis = millis() + enterPinCodeTimeout;
         pinCodeSlot = 0;
-        pinCodeButtonsMatch = true;
-        pinCodeIRMatch = true;
+        pinCodeMatch = true;
 #ifdef STATUSLED
         statusLedBurst();
 #endif

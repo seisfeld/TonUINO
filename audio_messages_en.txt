@@ -1,19 +1,20 @@
 0800.mp3|Lets go!
-0801.mp3|A new card was found, please leave it on the box until its setup. Use the volume keys to pick a folder, confirm with the pause key.
-0802.mp3|Ok, single track. Use the volume keys to pick a track, confirm with the pause key.
+0801.mp3|A new card was found, please leave it on the box until its setup. Use the volume keys to pick a folder and confirm with the pause key. Hold the pause key to cancel.
+0802.mp3|Ok, single track. Use the volume keys to pick a track and confirm with the pause key. Hold the pause key to cancel.
 0803.mp3|Ok, the card is setup. Have fun.
 0804.mp3|An error occurred while setting up the card. Please try again.
 0805.mp3|Card setup canceled.
 0806.mp3|Oops my batteries died. Please ask mom or dad to swap them. Im powering down now, bye.
 0807.mp3|Reset completed.
 0808.mp3|Please enter PIN.
-0820.mp3|Ok, use the volume keys to pick a playback mode, confirm with the pause key.
+0809.mp3|PIN entry canceled.
+0820.mp3|Ok, use the volume keys to pick a playback mode and confirm with the pause key. Hold the pause key to cancel.
 0821.mp3|Story mode. Play one random track from the folder.
 0822.mp3|Album mode. Play the complete folder.
 0823.mp3|Party mode. Randomly play the complete folder.
 0824.mp3|Single mode. Play one particular track from the folder.
 0825.mp3|Audiobook mode. Play the complete folder and track the progress.
-0900.mp3|Parents menu. Use the volume keys to pick an option, confirm with the pause key.
+0900.mp3|Parents menu. Use the volume keys to pick an option and confirm with the pause key. Hold the pause key to cancel.
 0901.mp3|Preference saved.
 0902.mp3|Audiobook progress reset completed.
 0903.mp3|Preferences reset completed.
@@ -32,10 +33,10 @@
 0921.mp3|Ok, card erased.
 0922.mp3|Erasing the card failed. Please try again.
 0923.mp3|Erasing the card canceled.
-0930.mp3|Use the volume keys to pick the startup volume, confirm with the pause key.
-0931.mp3|Use the volume keys to pick the maximum volume, confirm with the pause key.
-0932.mp3|Use the volume keys to pick the menu volume, confirm with the pause key.
-0940.mp3|Use the volume keys to pick the equalizer, confirm with the pause key.
+0930.mp3|Use the volume keys to pick the startup volume and confirm with the pause key. Hold the pause key to cancel.
+0931.mp3|Use the volume keys to pick the maximum volume and confirm with the pause key. Hold the pause key to cancel.
+0932.mp3|Use the volume keys to pick the menu volume and confirm with the pause key. Hold the pause key to cancel.
+0940.mp3|Use the volume keys to pick the equalizer and confirm with the pause key. Hold the pause key to cancel.
 0941.mp3|Normal
 0942.mp3|Pop
 0943.mp3|Rock
@@ -50,7 +51,7 @@
 0955.mp3|Press the center key on the remote.
 0956.mp3|Press the menu key on the remote.
 0957.mp3|Press the play/pause key on the remote.
-0960.mp3|Use the volume keys to pick the shutdown timer, confirm with the pause key.
+0960.mp3|Use the volume keys to pick the shutdown timer and confirm with the pause key. Hold the pause key to cancel.
 0961.mp3|5 minutes.
 0962.mp3|10 minutes.
 0963.mp3|15 minutes.
