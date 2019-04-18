@@ -52,39 +52,41 @@ TonUINO funktioniert nur korrekt, wenn ein **zur Firmware passendes** Set an Aud
 
 Das passende Set an Audio Meldungen lässt sich mit dem beigelegten Python Script `create_audio_messages.py` erzeugen. Das Script kann sowohl *deutsche* als auch *englische* Audio Meldungen erzeugen. Die Beschreibung weiter unten beschreibt *deutsch*.
 
-Das Skript bietet dabei zwei Möglichkeiten:
+Das Skript bietet dabei drei Möglichkeiten:
 
   1. Mit den Tools `say` (benötigt macOS) und `ffmpeg`. Sofern man einen Mac hat ist dieser Weg schnell und einfach.
-  2. Mit Hilfe des text-to-speech Service von Google. Hierzu muss man erst einen (für die Anzahl der benötigten Meldungen) kostenfreien API Key besorgen, dafür klingt das Ergebnis besser als Möglichkeit Eins.
+  2. Mit Amazon Polly, dem text-to-speech Service von Amazon.
+  3. Mit Hilfe des text-to-speech Service von Google.
+
+Für die Anzahl der benötigten Meldungen ist die Nutzung des Service von Google bzw. Amazon kostenlos. Allerdings muss man erst einen Account anlegen. Qualitativ ist Amazon Polly am besten, gefolgt von Google und zuletzt `say`.
 
 Zum Download kann ich die Dateien derzeit leider nicht anbieten!
 
-### Audio Meldungen mit `say` erzeugen (Möglichkeit Eins)
+### Audio Meldungen mit `say` erzeugen (Möglichkeit eins)
 
 Neben dem Tool `say` (ist Teil von macOS) wird hier noch `ffmpeg` benötigt. Letzteres lässt sich z.B. ganz einfach über Homebrew installieren.
 
-Zur Installation von Homebrew öffnet Ihr einfach `Terminal.app` und folgt danach den Anweisungen auf der [Homebrew](https://brew.sh) Webseite. Nachdem das erledigt ist, führt ihr im Terminal folgende Schritte aus:
+1. `ffmpeg` installieren (falls noch nicht geschehen):
+    - `Terminal.app` öffnen und den Anweisungen auf der [Homebrew](https://brew.sh) Webseite folgen.
+    - Im Terminal `brew update && brew install ffmpeg` ausführen.
+2. In den Ordner wechseln wo ihr die `.zip` Datei von GitHub entpackt, bzw. das Repository gecloned habt.
+3. `python tools/create_audio_messages.py --use-say` ausführen.
+4. Kopiert den Inhalt des Ordners **sd-card** auf die SD Karte.
 
-#### Installation von ffmpeg
+### Audio Meldungen mit Amazon Polly erzeugen (Möglichkeit zwei)
 
-1. `brew update`
-2. `brew install ffmpeg`
+1. Auf der [AWS-Seite Seite](https://aws.amazon.com/) einen Account anlegen.
+2. Das [Tool `aws` installieren](https://docs.aws.amazon.com/de_de/cli/latest/userguide/cli-chap-install.html) (auf dem Mac per `brew install awscli`) und [konfigurieren](https://docs.aws.amazon.com/de_de/cli/latest/userguide/cli-chap-configure.html).
+3. In den Ordner wechseln wo ihr die `.zip` Datei von GitHub entpackt, bzw. das Repository gecloned habt.
+4. `python tools/create_audio_messages.py --use-amazon` ausführen.
+5. Kopiert den Inhalt des Ordners **sd-card** auf die SD Karte.
 
-Wenn dies erfolgreich erledigt ist, können die Audio Meldungen erzeugt werden. Dazu im Terminal:
-
-#### Audio Meldungen erzeugen
-
-1. In den Ordner wechseln wo ihr die `.zip` Datei von GitHub entpackt, bzw. das Repository gecloned habt.
-2. `python create_audio_messages.py de` ausführen.
-3. Kopiert den Inhalt des Ordners **sd-card** auf die SD Karte.
-
-### Audio Meldungen mit dem text-to-speech Service von Google erzeugen (Möglichkeit Zwei)
+### Audio Meldungen mit dem text-to-speech Service von Google erzeugen (Möglichkeit drei)
 
 1. Auf [Googles text-to-speech Seite](https://cloud.google.com/text-to-speech/) einen Account anlegen und einen API-Key erzeugen.
 2. In den Ordner wechseln wo ihr die `.zip` Datei von GitHub entpackt, bzw. das Repository gecloned habt.
-3. Die Datei `create_audio_messages.py` öffnen und darin bei `googleApiKey=` den API-Key eintragen und das Kommentarzeichen `#` am Anfang der Zeile entfernen.
-4. `python create_audio_messages.py de` ausführen.
-5. Kopiert den Inhalt des Ordners **sd-card** auf die SD Karte.
+3. `python tools/create_audio_messages.py --use-google-key=ABCD` ausführen.
+4. Kopiert den Inhalt des Ordners **sd-card** auf die SD Karte.
 
 ## Tool für Ansagen
 
@@ -105,7 +107,7 @@ Angenommen man hat einen Ordner mit folgendem Inhalt:
 
 Dann kann man mit folgendem Aufruf mp3-Dateien mit Ansagen generieren (Beispiel):
 
-    python add_lead_in_messages.py -i '04_Benjamin Blümchen' -o /Volumes/TonUINO/04 --google-key=ABCD --add-numbering
+    python tools/add_lead_in_messages.py -i '04_Benjamin Blümchen' -o /Volumes/TonUINO/04 --google-key=ABCD --add-numbering
 
 Was dann passiert:
   - Es werden neue mp3-Dateien mit den Ansagen erzeugt. Man kann dabei auch direkt auf die SD-Karte schreiben (wie im Beispiel).

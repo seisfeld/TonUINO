@@ -50,10 +50,13 @@ TonUINO only functions correctly, when there is the correct (**as in matches the
 
 You can create the matching set of audio messages, using the `create_audio_messages.py` python script supplied in this repo. The script can create *english* and *german* audio messages. The description down below describes *english*.
 
-The script offers two options to do this:
+The script offers the three options to do this:
 
   1. Using the tools `say` (requires macOS) and `ffmpeg`. If you have a Mac this way is pretty simple.
-  2. Using Googles text-to-speech service. For this option you need an API key (which is free for the amount of messages you need), but the result sounds better than option one.
+  2. Using Amazon Polly, the text-to-speech service of Amazon.
+  3. Using Googles text-to-speech service.
+
+For the amount of messages you need using the service of Google resp. Amazon is free. But you have to create an account first. Regarding quality, Amazon Polly sounds best, followed by Google and last `say`.
 
 The audio message files are not available for download at this point in time.
 
@@ -61,27 +64,26 @@ The audio message files are not available for download at this point in time.
 
 Besides the tool `say` (part of macOS) you also need `ffmpeg`. The later can quickly be installed via Homebrew.
 
-To install Homebrew, open `Terminal.app` and follow the instructions on the [Homebrew](https://brew.sh) website. After that, please follow these steps in Terminal:
+1. Install `ffmpeg` (if not done yet):
+    - Open `Terminal.app` and follow the instructions on the [Homebrew](https://brew.sh) website.
+    - In Terminal run `brew update && brew install ffmpeg`
+2. Change into the folder where you unzipped the `.zip` from GitHub or where you cloned the repo to.
+3. Run `tools/python create_audio_messages.py --use-say --lang=en`.
+4. Copy the contents of the folder **sd-card** to the SD Card.
 
-#### Install ffmpeg
+### How to create audio messages using Amazon Polly (option two)
 
-1. `brew update`
-2. `brew install ffmpeg`
+1. Go to the [AWS website](https://aws.amazon.com/) and create an account.
+2. [Install the tool `aws`](https://docs.aws.amazon.com/en_us/cli/latest/userguide/cli-chap-install.html) (on a Mac by `brew install awscli`) und [configure it](https://docs.aws.amazon.com/en_us/cli/latest/userguide/cli-chap-configure.html).
+3. Change into the folder where you unzipped the `.zip` from GitHub or where you cloned the repo to.
+4. Run `python tools/create_audio_messages.py --use-amazon --lang=en`.
+5. Copy the contents of the folder **sd-card** to the SD Card.
 
-When that completed successfully, you can create the audio messages. In Terminal:
-
-#### Create Audio Messages
-
-1. Change into the folder where you unzipped the `.zip` from GitHub or where you cloned the repo to.
-2. Run `python create_audio_messages.py en`.
-3. Copy the contents of the folder **sd-card** to the SD Card.
-
-### How to create audio messages using Googles text-to-speech service (option two)
+### How to create audio messages using Googles text-to-speech service (option three)
 
 1. Go to [Googles text-to-speech website](https://cloud.google.com/text-to-speech/) and create an account and an API key.
 2. Change into the folder where you unzipped the `.zip` from GitHub or where you cloned the repo to.
-3. Open the file `create_audio_messages.py` and enter your API key at the line with `googleApiKey=`. Then remove the comment character `#` at the begining of the line.
-4. Run `python create_audio_messages.py en`.
+4. Run `python tools/create_audio_messages.py --use-google-key=ABCD --lang=en`.
 5. Copy the contents of the folder **sd-card** to the SD Card.
 
 ## Tool for lead-in messages
@@ -103,7 +105,7 @@ Suppose you have a folder with the following content:
 
 Then you can use the following call to generate mp3 files with lead-in messages (example):
 
-    python add_lead_in_messages.py -i '04_Benjamin Blossom' -o /Volumes/TonUINO/04 --google-key=ABCD --add-numbering
+    python tools/add_lead_in_messages.py -i '04_Benjamin Blossom' -o /Volumes/TonUINO/04 --google-key=ABCD --add-numbering
 
 What happens:
 
