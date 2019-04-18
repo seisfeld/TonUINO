@@ -4,42 +4,27 @@
 # So - when played e.g. on a TonUINO - you first will hear the title of the track, then the track itself.
 
 
-import argparse, base64, json, os, re, subprocess, sys
+import argparse, base64, json, os, re, subprocess, sys, text_to_speach
 
 
-class PatchedArgumentParser(argparse.ArgumentParser):
-    def error(self, message):
-        sys.stderr.write('error: %s\n\n' % message)
-        self.print_help()
-        sys.exit(2)
-
-
-argFormatter = lambda prog: argparse.HelpFormatter(prog, max_help_position=27, width=100)
-argparser = PatchedArgumentParser(
+argFormatter = lambda prog: argparse.RawDescriptionHelpFormatter(prog, max_help_position=27, width=100)
+argparser = text_to_speach.PatchedArgumentParser(
     description=
         'Adds a lead-in message to each mp3 file of a directory storing the result in another directory.\n' +
-        'So - when played e.g. on a TonUINO - you first will hear the title of the track, then the track itself.',
+        'So - when played e.g. on a TonUINO - you first will hear the title of the track, then the track itself.\n\n' +
+        text_to_speach.textToSpeechDescription,
     usage='%(prog)s -i my/source/dir -o my/output/dir [optional arguments...]',
     formatter_class=argFormatter)
 argparser.add_argument('-i', '--input', type=str, required=True, help='The input directory or mp3 file to process (input won\'t be changed)')
 argparser.add_argument('-o', '--output', type=str, required=True, help='The output directory where to write the mp3 files (will be created if not existing)')
-argparser.add_argument('--lang', choices=['de', 'en'], default='de', help='The language')
-argparser.add_argument('--google-key', type=str, default=None, help="The API key of the Google text-to-speech account to use. If missing the MacOS tool `say` will be used.")
+text_to_speach.addArgumentsToArgparser(argparser)
 argparser.add_argument('--file-regex', type=str, default=None, help="The regular expression to use for parsing the mp3 file name. If missing the whole file name except a leading number will be used as track title.")
 argparser.add_argument('--title-pattern', type=str, default=None, help="The pattern to use as track title. May contain groups of `--file-regex`, e.g. '\\1'")
 argparser.add_argument('--add-numbering', action='store_true', help='Whether to add a three-digit number to the mp3 files (suitable for DFPlayer Mini)')
 argparser.add_argument('--dry-run', action='store_true', help='Dry run: Only prints what the script would do, without actually creating files')
 args = argparser.parse_args()
 
-
-googleVoiceByLang = {
-    'de': { 'languageCode': 'de-DE', 'name': 'de-DE-Wavenet-C' },
-    'en': { 'languageCode': 'en-US', 'name': 'en-US-Wavenet-D' },
-}
-sayVoiceByLang = {
-    'de': 'Anna',
-    'en': 'Samantha',
-}
+text_to_speach.checkArgs(argparser, args)
 
 fileRegex = re.compile(args.file_regex if args.file_regex is not None else '\\d*(.*)')
 titlePattern = args.title_pattern if args.title_pattern is not None else '\\1'
@@ -50,38 +35,6 @@ mp3FileIndex = 0
 def fail(msg):
     print('ERROR: ' + msg)
     sys.exit(1)
-
-
-def postJson(url, postBody):
-    response = subprocess.check_output(['curl', '--header', 'Content-Type: application/json; charset=utf-8', '--data', json.dumps(postBody).encode('utf-8'), url])
-    return json.loads(response)
-
-
-def textToSpeech(text, targetFile):
-    if args.google_key:
-        responseJson = postJson(
-            'https://texttospeech.googleapis.com/v1beta1/text:synthesize?key=' + args.google_key,
-            {
-                'audioConfig': {
-                    'audioEncoding': 'MP3',
-                    'speakingRate': 1.0,
-                    'pitch': 2.0,  # Default is 0.0
-                    'sampleRateHertz': 44100,
-                    'effectsProfileId': [ 'small-bluetooth-speaker-class-device' ]
-                },
-                'voice': googleVoiceByLang[args.lang],
-                'input': { 'text': text }
-            }
-        )
-
-        mp3Data = base64.b64decode(responseJson['audioContent'])
-
-        with open(targetFile, 'wb') as f:
-            f.write(mp3Data)
-    else:
-        subprocess.call([ 'say', '-v', sayVoiceByLang[args.lang], '-o', 'temp.aiff', text ])
-        subprocess.call([ 'ffmpeg', '-y', '-i', 'temp.aiff', '-acodec', 'libmp3lame', '-ab', '128k', '-ac', '1', targetFile ])
-        os.remove('temp.aiff')
 
 
 def addLeadInMessage(inputPath, outputPath):
@@ -125,16 +78,46 @@ def addLeadInMessage(inputPath, outputPath):
 
     if not args.dry_run:
         tempLeadInFile = 'temp-lead-in.mp3'
-        textToSpeech(text, tempLeadInFile)
+        tempLeadInFileAdjusted = 'temp-lead-in_adjusted.mp3'
+        text_to_speach.textToSpeechUsingArgs(text=text, targetFile=tempLeadInFile, args=args)
 
-        subprocess.call([ 'ffmpeg', '-i', 'concat:{}|{}'.format(tempLeadInFile, inputPath), '-acodec', 'copy', outputPath, '-map_metadata', '0:1' ])
+        # Adjust sample rate and mono/stereo
+        print('Detecting sample rate and channels')
+        detectionInfo = detectAudioData(inputPath)
+        if detectionInfo is None:
+            # We can't adjust
+            print('Detecting sample rate and channels failed -> Skipping adjustment')
+            tempLeadInFileAdjusted = tempLeadInFile
+        else:
+            print('Adjust sample rate to {} and channels to {}'.format(detectionInfo['sampleRate'], detectionInfo['channels']))
+            subprocess.call([ 'ffmpeg', '-i', tempLeadInFile, '-vn', '-ar', detectionInfo['sampleRate'], '-ac', detectionInfo['channels'], tempLeadInFileAdjusted ])
+
+        print('Concat')
+        subprocess.call([ 'ffmpeg', '-i', 'concat:{}|{}'.format(tempLeadInFileAdjusted, inputPath), '-acodec', 'copy', outputPath, '-map_metadata', '0:1' ])
 
         os.remove(tempLeadInFile)
+        os.remove(tempLeadInFileAdjusted)
         print('\n')
 
 
+def detectAudioData(mp3File):
+    try:
+        output = subprocess.check_output([ 'ffmpeg', '-i', mp3File, '-hide_banner' ], stderr=subprocess.STDOUT)
+    except Exception, e:
+        output = str(e.output)
+
+    match = re.match('.*Stream #\\d+:\\d+: Audio: mp3, (\\d+) Hz, (mono|stereo), .*', output, re.S)
+    if match:
+        return {
+            'sampleRate': match.group(1),
+            'channels': '2' if match.group(2) == 'stereo' else '1'
+        }
+    else:
+        return None
+
+
 if not os.path.exists(args.output) and not args.dry_run:
-    outputParent = os.path.dirname(args.output)
+    outputParent = os.path.dirname(os.path.abspath(args.output))
     if not os.path.isdir(outputParent):
         fail('Parent of output is no directory: ' + os.path.abspath(outputParent))
 

@@ -27,5 +27,6 @@ Temporary Items
 .apdisk
 
 # TonUINO media folders
-/tools/sd-card
-/tools/sd-card_*
+/sd-card
+/sd-card_*
+/tools/*.pyc
