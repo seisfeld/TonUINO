@@ -14,8 +14,8 @@ if __name__ == '__main__':
             text_to_speach.textToSpeechDescription,
         usage='%(prog)s [optional arguments...]',
         formatter_class=argFormatter)
-    argparser.add_argument('-i', '--input', type=str, default='.', help='The directory where `audio_messages_*.txt` files are located.')
-    argparser.add_argument('-o', '--output', type=str, default='sd-card', help='The directory where to create the audio messages.')
+    argparser.add_argument('-i', '--input', type=str, default='.', help='The directory where `audio_messages_*.txt` files are located. (default: current directory)')
+    argparser.add_argument('-o', '--output', type=str, default='sd-card', help='The directory where to create the audio messages. (default: `sd-card`)')
     text_to_speach.addArgumentsToArgparser(argparser)
     argparser.add_argument('--skip-numbers', action='store_true', help='If set, no number messages will be generated (`0001.mp3` - `0255.mp3`)')
     args = argparser.parse_args()
