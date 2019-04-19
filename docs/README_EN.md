@@ -84,6 +84,44 @@ When that completed successfully, you can create the audio messages. In Terminal
 4. Run `python create_audio_messages.py en`.
 5. Copy the contents of the folder **sd-card** to the SD Card.
 
+## Tool for lead-in messages
+
+In story mode there is the problem that when playing the card one does not know which episode is played. If you play for example Benjamin Blossom, then you'll always hear the title song first, which sounds the same in all episodes.
+
+The script `add_lead_in_messages.py` adds a lead-in message to the mp3 file, such as "Benjamin Blossom on vacation". If you want to hear another episode, then you can just lay on the Benjamin Blossom card again.
+
+**Functionality:**
+
+Suppose you have a folder with the following content:
+
+```
++- 04_Benjamin Blossom/
+   +- Benjamin Blossom has his birthday.mp3
+   +- Benjamin Blossom on vacation.mp3
+   +- Benjamin Blossom as a pilot.mp3
+```
+
+Then you can use the following call to generate mp3 files with lead-in messages (example):
+
+    python add_lead_in_messages.py -i '04_Benjamin Blossom' -o /Volumes/TonUINO/04 --google-key=ABCD --add-numbering
+
+What happens:
+
+  - New mp3 files are generated including the lead-in messages. You can also write directly to the SD card (as in the example).
+  - The original files are not changed.
+  - The mp3 data is not re-encoded (so no quality loss).
+  - Optionally, the mp3 files are numbered compatible with DFPlayer Mini. For example `001_Benjamin Blossom has his birthday.mp3` (parameter` --add-numbering`)
+  - The script generates the lead-in messages either with Google Text-to-speech (if the parameter `--google-key` was specified) or with the Mac tool `say`.
+
+The result looks like this:
+
+```
++- /Volumes/TonUINO/04/
+   +- 001_Benjamin Blossom has his birthday.mp3
+   +- 002_Benjamin Blossom on vacation.mp3
+   +- 003_Benjamin Blossom as a pilot.mp3
+```
+
 ## License
 
 GPL v3. See [LICENSE](../LICENSE.md).

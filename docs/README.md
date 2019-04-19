@@ -86,6 +86,43 @@ Wenn dies erfolgreich erledigt ist, können die Audio Meldungen erzeugt werden. 
 4. `python create_audio_messages.py de` ausführen.
 5. Kopiert den Inhalt des Ordners **sd-card** auf die SD Karte.
 
+## Tool für Ansagen
+
+Im Hörspielmodus gibt es das Problem, dass man beim Auflegen der Karte nicht weiß, welche Folge abgespielt wird. Spielt man z.B. Benjamin Blümchen ab, dann kommt immer zuerst der Titelsong, der sich bei allen Folgen gleich anhört.
+
+Das Skript `add_lead_in_messages.py` fügt der mp3-Datei eine Ansage wie z.B. "Benjamin Blümchen im Urlaub" hinzu. Wenn man eine andere Folge hören will, kann man dann einfach nochmal die Benjamin-Blümchen-Karte auflegen.
+
+**Funktionsweise:**
+
+Angenommen man hat einen Ordner mit folgendem Inhalt:
+
+```
++- 04_Benjamin Blümchen/
+   +- Benjamin Blümchen hat Geburtstag.mp3
+   +- Benjamin Blümchen im Urlaub.mp3
+   +- Benjamin Blümchen als Pilot.mp3
+```
+
+Dann kann man mit folgendem Aufruf mp3-Dateien mit Ansagen generieren (Beispiel):
+
+    python add_lead_in_messages.py -i '04_Benjamin Blümchen' -o /Volumes/TonUINO/04 --google-key=ABCD --add-numbering
+
+Was dann passiert:
+  - Es werden neue mp3-Dateien mit den Ansagen erzeugt. Man kann dabei auch direkt auf die SD-Karte schreiben (wie im Beispiel).
+  - Die Original-Dateien werden dabei nicht geändert.
+  - Die mp3-Daten werden nicht neu kodiert (also kein Qualitätsverlust).
+  - Auf Wunsch werden die mp3-Dateien kompatibel zu DFPlayer Mini numeriert. Also z.B. `001_Benjamin Blümchen hat Geburtstag.mp3` (Parameter `--add-numbering`)
+  - Das Skript erzeugt die Ansagen entweder mit Google Text-to-speech (wenn der Parameter `--google-key` angegeben wurde) oder mit dem Mac-Tool `say`.
+
+Das Ergebnis sieht dann so aus:
+
+```
++- /Volumes/TonUINO/04/
+   +- 001_Benjamin Blümchen hat Geburtstag.mp3
+   +- 002_Benjamin Blümchen im Urlaub.mp3
+   +- 003_Benjamin Blümchen als Pilot.mp3
+```
+
 ## Lizenz
 
 GPL v3. Siehe [LICENSE](../LICENSE.md).
