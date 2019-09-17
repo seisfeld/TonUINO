@@ -103,7 +103,7 @@ def postJson(url, postBody, headers = None):
 
 def postForm(url, formData):
     response = subprocess.check_output(['curl', '-H', 'Content-Type: application/x-www-form-urlencoded; charset=utf-8', '--data', urllib.urlencode(formData), url])
-    return json.loads(response)
+    return json.loads(response.decode('utf-8'))
 
 
 if __name__ == '__main__':
