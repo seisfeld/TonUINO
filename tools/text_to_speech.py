@@ -3,7 +3,7 @@
 # Converts text into spoken language saved to an mp3 file.
 
 
-import argparse, base64, json, os, subprocess, sys, urllib
+import argparse, base64, json, os, subprocess, sys, urllib.request
 
 
 class PatchedArgumentParser(argparse.ArgumentParser):
@@ -91,19 +91,16 @@ def textToSpeech(text, targetFile, lang='de', useAmazon=False, useGoogleKey=None
         os.remove('temp.aiff')
 
 
-def postJson(url, postBody, headers = None):
-    cmd = ['curl']
-    if headers is not None:
-        for header in headers:
-            cmd.extend(['-H', header])
-    cmd.extend(['-H', 'Content-Type: application/json; charset=utf-8', '--data', json.dumps(postBody).encode('utf-8'), url])
-    response = subprocess.check_output(cmd)
-    return json.loads(response.decode('utf-8'))
-
-
-def postForm(url, formData):
-    response = subprocess.check_output(['curl', '-H', 'Content-Type: application/x-www-form-urlencoded; charset=utf-8', '--data', urllib.urlencode(formData), url])
-    return json.loads(response)
+def postJson(postUrl, postBody, headers = {}):
+    headers['Content-Type'] = 'application/json; charset=utf-8'
+    postData = json.dumps(postBody).encode('utf-8')
+    try:
+        postRequest = urllib.request.Request(postUrl, postData, headers)
+        with urllib.request.urlopen(postRequest) as req:
+            postResponseData=req.read()
+        return json.loads(postResponseData.decode())
+    except Exception as e:
+        print(e)
 
 
 if __name__ == '__main__':
