@@ -153,6 +153,12 @@
 
   [1] https://www.pololu.com/product/2535
 
+  display album(@setup) & track(@playback) numbers:
+  =================================================
+
+  Connect a TM1637 display to pins D5(CLK) and D6(DIO) and uncomment the '#define DISPLAY_TRACK' below
+  to enable the displaying of the album and track numbers.
+
   cubiekid:
   =========
 
@@ -209,6 +215,7 @@
   AceButton.h - https://github.com/bxparks/AceButton
   IRremote.h - https://github.com/z3t0/Arduino-IRremote
   WS2812.h - https://github.com/cpldcpu/light_ws2812
+  TM1637Display.h - https://github.com/avishorp/TM1637
   Vcc.h - https://github.com/Yveaux/Arduino_Vcc
 */
 
@@ -232,6 +239,9 @@
 
 // uncomment the below line to flip the shutdown pin logic
 // #define POLOLUSWITCH
+
+// uncomment the below line to enable display support
+#define DISPLAY_TRACK
 
 // include required libraries
 #include <avr/sleep.h>
@@ -258,6 +268,11 @@ using namespace ace_button;
 // include additional library if low voltage shutdown support is enabled
 #if defined LOWVOLTAGE
 #include <Vcc.h>
+#endif
+
+// include additional library if display support is enabled
+#if defined DISPLAY_TRACK
+#include <TM1637Display.h>
 #endif
 
 // playback modes
@@ -357,6 +372,16 @@ const float shutdownMinVoltage = 4.4;                        // minimum expected
 const float shutdownWarnVoltage = 4.8;                       // warning voltage level (in volts)
 const float shutdownMaxVoltage = 5.0;                        // maximum expected voltage level (in volts)
 const float shutdownVoltageCorrection = 1.0 / 1.0;           // voltage measured by multimeter divided by reported voltage
+#endif
+
+#if defined DISPLAY_TRACK
+// define constants for display feature
+const int displayBrightness = 4;                           // display brightness (0 - lowest, 15 - highest)
+const int displayClk = 5;                                  // display CLK pin (D5)
+const int displayDio = 6;                                  // display DIO pin (D6)
+const uint8_t on_txt[] = { 0x3f, 0x54, 0x00, 0x00 };       // on text
+const uint8_t t_txt[] = { 0xF8 };                          // t. text
+const uint8_t a_txt[] = { 0xF7 };                          // A. text
 #endif
 
 // define strings
@@ -534,6 +559,10 @@ WS2812 rgbLed(statusLedCount);                                                //
 Vcc shutdownVoltage(shutdownVoltageCorrection);                               // create Vcc instance
 #endif
 
+#if defined DISPLAY_TRACK
+TM1637Display display(displayClk, displayDio);
+#endif
+
 void setup() {
   // things we need to do immediately on startup
   pinMode(shutdownPin, OUTPUT);
@@ -669,6 +698,11 @@ void setup() {
     }
 #endif
   }
+
+#if defined DISPLAY_TRACK
+  display.setBrightness(displayBrightness);
+  display.setSegments(on_txt);
+#endif
 
   switchButtonConfiguration(PAUSE);
   mp3.playMp3FolderTrack(800);
@@ -1258,6 +1292,11 @@ void waitPlaybackToFinish(uint8_t red, uint8_t green, uint8_t blue, uint16_t sta
 
 // prints current mode, folder and track information
 void printModeFolderTrack(bool cr) {
+  // display track number
+#if defined DISPLAY_TRACK
+  display.showNumberDec(playback.playListItem, false, 4, 4);
+  display.setSegments(t_txt, 1, 0);
+#endif
   Serial.print(playbackModeName[playback.currentTag.mode]);
   Serial.print(F("-"));
   Serial.print(playback.currentTag.folder);
@@ -1737,7 +1776,13 @@ uint8_t prompt(uint8_t promptOptions, uint16_t promptHeading, uint16_t promptOff
       promptResult = min(promptResult + 1, promptOptions);
       Serial.println(promptResult);
       if (promptPreview) {
-        if (promptFolder == 0) mp3.playFolderTrack(promptResult, 1);
+        if (promptFolder == 0) {
+          mp3.playFolderTrack(promptResult, 1);
+#if defined DISPLAY_TRACK
+          display.showNumberDec(promptResult, false, 4, 4);
+          display.setSegments(a_txt, 1, 0);
+#endif
+        }
         else mp3.playFolderTrack(promptFolder, promptResult);
       }
       else {
@@ -1750,7 +1795,13 @@ uint8_t prompt(uint8_t promptOptions, uint16_t promptHeading, uint16_t promptOff
       promptResult = max(promptResult - 1, 1);
       Serial.println(promptResult);
       if (promptPreview) {
-        if (promptFolder == 0) mp3.playFolderTrack(promptResult, 1);
+        if (promptFolder == 0) { 
+          mp3.playFolderTrack(promptResult, 1);
+#if defined DISPLAY_TRACK
+          display.showNumberDec(promptResult, false, 4, 4);
+          display.setSegments(a_txt, 1, 0);
+#endif
+        }
         else mp3.playFolderTrack(promptFolder, promptResult);
       }
       else {

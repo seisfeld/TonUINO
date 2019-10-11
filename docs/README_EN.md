@@ -42,6 +42,7 @@ This is my alternative firmware for the wonderful [TonUINO](https://www.voss.ear
 - **Optional:** IR remote control (incl. box lock). The remote (which needs at least 7 keys) can be learned in using the parents menu.
 - **Optional:** Vanilla status LED.
 - **Optional:** WS281x status LED(s).
+- **Optional:** support for TM1637 display for displaying of the track and album number.
 - **Optional:** Low voltage shutdown i.e. for the [CubieKid PCB](https://www.thingiverse.com/thing:3148200).
 - **Optional:** [Pololu Power Switch (LV)](https://www.pololu.com/product/2808) support.
 
