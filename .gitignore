@@ -29,3 +29,6 @@ Temporary Items
 # TonUINO
 /sd-card*
 /tools/*.pyc
+
+# eclipse
+/.project
