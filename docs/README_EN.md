@@ -75,12 +75,13 @@ The audio messages have been generated with Amazon Polly and can be downloaded i
 
 - German: [audio-messages-polly-de.zip](https://seisfeld.github.io/tonuino/audio-messages-polly-de.zip)
 - English: [audio-messages-polly-en.zip](https://seisfeld.github.io/tonuino/audio-messages-polly-en.zip)
+- Dutch: [audio-messages-polly-nl.zip](https://seisfeld.github.io/tonuino/audio-messages-polly-nl.zip)
 
 Extract the `.zip` file and copy the folders **advert** and **mp3** to the SD Card. Done.
 
 ### Create the audio messages yourself
 
-If you want to, you can as well create the matching set of audio messages yourself, using the `create_audio_messages.py` python script from this repo. This way then also offers different text-to-speech engines if you like (see below). The script can create **english** and **german** audio messages. It is tested on macOS, but you should be able to run it on Windows / Linux with minimal effort - given you resolve the dependencies (like [Python](https://www.python.org/downloads/)).
+If you want to, you can as well create the matching set of audio messages yourself, using the `create_audio_messages.py` python script from this repo. This way then also offers different text-to-speech engines if you like (see below). The script can create **german**, **english** as well as **dutch** audio messages (**french** is also supported, but there is currently no source file included). It is tested on macOS, but you should be able to run it on Windows / Linux with minimal effort - given you resolve the dependencies (like [Python](https://www.python.org/downloads/)).
 
 The script is able utilize three text-to-speech engines:
 
