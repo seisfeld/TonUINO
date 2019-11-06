@@ -1,10 +1,13 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 # Converts text into spoken language saved to an mp3 file.
 
 
-import argparse, base64, json, os, subprocess, sys, urllib.request
-
+import argparse, base64, json, os, subprocess, sys
+try:
+    import urllib.request
+except ImportError:
+    print("WARNING: It looks like your are using an old Python version. Please use Python 3 if you intend to Google Text to Speech.")
 
 class PatchedArgumentParser(argparse.ArgumentParser):
     def error(self, message):
