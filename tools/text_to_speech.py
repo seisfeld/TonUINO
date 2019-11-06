@@ -7,7 +7,7 @@ import argparse, base64, json, os, subprocess, sys
 try:
     import urllib.request
 except ImportError:
-    print("WARNING: It looks like your are using an old Python version. Please use Python 3 if you intend to use Google Text to Speech.")
+    print("WARNING: It looks like you are using an old version of Python. Please use Python 3 if you intend to use Google Text to Speech.")
 
 class PatchedArgumentParser(argparse.ArgumentParser):
     def error(self, message):
