@@ -1,0 +1,66 @@
+0800.mp3|Daar gaan we!
+0801.mp3|Een nieuwe kaart gevonden. Laat de kaart op de doos liggen, tot hij is geconfigureerd. Je kunt nu met de volume knoppen de map uitkiezen, en met de pause knop bevestigen. Je kunt afbreken door lang op de pause knop te drukken.
+0802.mp3|Ok, lievelings volgorde. Je kunt nu met de volume toetsen een lievelingsvolgorde kiezen, en met de pause knop bevestigen.
+0803.mp3|Ok. Virtuele map, je kunt nu met de volume toetsen een start plek kiezen, en met de pause knop bevestigen. Je kunt afbreken door lang op de pause knop te drukken.
+0804.mp3|Ok. Je kunt nu met de volume toetsen een eind plek kiezen, en met de pause knop bevestigen. Je kunt afbreken door lang op de pause knop te drukken.
+0805.mp3|Ok, de kaart is geconfigureerd, veel plezier ermee!
+0806.mp3|Bij het configureren van de kaart is iets mis gegaan, probeer het opnieuw.
+0807.mp3|Kaart configureren is afgebroken.
+0808.mp3|Oh nee, mijn batterij is bijna op, vraag aan papa of mama om me op te laden, nu zet ik mezelf uit.
+0809.mp3|Reset gelukt.
+0810.mp3|Voer de PIN code in
+0811.mp3|PIN code invoeren afgebroken.
+0820.mp3|Ok. Je kunt nu de weergavemodus instellen met de volume toetsen, en met de pause knop bevestigen. Je kunt afbreken door lang op de pause knop te drukken.
+0821.mp3|Verhaal modus. Ik kies een verhaaltje uit.
+0822.mp3|Album modus. Ik speel het helemaal af.
+0823.mp3|Feest. Ik speel alles lekker door elkaar.
+0824.mp3|Lievelings liedje. Ik speel nu jouw lievelingsliedje af.
+0825.mp3|Luisterboek modus. Ik speel alle hoofdstukken af.
+0826.mp3|Virtuele map, in verhaal modus. Ik kies een verhaaltje uit.
+0827.mp3|Virtuele map, album modus. Ik speel het helemaal af.
+0828.mp3|Virtuele map, in feest modus. Ik speel alles lekker door elkaar.
+0900.mp3|Papa en mama menu. Je kunt nu met de volume toetsen een optie kiezen, en met de pause knop bevestigen. Je kunt afbreken door lang op de pause knop te drukken.
+0901.mp3|Instelling opgeslagen.
+0902.mp3|Luisterboek voortgang gewist.
+0903.mp3|Instellingen gewist.
+0904.mp3|Ouder menu gestopt.
+0910.mp3|Kaartje wissen.
+0911.mp3|Start volume opslaan.
+0912.mp3|Maximaal volume opslaan.
+0913.mp3|Menu volume opslaan.
+0914.mp3|Equalizer opslaan.
+0915.mp3|Afstandsbediening leren. Je hebt een afstandsbediening nodig met tenminste 7 knoppen.
+0916.mp3|Shutdown Timer opslaan.
+0917.mp3|Wis luisterboek voortgang.
+0918.mp3|Wis instellingen.
+0919.mp3|Box uitzetten.
+0920.mp3|Leg het kaartje wat je wilt wissen op de doos, en wacht op bevestiging.
+0921.mp3|Ok, het kaartje is gewist.
+0922.mp3|Bij het wissen van het kaartje is iets mis gegaan, probeer het opnieuw.
+0923.mp3|Kaartje wissen afgebroken.
+0930.mp3|Je kunt nu het startvolume kiezen met de volume toetsen, en met de pause knop bevestigen. Je kunt afbreken door lang op de pause knop te drukken.
+0931.mp3|Je kunt nu het maximale volume kiezen met de volume toetsen, en met de pause knop bevestigen. Je kunt afbreken door lang op de pause knop te drukken.
+0932.mp3|Je kunt nu het menu volume kiezen met de volume toetsen, en met de pause knop bevestigen. Je kunt afbreken door lang op de pause knop te drukken.
+0940.mp3|Je kunt nu de equalizer instelling kiezen met de volume toetsen, en met de pause knop bevestigen. Je kunt afbreken door lang op de pause knop te drukken.
+0941.mp3|Normaal
+0942.mp3|Pop
+0943.mp3|Rock
+0944.mp3|Jazz
+0945.mp3|Classic
+0946.mp3|Bass
+0950.mp3|Deze functie heeft een infrarood ontvanger nodig.
+0951.mp3|Druk op de volume hoger knop op de afstandsbediening. Volume hoger knop.
+0952.mp3|Druk op de volume lager knop op de afstandsbediening. Volume lager knop.
+0953.mp3|Druk op de vorige titel knop op de afstandsbediening. Vorige titel knop.
+0954.mp3|Druk op de volgende titel knop op de afstandsbediening. Volgende titel knop.
+0955.mp3|Druk op de bevestiging knop op de afstandsbediening. Bevestiging knop.
+0956.mp3|Druk op de menu knop op de afstandsbediening. Menu knop.
+0957.mp3|Druk op de play/pauze knop op de afstandsbediening. Play/pause knop.
+0960.mp3|Je kunt nu de shutdown timer tijd kiezen met de volume toetsen, en met de pause knop bevestigen. Je kunt afbreken door lang op de pause knop te drukken.
+0961.mp3|5 Minuten.
+0962.mp3|10 Minuten.
+0963.mp3|15 Minuten.
+0964.mp3|20 Minuten.
+0965.mp3|30 Minuten.
+0966.mp3|60 Minuten.
+0967.mp3|Shutdown Timer deactiveren.

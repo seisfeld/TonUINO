@@ -76,12 +76,15 @@ The audio messages have been generated with Amazon Polly and can be downloaded i
 
 - German: [audio-messages-polly-de.zip](https://seisfeld.github.io/tonuino/audio-messages-polly-de.zip)
 - English: [audio-messages-polly-en.zip](https://seisfeld.github.io/tonuino/audio-messages-polly-en.zip)
+- Dutch: [audio-messages-polly-nl.zip](https://seisfeld.github.io/tonuino/audio-messages-polly-nl.zip)
 
 Extract the `.zip` file and copy the folders **advert** and **mp3** to the SD Card. Done.
 
 ### Create the audio messages yourself
 
-If you want to, you can as well create the matching set of audio messages yourself, using the `create_audio_messages.py` python script from this repo. This way then also offers different text-to-speech engines if you like (see below). The script can create **english** and **german** audio messages. It is tested on macOS, but you should be able to run it on Windows / Linux with minimal effort - given you resolve the dependencies (like [Python](https://www.python.org/downloads/)).
+If you want to, you can as well create the matching set of audio messages yourself, using the `create_audio_messages.py` python script from this repo. This way then also offers different text-to-speech engines if you like (see below). The script can create **german**, **english** as well as **dutch** audio messages (**french** is also supported, but there is currently no source file included). It is tested on macOS, Linux and Windows, and requires `Python 3` and `ffmpeg`.
+
+Install Python 3 using your favorite package manager on Linux, macOS users can use [Homebrew](https://brew.sh): `brew install python` and for Windows it can be [downloaded here](https://www.python.org/downloads/windows/).
 
 The script is able utilize three text-to-speech engines:
 
@@ -97,7 +100,7 @@ In addition to `say` (part of macOS) you also need `ffmpeg`.
 
 1. Install `ffmpeg`, i.e. via [Homebrew](https://brew.sh): `brew install ffmpeg`
 2. Change into the folder where you unzipped the `.zip` from GitHub or where you cloned the repo to.
-3. Run `tools/python create_audio_messages.py --use-say --lang=en`.
+3. Run `python3 tools/create_audio_messages.py --use-say --lang=en`.
 4. Copy the contents of the folder **sd-card** to the SD Card. Done.
 
 #### Create audio messages using Amazon Polly
@@ -106,21 +109,21 @@ In addition to `say` (part of macOS) you also need `ffmpeg`.
 2. [Install](https://docs.aws.amazon.com/en_us/cli/latest/userguide/cli-chap-install.html) (Windows / Linux) the `aws` command line tool. On macOS i.e. via [Homebrew](https://brew.sh): `brew install awscli`.
 3. [Configure](https://docs.aws.amazon.com/en_us/cli/latest/userguide/cli-chap-configure.html) the the `aws` command line tool.
 4. Change into the folder where you unzipped the `.zip` from GitHub or where you cloned the repo to.
-5. Run `python tools/create_audio_messages.py --use-amazon --lang=en`.
+5. Run `python3 tools/create_audio_messages.py --use-amazon --lang=en`.
 6. Copy the contents of the folder **sd-card** to the SD Card. Done.
 
 #### Create audio messages using Googles text-to-speech service
 
 1. Go to Googles [Cloud text-to-speech](https://cloud.google.com/text-to-speech/) website, create an account and API key.
 2. Change into the folder where you unzipped the `.zip` from GitHub or where you cloned the repo to.
-4. Run `python tools/create_audio_messages.py --use-google-key=ABCD --lang=en`.
+4. Run `python3 tools/create_audio_messages.py --use-google-key=ABCD --lang=en`.
 5. Copy the contents of the folder **sd-card** to the SD Card. Done.
 
 #### Help and additional options
 
 The python script offers additional options, run the following command to get an overview:
 
-- `python tools/create_audio_messages.py --help`
+- `python3 tools/create_audio_messages.py --help`
 
 ## Add Lead-In Messages To mp3 Files
 
@@ -141,7 +144,7 @@ Suppose you have a folder with the following content:
 
 Then you can use the following command to generate mp3 files with lead-in messages (example):
 
-    python tools/add_lead_in_messages.py -i '04_Benjamin the Elephant' -o /Volumes/TonUINO/04 --google-key=ABCD --add-numbering
+    python3 tools/add_lead_in_messages.py -i '04_Benjamin the Elephant' -o /Volumes/TonUINO/04 --google-key=ABCD --add-numbering
 
 What happened:
 
@@ -167,7 +170,7 @@ The result looks like this:
 
 The python script offers additional options, run the following command to get an overview:
 
-- `python tools/add_lead_in_messages.py --help`
+- `python3 tools/add_lead_in_messages.py --help`
 
 ## License
 

@@ -78,12 +78,15 @@ Die Audio Meldungen sind mit Amazon Polly generiert worden und können in versch
 
 - Deutsch: [audio-messages-polly-de.zip](https://seisfeld.github.io/tonuino/audio-messages-polly-de.zip)
 - Englisch: [audio-messages-polly-en.zip](https://seisfeld.github.io/tonuino/audio-messages-polly-en.zip)
+- Niederländisch: [audio-messages-polly-nl.zip](https://seisfeld.github.io/tonuino/audio-messages-polly-nl.zip)
 
 Die `.zip` Datei entpacken und die Ordner **advert** und **mp3** auf die SD Karte kopieren. Fertig.
 
 ### Audio Meldungen selbst erzeugen
 
-Das passende Set an Audio Meldungen lässt sich auch jederzeit mit dem beigelegten Python Skript `create_audio_messages.py` erzeugen. Hier sind dann auch weitere text-to-speech Engines möglich wenn ihr möchtet (siehe unten). Das Skript kann sowohl **deutsche** als auch **englische** Audio Meldungen erzeugen. Es ist unter macOS getested, sollte aber mit minimalem Aufwand auch unter Windows / Linux laufen - wenn alle Abhängigkeiten (wie z.B. [Python](https://www.python.org/downloads/)) erfüllt werden.
+Das passende Set an Audio Meldungen lässt sich auch jederzeit mit dem beigelegten Python Skript `create_audio_messages.py` erzeugen. Hier sind dann auch weitere text-to-speech Engines möglich wenn ihr möchtet (siehe unten). Das Skript kann sowohl **deutsche**, **englische** als auch **niederländische** Audio Meldungen erzeugen (unterstützt wird ebenfalls **französisch**, es liegt dafür allerdings momentan keine Quelldatei bei). Es ist unter macOS, Linux und Windows getested, und benötigt **Python 3** und ggf. **ffmpeg**.
+
+Unter Linux kann Python 3 mit dem zur Distribution gehörenden Paketmanager installiert werden. macOS Nutzer benutzen z.B. [Homebrew](https://brew.sh): `brew install python` und für Windows kann es [hier heruntergeladen werden](https://www.python.org/downloads/windows/).
 
 Das Skript unerstützt dabei die Nutzung von drei text-to-speech Engines:
 
@@ -99,7 +102,7 @@ Neben dem Tool `say` (ist Teil von macOS) wird hier noch `ffmpeg` benötigt.
 
 1. `ffmpeg` installieren, z.B. via [Homebrew](https://brew.sh): `brew install ffmpeg`
 2. In den Ordner wechseln wo ihr die `.zip` Datei von GitHub entpackt, bzw. das Repository gecloned habt.
-3. `python tools/create_audio_messages.py --use-say` ausführen.
+3. `python3 tools/create_audio_messages.py --use-say` ausführen.
 4. Kopiert nun den Inhalt des Ordners **sd-card** auf die SD Karte. Fertig.
 
 #### Audio Meldungen mit Amazon Polly erzeugen
@@ -108,21 +111,21 @@ Neben dem Tool `say` (ist Teil von macOS) wird hier noch `ffmpeg` benötigt.
 2. Das Tool `aws` [installieren](https://docs.aws.amazon.com/de_de/cli/latest/userguide/cli-chap-install.html) (Windows / Linux), macOS z.B. via [Homebrew](https://brew.sh): `brew install awscli`.
 3. Das Tool `aws` [konfigurieren](https://docs.aws.amazon.com/de_de/cli/latest/userguide/cli-chap-configure.html).
 4. In den Ordner wechseln wo ihr die `.zip` Datei von GitHub entpackt, bzw. das Repository gecloned habt.
-5. `python tools/create_audio_messages.py --use-amazon` ausführen.
+5. `python3 tools/create_audio_messages.py --use-amazon` ausführen.
 6. Kopiert nun den Inhalt des Ordners **sd-card** auf die SD Karte. Fertig.
 
 #### Audio Meldungen mit dem Cloud text-to-speech Service von Google erzeugen
 
 1. Auf Googles [Cloud text-to-speech](https://cloud.google.com/text-to-speech/) Webseite einen Account anlegen und einen API-Key erzeugen.
 2. In den Ordner wechseln wo ihr die `.zip` Datei von GitHub entpackt, bzw. das Repository gecloned habt.
-3. `python tools/create_audio_messages.py --use-google-key=ABCD` ausführen.
+3. `python3 tools/create_audio_messages.py --use-google-key=ABCD` ausführen.
 4. Kopiert nun den Inhalt des Ordners **sd-card** auf die SD Karte. Fertig.
 
 #### Hilfe und weitere Optionen
 
 Das Python Skript hat noch einige weitere Funktionen. Eine Übersicht gibt:
 
-- `python tools/create_audio_messages.py --help`
+- `python3 tools/create_audio_messages.py --help`
 
 ## Titelansagen in MP3-Dateien einfügen
 
@@ -143,7 +146,7 @@ Angenommen man hat einen Ordner mit folgendem Inhalt:
 
 Dann kann man mit folgendem Aufruf MP3-Dateien mit Ansagen generieren (Beispiel):
 
-    python tools/add_lead_in_messages.py -i '04_Benjamin Blümchen' -o /Volumes/TonUINO/04 --google-key=ABCD --add-numbering
+    python3 tools/add_lead_in_messages.py -i '04_Benjamin Blümchen' -o /Volumes/TonUINO/04 --google-key=ABCD --add-numbering
 
 Was dann passiert:
 
@@ -169,7 +172,7 @@ Das Ergebnis sieht dann so aus:
 
 Das Python Skript hat noch einige weitere Funktionen. Eine Übersicht gibt:
 
-- `python tools/add_lead_in_messages.py --help`
+- `python3 tools/add_lead_in_messages.py --help`
 
 ## Lizenz
 
