@@ -245,7 +245,7 @@
 // #define POLOLUSWITCH
 
 // uncomment the below line to enable display support
-#define DISPLAY_TRACK
+// #define DISPLAY_TRACK
 
 // include required libraries
 #include <avr/sleep.h>
