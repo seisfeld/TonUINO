@@ -1,0 +1,66 @@
+0800.mp3|Vamos!
+0801.mp3|Acabo de detectar una tarjeta nueva, Por favor inténtalo de nuevo déjala encima hasta que acabe de configurarla. Usa los botones de volumen para escojer una carpeta y confirma con el botón de pausa. Mantén presionado el botón de pausa para cancelar.
+0802.mp3|Vale, solo una vez. Usa los botones de volumen para escojer una pista y confirma con el botón de pausa. Para cancelar, mantén presionado el botón de pausa.
+0803.mp3|Vale. Usa los botones de volumen para escojer la primera pista de la carpeta virtual y confirma con el botón de pausa. Para cancelar, mantén presionado el botón de pausa.
+0804.mp3|Vale. Usa los botones de volumen para escojer la última pista de la carpeta virtual y confirma con el botón de pausa. Para cancelar, mantén presionado el botón de pausa.
+0805.mp3|Vale, la tarjeta est#a configurada. Diviértete.
+0806.mp3|Ha ocurrido un error al configurar la tarjeta. Por favor inténtalo de nuevo.
+0807.mp3|Configuración de tarjeta cancelada.
+0808.mp3|Ups, me he quedado sin batería. Díle a mama o papa que las cambie. Me voy a apagar ahora, adios.
+0809.mp3|Reset completado.
+0810.mp3|Por favor intruduce PIN.
+0811.mp3|Esperando al PIN cancelado.
+0820.mp3|Vale, Usa los botones de volumen para escojer el modo de reproducción y confirma con el botón de pausa. Para cancelar, mantén presionado el botón de pausa..
+0821.mp3|Modo historia. Reproduce una pista aleatoria de la carpeta.
+0822.mp3|Modo Album. Reproduce la carpeta entera.
+0823.mp3|Modo fiesta. Reproduce una carpeta completa al aleatoria.
+0824.mp3|Modo simple. Reproduce solo una pista de la carpeta.
+0825.mp3|Modo audiolibro. Reproduce la carpeta entera acordándome del progreso.
+0826.mp3|Carpeta virtual, modo historia. Reproduce una pista aleatoria entre la primera y la última.
+0827.mp3|Carpeta virtual, modo album. Reproduce todas las pistas entre la primera y la última.
+0828.mp3|Carpeta virtual, modo fiesta. Reproduce de modo aleatorio todas las pistas entre la primera y la última.
+0900.mp3|Menu para los padres. Usa los botones de volumen para escojer una opción y confirma con el botón de pausa. Para cancelar, mantén presionado el botón de pausa.
+0901.mp3|Ajustes guardados.
+0902.mp3|Progreso del audiolibro borrado.
+0903.mp3|Ajustes borrados.
+0904.mp3|Saliendo del menu de padres.
+0910.mp3|Borra la tarjeta de memória.
+0911.mp3|Ajusta el volúmen inicial.
+0912.mp3|Ajusta el volúmen máximo.
+0913.mp3|Ajusta el volúmen de mi voz.
+0914.mp3|Escoje el preset del ecualizador.
+0915.mp3|Aprende el mando a distancia por infrarrojos. Necesitas un mando con almenos 7 botones.
+0916.mp3|Ajusta el tiempo para auto apagarse.
+0917.mp3|Resetea el progreso de un audiolibro.
+0918.mp3|Resetea los ajustes.
+0919.mp3|Apaga el sistema.
+0920.mp3|Por favor pon la tarjeta encima y espera un mensaje afirmativo.
+0921.mp3|Vale, tarjeta borrada.
+0922.mp3|Ha habido un problema borrando la tarjeta. Por favor inténtalo de nuevo.
+0923.mp3|Borrado de tarjeta cancelado.
+0930.mp3|Usa los botones de volumen para escojer el volúmen inicial y confirma con el botón de pausa. Para cancelar, mantén presionado el botón de pausa..
+0931.mp3|Usa los botones de volumen para escojer el volúmen máximo y confirma con el botón de pausa. Para cancelar, mantén presionado el botón de pausa..
+0932.mp3|Usa los botones de volumen para escojer el volúmen de mi voz y confirma con el botón de pausa. Para cancelar, mantén presionado el botón de pausa..
+0940.mp3|Usa los botones de volumen para ajustar el ecualizador y confirma con el botón de pausa. Para cancelar, mantén presionado el botón de pausa..
+0941.mp3|Normal
+0942.mp3|Pop
+0943.mp3|Rock
+0944.mp3|Jazz
+0945.mp3|Clasica
+0946.mp3|Bass
+0950.mp3|Esta función necesita un mando a distancia, el cual necesita ser habilitado en el código del programa.
+0951.mp3|Presiona en el mando el botón de más volúmen.
+0952.mp3|Presiona en el mando el botón de menos volúmen.
+0953.mp3|Presiona en el mando el botón de pista anterior.
+0954.mp3|Presiona en el mando el botón de pista siguiente.
+0955.mp3|Presiona en el mando el botón central.
+0956.mp3|Presiona en el mando el botón menu.
+0957.mp3|Presiona en el mando el botón de play/pausa.
+0960.mp3|Usa los botones de volumen para escojer el timepo de autoapagado y confirma con el botón de pausa. Para cancelar, mantén presionado el botón de pausa..
+0961.mp3|5 minutos.
+0962.mp3|10 minutos.
+0963.mp3|15 minutos.
+0964.mp3|20 minutos.
+0965.mp3|30 minutos.
+0966.mp3|60 minutos.
+0967.mp3|Desactiva el auto apagado.
