@@ -28,6 +28,7 @@ googleVoiceByLang = {
     'en': { 'languageCode': 'en-US', 'name': 'en-US-Wavenet-C' },
     'fr': { 'languageCode': 'fr-FR', 'name': 'fr-FR-Wavenet-C' },
     'nl': { 'languageCode': 'nl-NL', 'name': 'nl-NL-Wavenet-A' },
+    'es': { 'languageCode': 'es-ES', 'name': '' }
 }
 amazonVoiceByLang = {
     # See: https://docs.aws.amazon.com/de_de/polly/latest/dg/voicelist.html
@@ -35,6 +36,7 @@ amazonVoiceByLang = {
     'en': 'Joanna',
     'fr': 'Celine',
     'nl': 'Lotte',
+    'es': 'Lucia'
 }
 
 
