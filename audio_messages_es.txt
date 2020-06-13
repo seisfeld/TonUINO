@@ -1,5 +1,5 @@
 0800.mp3|Vamos!
-0801.mp3|Acabo de detectar una tarjeta nueva, Por favor inténtalo de nuevo déjala encima hasta que acabe de configurarla. Usa los botones de volumen para escojer una carpeta y confirma con el botón de pausa. Mantén presionado el botón de pausa para cancelar.
+0801.mp3|Acabo de detectar una tarjeta nueva, por favor inténtalo de nuevo déjala encima hasta que acabe de configurarla. Usa los botones de volumen para escojer una carpeta y confirma con el botón de pausa. Mantén presionado el botón de pausa para cancelar.
 0802.mp3|Vale, solo una vez. Usa los botones de volumen para escojer una pista y confirma con el botón de pausa. Para cancelar, mantén presionado el botón de pausa.
 0803.mp3|Vale. Usa los botones de volumen para escojer la primera pista de la carpeta virtual y confirma con el botón de pausa. Para cancelar, mantén presionado el botón de pausa.
 0804.mp3|Vale. Usa los botones de volumen para escojer la última pista de la carpeta virtual y confirma con el botón de pausa. Para cancelar, mantén presionado el botón de pausa.
@@ -10,7 +10,7 @@
 0809.mp3|Reset completado.
 0810.mp3|Por favor intruduce PIN.
 0811.mp3|Esperando al PIN cancelado.
-0820.mp3|Vale, Usa los botones de volumen para escojer el modo de reproducción y confirma con el botón de pausa. Para cancelar, mantén presionado el botón de pausa.
+0820.mp3|Vale, usa los botones de volumen para escojer el modo de reproducción y confirma con el botón de pausa. Para cancelar, mantén presionado el botón de pausa.
 0821.mp3|Modo historia. Reproduce una pista aleatoria de la carpeta.
 0822.mp3|Modo Album. Reproduce la carpeta entera.
 0823.mp3|Modo fiesta. Reproduce una carpeta completa al aleatoria.
