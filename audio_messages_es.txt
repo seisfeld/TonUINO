@@ -3,14 +3,14 @@
 0802.mp3|Vale, solo una vez. Usa los botones de volumen para escojer una pista y confirma con el botón de pausa. Para cancelar, mantén presionado el botón de pausa.
 0803.mp3|Vale. Usa los botones de volumen para escojer la primera pista de la carpeta virtual y confirma con el botón de pausa. Para cancelar, mantén presionado el botón de pausa.
 0804.mp3|Vale. Usa los botones de volumen para escojer la última pista de la carpeta virtual y confirma con el botón de pausa. Para cancelar, mantén presionado el botón de pausa.
-0805.mp3|Vale, la tarjeta est#a configurada. Diviértete.
+0805.mp3|Vale, la tarjeta est'a configurada. Diviértete.
 0806.mp3|Ha ocurrido un error al configurar la tarjeta. Por favor inténtalo de nuevo.
 0807.mp3|Configuración de tarjeta cancelada.
 0808.mp3|Ups, me he quedado sin batería. Díle a mama o papa que las cambie. Me voy a apagar ahora, adios.
 0809.mp3|Reset completado.
 0810.mp3|Por favor intruduce PIN.
 0811.mp3|Esperando al PIN cancelado.
-0820.mp3|Vale, Usa los botones de volumen para escojer el modo de reproducción y confirma con el botón de pausa. Para cancelar, mantén presionado el botón de pausa..
+0820.mp3|Vale, Usa los botones de volumen para escojer el modo de reproducción y confirma con el botón de pausa. Para cancelar, mantén presionado el botón de pausa.
 0821.mp3|Modo historia. Reproduce una pista aleatoria de la carpeta.
 0822.mp3|Modo Album. Reproduce la carpeta entera.
 0823.mp3|Modo fiesta. Reproduce una carpeta completa al aleatoria.
@@ -38,10 +38,10 @@
 0921.mp3|Vale, tarjeta borrada.
 0922.mp3|Ha habido un problema borrando la tarjeta. Por favor inténtalo de nuevo.
 0923.mp3|Borrado de tarjeta cancelado.
-0930.mp3|Usa los botones de volumen para escojer el volúmen inicial y confirma con el botón de pausa. Para cancelar, mantén presionado el botón de pausa..
-0931.mp3|Usa los botones de volumen para escojer el volúmen máximo y confirma con el botón de pausa. Para cancelar, mantén presionado el botón de pausa..
-0932.mp3|Usa los botones de volumen para escojer el volúmen de mi voz y confirma con el botón de pausa. Para cancelar, mantén presionado el botón de pausa..
-0940.mp3|Usa los botones de volumen para ajustar el ecualizador y confirma con el botón de pausa. Para cancelar, mantén presionado el botón de pausa..
+0930.mp3|Usa los botones de volumen para escojer el volúmen inicial y confirma con el botón de pausa. Para cancelar, mantén presionado el botón de pausa.
+0931.mp3|Usa los botones de volumen para escojer el volúmen máximo y confirma con el botón de pausa. Para cancelar, mantén presionado el botón de pausa.
+0932.mp3|Usa los botones de volumen para escojer el volúmen de mi voz y confirma con el botón de pausa. Para cancelar, mantén presionado el botón de pausa.
+0940.mp3|Usa los botones de volumen para ajustar el ecualizador y confirma con el botón de pausa. Para cancelar, mantén presionado el botón de pausa.
 0941.mp3|Normal
 0942.mp3|Pop
 0943.mp3|Rock
@@ -56,7 +56,7 @@
 0955.mp3|Presiona en el mando el botón central.
 0956.mp3|Presiona en el mando el botón menu.
 0957.mp3|Presiona en el mando el botón de play/pausa.
-0960.mp3|Usa los botones de volumen para escojer el timepo de autoapagado y confirma con el botón de pausa. Para cancelar, mantén presionado el botón de pausa..
+0960.mp3|Usa los botones de volumen para escojer el timepo de autoapagado y confirma con el botón de pausa. Para cancelar, mantén presionado el botón de pausa.
 0961.mp3|5 minutos.
 0962.mp3|10 minutos.
 0963.mp3|15 minutos.
