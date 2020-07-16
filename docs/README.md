@@ -78,12 +78,13 @@ Die Audio Meldungen sind mit Amazon Polly generiert worden und können in versch
 - Deutsch: [audio-messages-polly-de.zip](https://seisfeld.github.io/tonuino/audio-messages-polly-de.zip)
 - Englisch: [audio-messages-polly-en.zip](https://seisfeld.github.io/tonuino/audio-messages-polly-en.zip)
 - Niederländisch: [audio-messages-polly-nl.zip](https://seisfeld.github.io/tonuino/audio-messages-polly-nl.zip)
+- Spanisch: [audio-messages-polly-es.zip](https://seisfeld.github.io/tonuino/audio-messages-polly-es.zip)
 
 Die `.zip` Datei entpacken und die Ordner **advert** und **mp3** auf die SD Karte kopieren. Fertig.
 
 ### Audio Meldungen selbst erzeugen
 
-Das passende Set an Audio Meldungen lässt sich auch jederzeit mit dem beigelegten Python Skript `create_audio_messages.py` erzeugen. Hier sind dann auch weitere text-to-speech Engines möglich wenn ihr möchtet (siehe unten). Das Skript kann sowohl **deutsche**, **englische** als auch **niederländische** Audio Meldungen erzeugen (unterstützt wird ebenfalls **französisch**, es liegt dafür allerdings momentan keine Quelldatei bei). Es ist unter macOS, Linux und Windows getested, und benötigt **Python 3** und ggf. **ffmpeg**.
+Das passende Set an Audio Meldungen lässt sich auch jederzeit mit dem beigelegten Python Skript `create_audio_messages.py` erzeugen. Hier sind dann auch weitere text-to-speech Engines möglich wenn ihr möchtet (siehe unten). Das Skript kann sowohl **deutsche**, **englische**, **niederländische** als auch **spanische** Audio Meldungen erzeugen (unterstützt wird ebenfalls **französisch**, es liegt dafür allerdings momentan keine Quelldatei bei). Es ist unter macOS, Linux und Windows getested, und benötigt **Python 3** und ggf. **ffmpeg**.
 
 Unter Linux kann Python 3 mit dem zur Distribution gehörenden Paketmanager installiert werden. macOS Nutzer benutzen z.B. [Homebrew](https://brew.sh): `brew install python` und für Windows kann es [hier heruntergeladen werden](https://www.python.org/downloads/windows/).
 
