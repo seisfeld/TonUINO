@@ -1,0 +1,66 @@
+0800.mp3|Pojďme!
+0801.mp3|Byla nalezena nová karta. Nechte ji prosím na krabici dokud nebude její nastavení dokončeno. Pomocí tlačítek hlasitosti vyberte složku a potvrďte tlačítkem pauza. Chcete-li akci zrušit, podržte tlačítko pauza.
+0802.mp3|Ok, jediná skladba. Pomocí tlačítek hlasitosti vyberte skladbu a potvrďte tlačítkem pauza. Chcete-li akci zrušit, podržte tlačítko pauza.
+0803.mp3|Ok. Pomocí tlačítek hlasitosti vyberte počáteční skladbu pro virtuální složku a potvrďte tlačítkem pauza. Chcete-li akci zrušit, podržte tlačítko pauza.
+0804.mp3|OK. Pomocí tlačítek hlasitosti vyberte konečnou skladbu pro virtuální složku a potvrďte tlačítkem pauza. Chcete-li akci zrušit, podržte tlačítko pauza.
+0805.mp3|Ok, karta je nastavena. Bavte se.
+0806.mp3|Při nastavování karty došlo k chybě. Prosím zkuste to znovu.
+0807.mp3|Nastavení karty bylo zrušeno.
+0808.mp3|Jejda, moje baterie se vybila. Požádejte mámu nebo tátu, aby ji vyměnili. Teď se vypínám, ahoj.
+0809.mp3|Reset byl dokončen.
+0810.mp3|Zadejte prosím PIN.
+0811.mp3|Zadání PINu bylo zrušeno.
+0820.mp3|Ok, pomocí tlačítek hlasitosti vyberte režim přehrávání a potvrďte tlačítkem pauza. Chcete-li akci zrušit, podržte tlačítko pauza.
+0821.mp3|Režim příběhů. Přehraje jednu náhodnou skladbu ze složky.
+0822.mp3|Režim alba. Přehraje celou složku.
+0823.mp3|Párty režim. Náhodně přehraje celou složku.
+0824.mp3|Režim singl. Přehraje jednu konkrétní skladbu ze složky.
+0825.mp3|Režim audio knihy. Přehraje celou složku a pamatuje si, kde jsme minule skončili.
+0826.mp3|Virtuální složka, režim příběhů. Přehraje jednu náhodnou skladbu mezi počáteční a konečnou skladbou.
+0827.mp3|Virtuální složka, režim alba. Přehraje všechny skladby mezi počáteční a konečnou skladbou.
+0828.mp3|Virtuální složka, párty režim. Náhodně přehraje skladby mezi počáteční a konečnou skladbou.
+0900.mp3|Rodičovské menu. Pomocí tlačítek hlasitosti vyberte možnost a potvrďte tlačítkem pauza. Chcete-li akci zrušit, podržte tlačítko pauza.
+0901.mp3|Předvolba uložena.
+0902.mp3|Audio kniha je opět na začátku.
+0903.mp3|Předvolby byly vymazány.
+0904.mp3|Rodičovské menu ukončeno.
+0910.mp3|Vymazat kartu.
+0911.mp3|Nastavit počáteční hlasitost po spuštění.
+0912.mp3|Nastavit maximální hlasitost.
+0913.mp3|Nastavit hlasitost nabídky.
+0914.mp3|Nastavit ekvalizér.
+0915.mp3|Naučit se infračervené dálkové ovládání. Potřebujete dálkový ovladač s nejméně sedmi klávesami.
+0916.mp3|Nastavit časovač vypnutí.
+0917.mp3|Nastavit audio knihu na začátek.
+0918.mp3|Vymazat předvolby.
+0919.mp3|Vypnout.
+0920.mp3|Položte prosím kartu na krabici a počkejte na potvrzení.
+0921.mp3|Karta vymazána.
+0922.mp3|Vymazání karty se nezdařilo. Zkuste to prosím znovu.
+0923.mp3|Mazání karty bylo zrušeno.
+0930.mp3|Pomocí tlačítek hlasitosti nastavte počáteční hlasitost po spuštění a potvrďte tlačítkem pauza. Chcete-li akci zrušit, podržte tlačítko pauza.
+0931.mp3|Pomocí tlačítek hlasitosti vyberte maximální hlasitost a potvrďte tlačítkem pauza. Chcete-li akci zrušit, podržte tlačítko pauza.
+0932.mp3|Pomocí tlačítek hlasitosti vyberte hlasitost nabídky a potvrďte tlačítkem pauza. Chcete-li akci zrušit, podržte tlačítko pauza.
+0940.mp3|Pomocí tlačítek hlasitosti vyberte ekvalizér a potvrďte tlačítkem pauza. Chcete-li akci zrušit, podržte tlačítko pauza.
+0941.mp3|Standard
+0942.mp3|Pop
+0943.mp3|Rock
+0944.mp3|Jazz
+0945.mp3|Klasika
+0946.mp3|Basy
+0950.mp3|Tato funkce vyžaduje infračervený přijímač, který je poté nutné povolit v kódu programu.
+0951.mp3|Stiskněte tlačítko pro zvýšení hlasitosti na dálkovém ovladači.
+0952.mp3|Stiskněte tlačítko pro snížení hlasitosti na dálkovém ovladači.
+0953.mp3|Stiskněte tlačítko předchozí skladby na dálkovém ovladači.
+0954.mp3|Stiskněte tlačítko následující skladby na dálkovém ovladači.
+0955.mp3|Stiskněte prostřední tlačítko na dálkovém ovladači.
+0956.mp3|Stiskněte tlačítko nabídky na dálkovém ovladači.
+0957.mp3|Na dálkovém ovládání stiskněte tlačítko přehrávání/pozastavení.
+0960.mp3|Pomocí tlačítek hlasitosti nastavte časovač vypnutí a potvrďte tlačítkem pauza. Chcete-li akci zrušit, podržte tlačítko pauza.
+0961.mp3|5 minut.
+0962.mp3|10 minut.
+0963.mp3|15 minut.
+0964.mp3|20 minut.
+0965.mp3|30 minut.
+0966.mp3|60 minut.
+0967.mp3|Deaktivovat časovač vypnutí.
