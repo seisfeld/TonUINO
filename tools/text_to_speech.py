@@ -63,6 +63,18 @@ def checkArgs(argparser, args):
         print('ERROR: You have to provide one of the arguments `--use-say`, `--use-amazon` or `--use-google-key`\n')
         argparser.print_help()
         sys.exit(2)
+    if args.use_say:
+        checkLanguage(sayVoiceByLang, args.lang)
+    if args.use_google_key:
+        checkLanguage(googleVoiceByLang, args.lang)
+    if args.use_amazon:
+        checkLanguage(amazonVoiceByLang, args.lang)
+
+def checkLanguage(dictionary, lang):
+    if lang not in dictionary:
+        print('ERROR: Language is not supported by selected text-to-speech engine')
+        argparser.print_help()
+        sys.exit(2)
 
 
 def textToSpeechUsingArgs(text, targetFile, args):
