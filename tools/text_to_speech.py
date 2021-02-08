@@ -11,7 +11,7 @@ except ImportError:
 
 class PatchedArgumentParser(argparse.ArgumentParser):
     def error(self, message):
-        sys.stderr.write('error: %s\n\n' % message)
+        sys.stderr.write('ERROR: %s\n\n' % message)
         self.print_help()
         sys.exit(2)
 
@@ -20,7 +20,7 @@ sayVoiceByLang = {
     'de': 'Anna',
     'en': 'Samantha',
     'fr': 'Thomas',
-    'nl': 'Claire',
+    'nl': 'Xander',
     'es': 'Monica',
     'cz': 'Zuzana'
 }
@@ -72,7 +72,7 @@ def checkArgs(argparser, args):
 
 def checkLanguage(dictionary, lang, argparser):
     if lang not in dictionary:
-        print('ERROR: Language is not supported by selected text-to-speech engine')
+        print('ERROR: Language is not supported by selected text-to-speech engine\n')
         argparser.print_help()
         sys.exit(2)
 
