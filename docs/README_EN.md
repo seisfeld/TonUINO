@@ -18,7 +18,7 @@ This is my alternative firmware for the wonderful [TonUINO](https://www.voss.ear
       - [Create audio messages using Googles text-to-speech service](https://github.com/seisfeld/TonUINO/blob/master/docs/README_EN.md#create-audio-messages-using-googles-text-to-speech-service)
       - [Help and additional options](https://github.com/seisfeld/TonUINO/blob/master/docs/README_EN.md#help-and-additional-options)
 - [Add Lead-In Messages To mp3 Files](https://github.com/seisfeld/TonUINO/blob/master/docs/README_EN.md#add-lead-in-messages-to-mp3-files)
-  - [How it works](hhttps://github.com/seisfeld/TonUINO/blob/master/docs/README_EN.md#how-it-works)
+  - [How it works](https://github.com/seisfeld/TonUINO/blob/master/docs/README_EN.md#how-it-works)
   - [Help and additional options](https://github.com/seisfeld/TonUINO/blob/master/docs/README_EN.md#help-and-additional-options-1)
 - [License](https://github.com/seisfeld/TonUINO/blob/master/docs/README_EN.md#license)
 
