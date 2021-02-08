@@ -64,13 +64,13 @@ def checkArgs(argparser, args):
         argparser.print_help()
         sys.exit(2)
     if args.use_say:
-        checkLanguage(sayVoiceByLang, args.lang)
+        checkLanguage(sayVoiceByLang, args.lang, argparser)
     if args.use_google_key:
-        checkLanguage(googleVoiceByLang, args.lang)
+        checkLanguage(googleVoiceByLang, args.lang, argparser)
     if args.use_amazon:
-        checkLanguage(amazonVoiceByLang, args.lang)
+        checkLanguage(amazonVoiceByLang, args.lang, argparser)
 
-def checkLanguage(dictionary, lang):
+def checkLanguage(dictionary, lang, argparser):
     if lang not in dictionary:
         print('ERROR: Language is not supported by selected text-to-speech engine')
         argparser.print_help()
