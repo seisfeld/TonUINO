@@ -533,11 +533,6 @@ AceButton button3(&button3Config);                                            //
 AceButton button4(&button4Config);                                            // create AceButton instance
 #endif
 
-#if defined IRREMOTE
-IRrecv irReceiver(irReceiverPin);                                             // create IRrecv instance
-decode_results irReading;                                                     // create decode_results instance to store received ir reading
-#endif
-
 #if defined STATUSLED ^ defined STATUSLEDRGB
 #if defined STATUSLEDRGB
 WS2812 rgbLed(statusLedCount);                                                // create WS2812 instance
@@ -628,7 +623,7 @@ void setup() {
 
 #if defined IRREMOTE
   Serial.println(F("init ir"));
-  irReceiver.enableIRIn();
+  IrReceiver.begin(irReceiverPin, DISABLE_LED_FEEDBACK);
 #endif
 
 #if defined STATUSLED ^ defined STATUSLEDRGB
@@ -1052,11 +1047,10 @@ void checkForInput() {
   static uint64_t irRemoteOldMillis;
 
   // poll ir receiver, has precedence over (overwrites) physical buttons
-  if (irReceiver.decode(&irReading)) {
-    // on NEC encoding 0xFFFFFFFF means the button is held down, we ignore this
-    if (!(irReading.decode_type == NEC && irReading.value == 0xFFFFFFFF)) {
-      // convert irReading.value from 32bit to 16bit
-      irRemoteCode = (irReading.value & 0xFFFF);
+  if (IrReceiver.decode()) {
+    // process only codes which don't have the repeat flag set
+    if (!(IrReceiver.decodedIRData.flags & IRDATA_FLAGS_IS_REPEAT)) {
+      irRemoteCode = IrReceiver.decodedIRData.command;
       for (uint8_t i = 0; i < irRemoteCount; i++) {
         for (uint8_t j = 0; j < irRemoteCodeCount; j++) {
           //if we have a match, temporally populate irRemoteEvent and break
@@ -1068,14 +1062,14 @@ void checkForInput() {
         }
         // if the inner loop had a match, populate inputEvent and break
         // ir remote key presses are debounced by 250ms
-        if (irRemoteEvent != 0 && millis() - irRemoteOldMillis >= 250) {
+        if (millis() - irRemoteOldMillis >= 250) {
           irRemoteOldMillis = millis();
           inputEvent = irRemoteEvent;
           break;
         }
       }
     }
-    irReceiver.resume();
+    IrReceiver.resume();
   }
 #endif
 }
@@ -1926,17 +1920,16 @@ void parentsMenu() {
         mp3.playMp3FolderTrack(951 + i);
         waitPlaybackToFinish(0, 0, 255, 500);
         // clear ir receive buffer
-        irReceiver.resume();
+        IrReceiver.resume();
         // wait for ir signal
-        while (!irReceiver.decode(&irReading)) {
+        while (!IrReceiver.decode()) {
 #if defined STATUSLED ^ defined STATUSLEDRGB
           statusLedUpdate(BLINK, 0, 0, 255, 300);
 #endif
         }
-        // on NEC encoding 0xFFFFFFFF means the button is held down, we ignore this
-        if (!(irReading.decode_type == NEC && irReading.value == 0xFFFFFFFF)) {
-          // convert irReading.value from 32bit to 16bit
-          uint16_t irRemoteCode = (irReading.value & 0xFFFF);
+        // process only codes which don't have the repeat flag set
+        if (!(IrReceiver.decodedIRData.flags & IRDATA_FLAGS_IS_REPEAT)) {
+          uint16_t irRemoteCode = IrReceiver.decodedIRData.command;
           Serial.print(F("ir code: 0x"));
           Serial.print(irRemoteCode <= 0x0010 ? "0" : "");
           Serial.print(irRemoteCode <= 0x0100 ? "0" : "");
@@ -1947,7 +1940,7 @@ void parentsMenu() {
           statusLedUpdate(BURST4, 0, 255, 0, 0);
 #endif
         }
-        // key was held down on NEC encoding, repeat last question
+        // key was held down, repeat last question
         else {
           i--;
 #if defined STATUSLED ^ defined STATUSLEDRGB
