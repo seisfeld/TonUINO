@@ -32,7 +32,7 @@ googleVoiceByLang = {
     'nl': { 'languageCode': 'nl-NL', 'name': 'nl-NL-Wavenet-A' },
     'es': { 'languageCode': 'es-ES', 'name': '' },
     'cz': { 'languageCode': 'cs-CZ', 'name': 'cs-CZ-Wavenet-A' },
-    'it': { 'languageCode': 'it-IT', 'name': 'it-IT-Standard-B' },
+    'it': { 'languageCode': 'it-IT', 'name': 'it-IT-Standard-B' }
 }
 amazonVoiceByLang = {
     # See: https://docs.aws.amazon.com/de_de/polly/latest/dg/voicelist.html
