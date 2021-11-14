@@ -22,7 +22,8 @@ sayVoiceByLang = {
     'fr': 'Thomas',
     'nl': 'Xander',
     'es': 'Monica',
-    'cz': 'Zuzana'
+    'cz': 'Zuzana',
+    'it': 'Alice'
 }
 googleVoiceByLang = {
     'de': { 'languageCode': 'de-DE', 'name': 'de-DE-Wavenet-C' },
@@ -30,7 +31,8 @@ googleVoiceByLang = {
     'fr': { 'languageCode': 'fr-FR', 'name': 'fr-FR-Wavenet-C' },
     'nl': { 'languageCode': 'nl-NL', 'name': 'nl-NL-Wavenet-A' },
     'es': { 'languageCode': 'es-ES', 'name': '' },
-    'cz': { 'languageCode': 'cs-CZ', 'name': 'cs-CZ-Wavenet-A' }
+    'cz': { 'languageCode': 'cs-CZ', 'name': 'cs-CZ-Wavenet-A' },
+    'it': { 'languageCode': 'it-IT', 'name': 'it-IT-Standard-B' }
 }
 amazonVoiceByLang = {
     # See: https://docs.aws.amazon.com/de_de/polly/latest/dg/voicelist.html
@@ -38,7 +40,8 @@ amazonVoiceByLang = {
     'en': 'Joanna',
     'fr': 'Celine',
     'nl': 'Lotte',
-    'es': 'Lucia'
+    'es': 'Lucia',
+    'it': 'Carla'
 }
 
 
@@ -52,7 +55,7 @@ Amazon Polly sounds best, Google text-to-speech is second, MacOS `say` sounds wo
 """.strip()
 
 def addArgumentsToArgparser(argparser):
-    argparser.add_argument('--lang', choices=['de', 'en', 'fr', 'nl', 'es', 'cz'], default='de', help='The language (default: de)')
+    argparser.add_argument('--lang', choices=['de', 'en', 'fr', 'nl', 'es', 'cz', 'it'], default='de', help='The language (default: de)')
     argparser.add_argument('--use-say', action='store_true', default=None, help="If set, the MacOS tool `say` will be used.")
     argparser.add_argument('--use-amazon', action='store_true', default=None, help="If set, Amazon Polly is used. If missing the MacOS tool `say` will be used.")
     argparser.add_argument('--use-google-key', type=str, default=None, help="The API key of the Google text-to-speech account to use.")

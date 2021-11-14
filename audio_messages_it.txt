@@ -1,0 +1,66 @@
+0800.mp3|Iniziamo!
+0801.mp3|È stata rilevata una nuova carta: lasciala sul box fino al termine della sua configurazione. Usa i pulsanti volume per selezionare una cartella e conferma con il pulsante pausa. Tieni premuto il pulsante pausa per cancellare.
+0802.mp3|Ok. Traccia singola. Usa i pulsanti volume per selezionare una traccia e conferma con il pulsante pausa. Tieni premuto il pulsante pausa per annullare.
+0803.mp3|Ok. Usa i pulsanti volume per selezionare una traccia iniziale dalla cartella virtuale e conferma con il pulsante pausa. Tieni premuto il pulsante pausa per annullare.
+0804.mp3|Ok. Usa i pulsanti volume per selezionare una traccia finale dalla cartella virtuale e conferma con il pulsante pausa. Tieni premuto il pulsante pausa per annullare.
+0805.mp3|Ok, la carta è configurata. Buon divertimento!
+0806.mp3|Si è verificato un errore durante la configurazione della carta. Riprova.
+0807.mp3|La configurazione della carta è stata annullata.
+0808.mp3|Oooooops le mie batterie sono scariche, chiedi a mamma o babbo di ricaricarmi. Vado a nanna ora, ciao.
+0809.mp3|Reset completato.
+0810.mp3|Inserisci il PIN.
+0811.mp3|PIN di accesso cancellato.
+0820.mp3|Ok. Usa i pulsanti volume per selezionare una modalità di riproduzione e conferma con il pulsante pausa. Tieni premuto il pulsante pausa per annullare.
+0821.mp3|Modalità Story. Riproduce una traccia casuale dalla cartella.
+0822.mp3|Modalità Album. Riproduce l'intera cartella.
+0823.mp3|Modalità Party. Riproduce l'intera cartella in modalità casuale.
+0824.mp3|Modalità Single. Riproduce una traccia specifica dalla cartella.
+0825.mp3|Modalità Audiobook. Riproduce l'intera cartella tenendo traccia del progresso.
+0826.mp3|Cartella virtuale, modalità Story. Riproduce una traccia casuale compresa tra quella iniziale e quella finale.
+0827.mp3|Cartella virtuale, modalità Album. Riproduce tutte le tracce comprese tra quella iniziale e quella finale.
+0828.mp3|Cartella virtuale, modalità Party. Riproduce, in modo casuale, tutte le tracce comprese tra quella iniziale e quella finale.
+0900.mp3|Menu principale. Usa i pulsanti volume per selezionare un'opzione e conferma con il pulsante pausa. Tieni premuto il pulsante pausa per cancellare.
+0901.mp3|Impostazioni salvate.
+0902.mp3|Reset del progresso Audiobook completato.
+0903.mp3|Reset delle impostazioni completato.
+0904.mp3|Uscita dal menu principale.
+0910.mp3|Cancella la carta.
+0911.mp3|Imposta volume iniziale.
+0912.mp3|Imposta volume massimo.
+0913.mp3|Imposta volume menu.
+0914.mp3|Imposta equalizzatore.
+0915.mp3|Telecomando infrarossi. Hai bisogno di un telecomando con almeno 7 tasti.
+0916.mp3|Imposta un timer di spegnimento.
+0917.mp3|Reset del progresso Audiobook.
+0918.mp3|Reset delle impostazioni.
+0919.mp3|Spegnimento box.
+0920.mp3|Appoggia una carta sul box e attendi la conferma.
+0921.mp3|Ok. Carta cancellata.
+0922.mp3|Cancellazione della carta fallita. Riprova.
+0923.mp3|Cancellazione della carta completata.
+0930.mp3|Usa i pulsanti volume per selezionare il volume iniziale e conferma con il pulsante pausa. Tieni premuto il pulsante pausa per annullare.
+0931.mp3|Usa i pulsanti volume per selezionare il volume massimo e conferma con il pulsante pausa. Tieni premuto il pulsante pausa per annullare.
+0932.mp3|Usa i pulsanti volume per selezionare il volume del menu e conferma con il pulsante pausa. Tieni premuto il pulsante pausa per annullare.
+0940.mp3|Usa i pulsanti volume per selezionare l'equalizzatore e conferma con il pulsante pausa. Tieni premuto il pulsante pausa per annullare.
+0941.mp3|Normale
+0942.mp3|Pop
+0943.mp3|Rock
+0944.mp3|Jazz
+0945.mp3|Classica
+0946.mp3|Base
+0950.mp3|Questa funzione necessita di un telecomando infrarossi, che deve a sua volta essere abilitato nel codice del programma.
+0951.mp3|Premi il tasto volume su del telecomando.
+0952.mp3|Premi il tasto volume giù del telecomando.
+0953.mp3|Premi il tasto traccia precedente del telecomando.
+0954.mp3|Premi il tasto traccia successiva del telecomando.
+0955.mp3|Premi il tasto centrale del telecomando.
+0956.mp3|Premi il tasto menu del telecomando.
+0957.mp3|Premi il tasto play/pausa del telecomando.
+0960.mp3|Usa i pulsanti volume per selezionare il timer di spegnimento e conferma con il pulsante pausa. Tieni premuto il pulsante pausa per annullare.
+0961.mp3|5 minuti.
+0962.mp3|10 minuti.
+0963.mp3|15 minuti.
+0964.mp3|20 minuti.
+0965.mp3|30 minuti.
+0966.mp3|60 minuti.
+0967.mp3|Disattiva il timer di spegnimento.
