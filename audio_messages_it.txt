@@ -9,7 +9,7 @@
 0808.mp3|Oooooops le mie batterie sono scariche, chiedi a mamma o babbo di ricaricarmi. Vado a nanna ora, ciao.
 0809.mp3|Reset completato.
 0810.mp3|Inserisci il PIN.
-0811.mp3|PIN di accesso cancellato.
+0811.mp3|Inserimento PIN annullato.
 0820.mp3|Ok. Usa i pulsanti volume per selezionare una modalità di riproduzione e conferma con il pulsante pausa. Tieni premuto il pulsante pausa per annullare.
 0821.mp3|Modalità Story. Riproduce una traccia casuale dalla cartella.
 0822.mp3|Modalità Album. Riproduce l'intera cartella.
