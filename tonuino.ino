@@ -437,10 +437,39 @@ void statusLedUpdate(uint8_t statusLedAction, uint8_t red, uint8_t green, uint8_
 void statusLedUpdateHal(uint8_t red, uint8_t green, uint8_t blue, int16_t brightness);
 #endif
 
+class Mp3Notify;                                                              // forward declare the notify class, just the name
+
+SoftwareSerial mp3Serial(mp3SerialRxPin, mp3SerialTxPin);                     // create SoftwareSerial instance
+typedef DFMiniMp3<SoftwareSerial, Mp3Notify> DfMp3;                           // define a type using serial and the notify class
+DfMp3 mp3(mp3Serial);                                                         // create DfMp3 instance
+MFRC522 mfrc522(nfcSlaveSelectPin, nfcResetPin);                              // create MFRC522 instance
+ButtonConfig button0Config;                                                   // create ButtonConfig instance
+ButtonConfig button1Config;                                                   // create ButtonConfig instance
+ButtonConfig button2Config;                                                   // create ButtonConfig instance
+AceButton button0(&button0Config);                                            // create AceButton instance
+AceButton button1(&button1Config);                                            // create AceButton instance
+AceButton button2(&button2Config);                                            // create AceButton instance
+#if defined FIVEBUTTONS
+ButtonConfig button3Config;                                                   // create ButtonConfig instance
+ButtonConfig button4Config;                                                   // create ButtonConfig instance
+AceButton button3(&button3Config);                                            // create AceButton instance
+AceButton button4(&button4Config);                                            // create AceButton instance
+#endif
+
+#if defined STATUSLED ^ defined STATUSLEDRGB
+#if defined STATUSLEDRGB
+WS2812 rgbLed(statusLedCount);                                                // create WS2812 instance
+#endif
+#endif
+
+#if defined LOWVOLTAGE
+Vcc shutdownVoltage(shutdownVoltageCorrection);                               // create Vcc instance
+#endif
+
 // used by DFPlayer Mini library during callbacks
 class Mp3Notify {
   public:
-    static void OnError(uint16_t returnValue) {
+    static void OnError(DfMp3& mp3, uint16_t returnValue) {
       switch (returnValue) {
         case DfMp3_Error_Busy: {
             Serial.print(F("busy"));
@@ -503,45 +532,19 @@ class Mp3Notify {
       if (source & DfMp3_PlaySources_Flash) Serial.print("flash ");
       Serial.println(action);
     }
-    static void OnPlayFinished(DfMp3_PlaySources source, uint16_t returnValue) {
+    static void OnPlayFinished(DfMp3& mp3, DfMp3_PlaySources source, uint16_t returnValue) {
       playNextTrack(returnValue, true, false);
     }
-    static void OnPlaySourceOnline(DfMp3_PlaySources source) {
+    static void OnPlaySourceOnline(DfMp3& mp3, DfMp3_PlaySources source) {
       PrintlnSourceAction(source, "online");
     }
-    static void OnPlaySourceInserted(DfMp3_PlaySources source) {
+    static void OnPlaySourceInserted(DfMp3& mp3, DfMp3_PlaySources source) {
       PrintlnSourceAction(source, "in");
     }
-    static void OnPlaySourceRemoved(DfMp3_PlaySources source) {
+    static void OnPlaySourceRemoved(DfMp3& mp3, DfMp3_PlaySources source) {
       PrintlnSourceAction(source, "out");
     }
 };
-
-SoftwareSerial mp3Serial(mp3SerialRxPin, mp3SerialTxPin);                     // create SoftwareSerial instance
-MFRC522 mfrc522(nfcSlaveSelectPin, nfcResetPin);                              // create MFRC522 instance
-DFMiniMp3<SoftwareSerial, Mp3Notify> mp3(mp3Serial);                          // create DFMiniMp3 instance
-ButtonConfig button0Config;                                                   // create ButtonConfig instance
-ButtonConfig button1Config;                                                   // create ButtonConfig instance
-ButtonConfig button2Config;                                                   // create ButtonConfig instance
-AceButton button0(&button0Config);                                            // create AceButton instance
-AceButton button1(&button1Config);                                            // create AceButton instance
-AceButton button2(&button2Config);                                            // create AceButton instance
-#if defined FIVEBUTTONS
-ButtonConfig button3Config;                                                   // create ButtonConfig instance
-ButtonConfig button4Config;                                                   // create ButtonConfig instance
-AceButton button3(&button3Config);                                            // create AceButton instance
-AceButton button4(&button4Config);                                            // create AceButton instance
-#endif
-
-#if defined STATUSLED ^ defined STATUSLEDRGB
-#if defined STATUSLEDRGB
-WS2812 rgbLed(statusLedCount);                                                // create WS2812 instance
-#endif
-#endif
-
-#if defined LOWVOLTAGE
-Vcc shutdownVoltage(shutdownVoltageCorrection);                               // create Vcc instance
-#endif
 
 void setup() {
   // things we need to do immediately on startup
