@@ -469,7 +469,7 @@ Vcc shutdownVoltage(shutdownVoltageCorrection);                               //
 // used by DFPlayer Mini library during callbacks
 class Mp3Notify {
   public:
-    static void OnError(DfMp3& mp3, uint16_t returnValue) {
+    static void OnError([[maybe_unused]] DfMp3& mp3, uint16_t returnValue) {
       switch (returnValue) {
         case DfMp3_Error_Busy: {
             Serial.print(F("busy"));
@@ -532,16 +532,16 @@ class Mp3Notify {
       if (source & DfMp3_PlaySources_Flash) Serial.print("flash ");
       Serial.println(action);
     }
-    static void OnPlayFinished(DfMp3& mp3, DfMp3_PlaySources source, uint16_t returnValue) {
+    static void OnPlayFinished([[maybe_unused]] DfMp3& mp3, [[maybe_unused]] DfMp3_PlaySources source, uint16_t returnValue) {
       playNextTrack(returnValue, true, false);
     }
-    static void OnPlaySourceOnline(DfMp3& mp3, DfMp3_PlaySources source) {
+    static void OnPlaySourceOnline([[maybe_unused]] DfMp3& mp3, DfMp3_PlaySources source) {
       PrintlnSourceAction(source, "online");
     }
-    static void OnPlaySourceInserted(DfMp3& mp3, DfMp3_PlaySources source) {
+    static void OnPlaySourceInserted([[maybe_unused]] DfMp3& mp3, DfMp3_PlaySources source) {
       PrintlnSourceAction(source, "in");
     }
-    static void OnPlaySourceRemoved(DfMp3& mp3, DfMp3_PlaySources source) {
+    static void OnPlaySourceRemoved([[maybe_unused]] DfMp3& mp3, DfMp3_PlaySources source) {
       PrintlnSourceAction(source, "out");
     }
 };
@@ -1256,7 +1256,7 @@ void switchButtonConfiguration(uint8_t buttonMode) {
 }
 
 // waits for current playing track to finish
-void waitPlaybackToFinish(uint8_t red, uint8_t green, uint8_t blue, uint16_t statusLedUpdateInterval) {
+void waitPlaybackToFinish([[maybe_unused]] uint8_t red, [[maybe_unused]] uint8_t green, [[maybe_unused]] uint8_t blue, [[maybe_unused]] uint16_t statusLedUpdateInterval) {
   uint64_t waitPlaybackToStartMillis = millis();
 
   delay(500);
@@ -2185,7 +2185,7 @@ void statusLedUpdate(uint8_t statusLedAction, uint8_t red, uint8_t green, uint8_
 }
 
 // abstracts status led(s) depending on what hardware is actually used (vanilla or ws281x led(s))
-void statusLedUpdateHal(uint8_t red, uint8_t green, uint8_t blue, int16_t brightness) {
+void statusLedUpdateHal([[maybe_unused]] uint8_t red, [[maybe_unused]] uint8_t green, [[maybe_unused]] uint8_t blue, int16_t brightness) {
 #if defined STATUSLEDRGB
   cRGB rgbLedColor;
 
