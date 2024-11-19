@@ -146,7 +146,7 @@ if __name__ == '__main__':
     checkArgs(argparser, args)
 
     if os.path.exists(args.output):
-        print('ERROR: Output file alread exists: ' + os.path.abspath(args.output))
+        print('ERROR: Output file already exists: ' + os.path.abspath(args.output))
         sys.exit(1)
 
 
