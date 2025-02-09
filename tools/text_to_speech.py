@@ -4,6 +4,7 @@
 
 
 import argparse, base64, json, os, subprocess, sys
+import requests  # For ElevenLabs API
 try:
     import urllib.request
 except ImportError:
@@ -43,15 +44,25 @@ amazonVoiceByLang = {
     'es': 'Lucia',
     'it': 'Carla'
 }
+elevenlabsVoiceByLang = {
+    # See: https://elevenlabs.io/app/voice-library
+    'de': 'Ewvy14akxdhONg4fmNry', # Finnegan Fairytale
+    'en': 'NOpBlnGInO9m6vDvFkFC', # Grandpa Spuds Oxley
+    'fr': 'FvmvwvObRqIHojkEGh5N', # Adina
+    'nl': 'YUdpWWny7k5yb4QCeweX', # Ruth
+    'es': 'KHCvMklQZZo0O30ERnVn', # Sara Martin - 1
+    'it': '3DPhHWXDY263XJ1d2EPN' # Linda Fiore
+}
 
 
 textToSpeechDescription = """
 The following text-to-speech engines are supported:
 - With `--use-say` the text-to-speech engine of MacOS is used (command `say`).
 - With `--use-amazon` Amazon Polly is used. Requires the AWS CLI to be installed and configured. See: https://aws.amazon.com/cli/
-- With `--use-google-key=ABCD` Google text-to-speech is used. See: https://cloud.google.com/text-to-speech/
+- With `--use-google-key=YOUR_API_KEY` Google text-to-speech is used. See: https://cloud.google.com/text-to-speech/
+- With `--use-elevenlabs-key=YOUR_API_KEY`, ElevenLabs text-to-speech is used. See: https://elevenlabs.io/docs
 
-Amazon Polly sounds best, Google text-to-speech is second, MacOS `say` sounds worst.'
+ElevenLabs sounds best, Amazon Polly is second, Google text-to-speech is third, MacOS `say` sounds worst.'
 """.strip()
 
 def addArgumentsToArgparser(argparser):
@@ -59,11 +70,12 @@ def addArgumentsToArgparser(argparser):
     argparser.add_argument('--use-say', action='store_true', default=None, help="If set, the MacOS tool `say` will be used.")
     argparser.add_argument('--use-amazon', action='store_true', default=None, help="If set, Amazon Polly is used. If missing the MacOS tool `say` will be used.")
     argparser.add_argument('--use-google-key', type=str, default=None, help="The API key of the Google text-to-speech account to use.")
+    argparser.add_argument('--use-elevenlabs-key', type=str, default=None, help="The API key of the ElevenLabs account to use.")
 
 
 def checkArgs(argparser, args):
-    if not args.use_say and not args.use_amazon and args.use_google_key is None:
-        print('ERROR: You have to provide one of the arguments `--use-say`, `--use-amazon` or `--use-google-key`\n')
+    if not args.use_say and not args.use_amazon and args.use_google_key is None and args.use_elevenlabs_key is None:
+        print('ERROR: You have to provide one of the arguments `--use-say`, `--use-amazon`, `--use-google-key`, or `--use-elevenlabs-key`\n')
         argparser.print_help()
         sys.exit(2)
     if args.use_say:
@@ -72,6 +84,8 @@ def checkArgs(argparser, args):
         checkLanguage(googleVoiceByLang, args.lang, argparser)
     if args.use_amazon:
         checkLanguage(amazonVoiceByLang, args.lang, argparser)
+    if args.use_elevenlabs_key:
+        checkLanguage(elevenlabsVoiceByLang, args.lang, argparser)
 
 def checkLanguage(dictionary, lang, argparser):
     if lang not in dictionary:
@@ -81,10 +95,10 @@ def checkLanguage(dictionary, lang, argparser):
 
 
 def textToSpeechUsingArgs(text, targetFile, args):
-    textToSpeech(text, targetFile, lang=args.lang, useAmazon=args.use_amazon, useGoogleKey=args.use_google_key)
+    textToSpeech(text, targetFile, lang=args.lang, useAmazon=args.use_amazon, useGoogleKey=args.use_google_key, useElevenLabsKey=args.use_elevenlabs_key)
 
 
-def textToSpeech(text, targetFile, lang='de', useAmazon=False, useGoogleKey=None):
+def textToSpeech(text, targetFile, lang='de', useAmazon=False, useGoogleKey=None, useElevenLabsKey=None):
     print('\nGenerating: ' + targetFile + ' - ' + text)
     if useAmazon:
         response = subprocess.check_output(['aws', 'polly', 'synthesize-speech', '--output-format', 'mp3',
@@ -111,6 +125,25 @@ def textToSpeech(text, targetFile, lang='de', useAmazon=False, useGoogleKey=None
 
         with open(targetFile, 'wb') as f:
             f.write(mp3Data)
+    elif useElevenLabsKey:
+        # Use ElevenLabs for TTS
+        elevenlabs_url = "https://api.elevenlabs.io/v1/text-to-speech/uvysWDLbKpA4XvpD3GI6"
+        payload = {
+            "text": text,
+            "voice_settings": {"stability": 0.5, "similarity_boost": 0.7},
+            "model_id": "eleven_multilingual_v2"
+        }
+        headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "xi-api-key": useElevenLabsKey
+        }
+        response = requests.post(elevenlabs_url, json=payload, headers=headers)
+        if response.status_code != 200:
+            print(f"ERROR: ElevenLabs API request failed with status {response.status_code}: {response.text}")
+            sys.exit(1)
+        with open(targetFile, "wb") as f:
+            f.write(response.content)
     else:
         subprocess.call([ 'say', '-v', sayVoiceByLang[lang], '-o', 'temp.aiff', text ])
         subprocess.call([ 'ffmpeg', '-y', '-i', 'temp.aiff', '-acodec', 'libmp3lame', '-ab', '128k', '-ac', '1', targetFile ])

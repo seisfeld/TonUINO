@@ -4,6 +4,7 @@
 
 
 import argparse, os, re, shutil, sys, text_to_speech
+from num2words import num2words
 
 
 if __name__ == '__main__':
@@ -42,6 +43,7 @@ if __name__ == '__main__':
         for i in range(1,256):
             targetFile1 = '{}/mp3/{:0>4}.mp3'.format(targetDir, i)
             targetFile2 = '{}/advert/{:0>4}.mp3'.format(targetDir, i)
+            i = num2words(i, lang=args.lang)
             text_to_speech.textToSpeechUsingArgs(text='{}'.format(i), targetFile=targetFile1, args=args)
             shutil.copy(targetFile1, targetFile2)
 
